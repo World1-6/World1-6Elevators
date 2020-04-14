@@ -1,0 +1,19 @@
+name: World1-6elevators
+version: ${project.version}
+main: com.andrew121410.mc.world16elevators.Main
+api-version: 1.15
+authors: [Andrew121410]
+description: A plugin that i made for my private mc server to add custom elevators.
+
+depend:
+  - World1-6Utils
+  - WorldEdit
+
+commands:
+  elevator:
+    permission: world16elevators.elevator
+
+permissions:
+  world16elevators.elevator:
+    description: Allows you to do the elevator command
+    default: op
