@@ -1,5 +1,5 @@
-name: World1-6Elevators
-version: ${project.version}
+name: World1-6elevators
+version: 1.0-SNAPSHOT
 main: com.andrew121410.mc.world16elevators.Main
 api-version: 1.15
 authors: [Andrew121410]

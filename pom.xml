@@ -40,6 +40,7 @@
                             <goal>shade</goal>
                         </goals>
                         <configuration>
+                            <finalName>World1-6Elevators</finalName>
                             <createDependencyReducedPom>false</createDependencyReducedPom>
                         </configuration>
                     </execution>

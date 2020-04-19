@@ -4,6 +4,7 @@ import com.andrew121410.mc.world16elevators.Main;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.configuration.serialization.SerializableAs;
 
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -71,6 +72,6 @@ public class ElevatorController implements ConfigurationSerializable {
     }
 
     public static ElevatorController deserialize(Map<String, Object> map) {
-        return new ElevatorController(Main.getPlugin(), (String) map.get("ControllerName"));
+        return new ElevatorController(Main.getInstance(), (String) map.get("ControllerName"));
     }
 }
