@@ -9,6 +9,8 @@ import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldedit.regions.CuboidRegion;
 import com.sk89q.worldedit.world.World;
+import lombok.Getter;
+import lombok.Setter;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
@@ -27,6 +29,8 @@ import org.bukkit.util.BoundingBox;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Getter
+@Setter
 @SerializableAs("ElevatorObject")
 public class ElevatorObject implements ConfigurationSerializable {
 
@@ -67,17 +71,21 @@ public class ElevatorObject implements ConfigurationSerializable {
 
     private FloorQueueObject whereItsCurrentlyGoing;
 
-    public ElevatorObject(boolean fromSave, Main plugin, String world, String nameOfElevator, ElevatorMovement elevatorMovement, BoundingBox boundingBox) {
+    public ElevatorObject(Main plugin, String nameOfElevator, String world, ElevatorMovement elevatorMovement, BoundingBox boundingBox) {
+        this(plugin, nameOfElevator, world, elevatorMovement, boundingBox, new HashMap<>());
+    }
+
+    public ElevatorObject(Main plugin, String name, String world, ElevatorMovement elevatorMovement, BoundingBox boundingBox, Map<Integer, FloorObject> floorsMap) {
         if (plugin != null) this.plugin = plugin;
 
         this.world = world; //NEEDS TO BE SECOND.
 
-        this.floorsMap = new HashMap<>();
+        this.floorsMap = floorsMap;
         this.floorQueueBuffer = new LinkedList<>();
         this.floorBuffer = new LinkedList<>();
         this.stopBy = new StopBy();
 
-        this.elevatorName = nameOfElevator;
+        this.elevatorName = name;
         this.elevatorMovement = elevatorMovement;
 
         this.locationDownPLUS = boundingBox.getMin().toLocation(getBukkitWorld());
@@ -96,7 +104,7 @@ public class ElevatorObject implements ConfigurationSerializable {
         //Helpers
         this.elevatorMessageHelper = new ElevatorMessageHelper(plugin, this);
 
-        if (!fromSave) this.addFloor(FloorObject.from(elevatorMovement));
+        if (this.floorsMap.isEmpty()) this.addFloor(FloorObject.from(elevatorMovement));
     }
 
     public Collection<Entity> getEntities() {
@@ -354,225 +362,18 @@ public class ElevatorObject implements ConfigurationSerializable {
         return Bukkit.getServer().getWorld(this.world);
     }
 
-    //GETTERS AND SETTERS
-    public ElevatorMessageHelper getElevatorMessageHelper() {
-        return elevatorMessageHelper;
-    }
-
-    public boolean isPlayersInItBefore() {
-        return isPlayersInItBefore;
-    }
-
-    public boolean isPlayersInItAfter() {
-        return isPlayersInItAfter;
-    }
-
-    public String getElevatorName() {
-        return elevatorName;
-    }
-
-    public void setElevatorName(String elevatorName) {
-        this.elevatorName = elevatorName;
-    }
-
-    public String getWorld() {
-        return world;
-    }
-
-    public void setWorld(String world) {
-        this.world = world;
-    }
-
-    public Location getLocationDownPLUS() {
-        return locationDownPLUS;
-    }
-
-    public void setLocationDownPLUS(Location locationDownPLUS) {
-        this.locationDownPLUS = locationDownPLUS;
-    }
-
-    public Location getLocationUpPLUS() {
-        return locationUpPLUS;
-    }
-
-    public void setLocationUpPLUS(Location locationUpPLUS) {
-        this.locationUpPLUS = locationUpPLUS;
-    }
-
-    public Map<Integer, FloorObject> getFloorsMap() {
-        return floorsMap;
-    }
-
-    public void setFloorsMap(Map<Integer, FloorObject> floorsMap) {
-        this.floorsMap = floorsMap;
-    }
-
-    public Main getPlugin() {
-        return plugin;
-    }
-
-    public void setPlugin(Main plugin) {
-        this.plugin = plugin;
-    }
-
-    public boolean isGoing() {
-        return isGoing;
-    }
-
-    public void setGoing(boolean going) {
-        isGoing = going;
-    }
-
-    public boolean isFloorQueueGoing() {
-        return isFloorQueueGoing;
-    }
-
-    public void setFloorQueueGoing(boolean floorQueueGoing) {
-        isFloorQueueGoing = floorQueueGoing;
-    }
-
-    public boolean isIdling() {
-        return isIdling;
-    }
-
-    public void setIdling(boolean idling) {
-        isIdling = idling;
-    }
-
-    public boolean isEmergencyStop() {
-        return isEmergencyStop;
-    }
-
-    public void setEmergencyStop(boolean emergencyStop) {
-        isEmergencyStop = emergencyStop;
-    }
-
-    public int getTopFloor() {
-        return topFloor;
-    }
-
-    public void setTopFloor(int topFloor) {
-        this.topFloor = topFloor;
-    }
-
-    public int getTopBottomFloor() {
-        return topBottomFloor;
-    }
-
-    public void setTopBottomFloor(int topBottomFloor) {
-        this.topBottomFloor = topBottomFloor;
-    }
-
-    public Queue<FloorQueueObject> getFloorQueueBuffer() {
-        return floorQueueBuffer;
-    }
-
-    public void setFloorQueueBuffer(Queue<FloorQueueObject> floorQueueBuffer) {
-        this.floorQueueBuffer = floorQueueBuffer;
-    }
-
-    public Queue<Integer> getFloorBuffer() {
-        return floorBuffer;
-    }
-
-    public void setFloorBuffer(Queue<Integer> floorBuffer) {
-        this.floorBuffer = floorBuffer;
-    }
-
-    public ElevatorMovement getElevatorMovement() {
-        return elevatorMovement;
-    }
-
-    public void setElevatorMovement(ElevatorMovement elevatorMovement) {
-        this.elevatorMovement = elevatorMovement;
-    }
-
-    public StopBy getStopBy() {
-        return stopBy;
-    }
-
-    public void setStopBy(StopBy stopBy) {
-        this.stopBy = stopBy;
-    }
-
-    public String getElevatorControllerName() {
-        return elevatorControllerName;
-    }
-
-    public void setElevatorControllerName(String elevatorControllerName) {
-        this.elevatorControllerName = elevatorControllerName;
-    }
-
-    public FloorQueueObject getWhereItsCurrentlyGoing() {
-        return whereItsCurrentlyGoing;
-    }
-
-    public void setWhereItsCurrentlyGoing(FloorQueueObject whereItsCurrnetlyGoing) {
-        this.whereItsCurrentlyGoing = whereItsCurrnetlyGoing;
-    }
-
     @Override
     public Map<String, Object> serialize() {
         Map<String, Object> map = new HashMap<>();
-        map.put("name", elevatorName);
-        map.put("world", world);
-        map.put("shaft", elevatorMovement);
-        map.put("shaftPlus", SimpleMath.toBoundingBox(locationDownPLUS.toVector(), locationUpPLUS.toVector()));
+        map.put("Name", elevatorName);
+        map.put("World", world);
+        map.put("Shaft", elevatorMovement);
+        map.put("ShaftPlus", SimpleMath.toBoundingBox(locationDownPLUS.toVector(), locationUpPLUS.toVector()));
+        map.put("Floors", this.floorsMap);
         return map;
     }
 
     public static ElevatorObject deserialize(Map<String, Object> map) {
-        return new ElevatorObject(true, Main.getInstance(), (String) map.get("world"), (String) map.get("name"), (ElevatorMovement) map.get("shaft"), (BoundingBox) map.get("shaftPlus"));
-    }
-
-    //JAVA
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        ElevatorObject that = (ElevatorObject) o;
-        return isGoing == that.isGoing &&
-                isFloorQueueGoing == that.isFloorQueueGoing &&
-                isIdling == that.isIdling &&
-                isEmergencyStop == that.isEmergencyStop &&
-                topFloor == that.topFloor &&
-                topBottomFloor == that.topBottomFloor &&
-                Objects.equals(elevatorName, that.elevatorName) &&
-                Objects.equals(world, that.world) &&
-                Objects.equals(elevatorMovement, that.elevatorMovement) &&
-                Objects.equals(locationDownPLUS, that.locationDownPLUS) &&
-                Objects.equals(locationUpPLUS, that.locationUpPLUS) &&
-                Objects.equals(floorsMap, that.floorsMap) &&
-                Objects.equals(plugin, that.plugin) &&
-                Objects.equals(floorQueueBuffer, that.floorQueueBuffer) &&
-                Objects.equals(floorBuffer, that.floorBuffer) &&
-                Objects.equals(stopBy, that.stopBy);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(elevatorName, world, elevatorMovement, locationDownPLUS, locationUpPLUS, floorsMap, plugin, isGoing, isFloorQueueGoing, isIdling, isEmergencyStop, topFloor, topBottomFloor, floorQueueBuffer, floorBuffer, stopBy);
-    }
-
-    @Override
-    public String toString() {
-        return "ElevatorObject{" +
-                "elevatorName='" + elevatorName + '\'' +
-                ", world='" + world + '\'' +
-                ", elevatorMovement=" + elevatorMovement +
-                ", locationDownPLUS=" + locationDownPLUS +
-                ", locationUpPLUS=" + locationUpPLUS +
-                ", floorsMap=" + floorsMap +
-                ", plugin=" + plugin +
-                ", isGoing=" + isGoing +
-                ", isFloorQueueGoing=" + isFloorQueueGoing +
-                ", isIdling=" + isIdling +
-                ", isEmergencyStop=" + isEmergencyStop +
-                ", topFloor=" + topFloor +
-                ", topBottomFloor=" + topBottomFloor +
-                ", floorQueueBuffer=" + floorQueueBuffer +
-                ", floorBuffer=" + floorBuffer +
-                ", stopBy=" + stopBy +
-                '}';
+        return new ElevatorObject(Main.getInstance(), (String) map.get("Name"), (String) map.get("World"), (ElevatorMovement) map.get("Shaft"), (BoundingBox) map.get("ShaftPlus"), (Map<Integer, FloorObject>) map.get("Floors"));
     }
 }

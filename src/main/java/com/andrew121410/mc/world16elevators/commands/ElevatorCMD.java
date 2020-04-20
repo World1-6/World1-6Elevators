@@ -196,7 +196,7 @@ public class ElevatorCMD implements CommandExecutor {
 
                 ElevatorMovement elevatorMovement = new ElevatorMovement(0, this.api.getBlockPlayerIsLookingAt(p).getLocation(), one, two);
                 BoundingBox boundingBox = SimpleMath.toBoundingBox(new Vector(XAX, XAY, XAZ), new Vector(XBX, XBY, XBZ));
-                ElevatorObject elevatorObject = new ElevatorObject(false, plugin, p.getWorld().getName(), elevatorName, elevatorMovement, boundingBox);
+                ElevatorObject elevatorObject = new ElevatorObject(this.plugin, elevatorName, p.getWorld().getName(), elevatorMovement, boundingBox);
 
                 elevatorController.registerElevator(elevatorName, elevatorObject);
                 p.sendMessage(Translate.chat("The elevator: " + elevatorName + " has been registered to " + controllerName));
