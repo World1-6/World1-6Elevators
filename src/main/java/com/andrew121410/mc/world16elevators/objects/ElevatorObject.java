@@ -9,8 +9,10 @@ import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldedit.regions.CuboidRegion;
 import com.sk89q.worldedit.world.World;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
@@ -29,6 +31,8 @@ import org.bukkit.util.BoundingBox;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@EqualsAndHashCode
+@ToString
 @Getter
 @Setter
 @SerializableAs("ElevatorObject")
@@ -369,11 +373,11 @@ public class ElevatorObject implements ConfigurationSerializable {
         map.put("World", world);
         map.put("Shaft", elevatorMovement);
         map.put("ShaftPlus", SimpleMath.toBoundingBox(locationDownPLUS.toVector(), locationUpPLUS.toVector()));
-        map.put("Floors", this.floorsMap);
+        map.put("FloorMap", this.floorsMap);
         return map;
     }
 
     public static ElevatorObject deserialize(Map<String, Object> map) {
-        return new ElevatorObject(Main.getInstance(), (String) map.get("Name"), (String) map.get("World"), (ElevatorMovement) map.get("Shaft"), (BoundingBox) map.get("ShaftPlus"), (Map<Integer, FloorObject>) map.get("Floors"));
+        return new ElevatorObject(Main.getInstance(), (String) map.get("Name"), (String) map.get("World"), (ElevatorMovement) map.get("Shaft"), (BoundingBox) map.get("ShaftPlus"), (Map<Integer, FloorObject>) map.get("FloorMap"));
     }
 }

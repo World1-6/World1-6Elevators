@@ -1,11 +1,20 @@
 package com.andrew121410.mc.world16elevators.objects;
 
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.ToString;
 import org.bukkit.Location;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.configuration.serialization.SerializableAs;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
+@EqualsAndHashCode
+@ToString
+@Getter
 @SerializableAs("FloorObject")
 public class FloorObject implements ConfigurationSerializable {
 
@@ -25,31 +34,6 @@ public class FloorObject implements ConfigurationSerializable {
         this.signList = signList;
     }
 
-    //GETTERS
-    public int getFloor() {
-        return floor;
-    }
-
-    public void setFloor(int floor) {
-        this.floor = floor;
-    }
-
-    public Location getMainDoor() {
-        return mainDoor;
-    }
-
-    public void setMainDoor(Location mainDoor) {
-        this.mainDoor = mainDoor;
-    }
-
-    public List<Location> getDoorList() {
-        return doorList;
-    }
-
-    public List<SignObject> getSignList() {
-        return signList;
-    }
-
     public static FloorObject from(ElevatorMovement elevatorMovement) {
         return new FloorObject(elevatorMovement.getFloor(), elevatorMovement.getAtDoor());
     }
@@ -57,40 +41,14 @@ public class FloorObject implements ConfigurationSerializable {
     @Override
     public Map<String, Object> serialize() {
         Map<String, Object> map = new HashMap<>();
-        map.put("floor", floor);
-        map.put("mainDoor", mainDoor);
-        map.put("doorList", doorList);
-        map.put("signList", signList);
+        map.put("Floor", floor);
+        map.put("MainDoor", mainDoor);
+        map.put("DoorList", doorList);
+        map.put("SignList", signList);
         return map;
     }
 
     public static FloorObject deserialize(Map<String, Object> map) {
-        return new FloorObject((int) map.get("floor"), (Location) map.get("mainDoor"), (List<Location>) map.get("doorList"), (List<SignObject>) map.get("signList"));
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        FloorObject that = (FloorObject) o;
-        return floor == that.floor &&
-                Objects.equals(mainDoor, that.mainDoor) &&
-                Objects.equals(doorList, that.doorList) &&
-                Objects.equals(signList, that.signList);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(floor, mainDoor, doorList, signList);
-    }
-
-    @Override
-    public String toString() {
-        return "FloorObject{" +
-                "floor=" + floor +
-                ", mainDoor=" + mainDoor +
-                ", doorList=" + doorList +
-                ", signList=" + signList +
-                '}';
+        return new FloorObject((int) map.get("Floor"), (Location) map.get("MainDoor"), (List<Location>) map.get("DoorList"), (List<SignObject>) map.get("SignList"));
     }
 }

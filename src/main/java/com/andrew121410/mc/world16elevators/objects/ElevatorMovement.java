@@ -1,13 +1,20 @@
 package com.andrew121410.mc.world16elevators.objects;
 
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 import org.bukkit.Location;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.configuration.serialization.SerializableAs;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 
+@EqualsAndHashCode
+@ToString
+@Getter
+@Setter
 @SerializableAs("ElevatorMovement")
 public class ElevatorMovement implements ConfigurationSerializable {
 
@@ -53,110 +60,20 @@ public class ElevatorMovement implements ConfigurationSerializable {
         this.locationDOWN.subtract(0, 1, 0);
     }
 
-    //GETTERS AND SETTERS
-    public Integer getFloor() {
-        return floor;
-    }
-
-    public void setFloor(Integer floor) {
-        this.floor = floor;
-    }
-
-    public Location getAtDoor() {
-        return atDoor;
-    }
-
-    public void setAtDoor(Location atDoor) {
-        this.atDoor = atDoor;
-    }
-
-    public Location getLocationDOWN() {
-        return locationDOWN;
-    }
-
-    public void setLocationDOWN(Location locationDOWN) {
-        this.locationDOWN = locationDOWN;
-    }
-
-    public Location getLocationUP() {
-        return locationUP;
-    }
-
-    public void setLocationUP(Location locationUP) {
-        this.locationUP = locationUP;
-    }
-
-    public long getTicksPerSecond() {
-        return ticksPerSecond;
-    }
-
-    public void setTicksPerSecond(long ticksPerSecond) {
-        this.ticksPerSecond = ticksPerSecond;
-    }
-
-    public long getDoorHolderTicksPerSecond() {
-        return doorHolderTicksPerSecond;
-    }
-
-    public void setDoorHolderTicksPerSecond(long doorHolderTicksPerSecond) {
-        this.doorHolderTicksPerSecond = doorHolderTicksPerSecond;
-    }
-
-    public long getElevatorWaiterTicksPerSecond() {
-        return elevatorWaiterTicksPerSecond;
-    }
-
-    public void setElevatorWaiterTicksPerSecond(long elevatorWaiterTicksPerSecond) {
-        this.elevatorWaiterTicksPerSecond = elevatorWaiterTicksPerSecond;
-    }
-
     @Override
     public Map<String, Object> serialize() {
         Map<String, Object> map = new HashMap<>();
-        map.put("floor", floor);
-        map.put("atDoor", atDoor);
-        map.put("locationDOWN", this.locationUP);
-        map.put("locationUP", this.locationDOWN);
-        map.put("ticksPerSecond", this.ticksPerSecond);
-        map.put("doorHolderTicksPerSecond", this.doorHolderTicksPerSecond);
-        map.put("elevatorWaiterTicksPerSecond", this.elevatorWaiterTicksPerSecond);
+        map.put("Floor", floor);
+        map.put("AtDoor", atDoor);
+        map.put("LocationUP", this.locationUP);
+        map.put("LocationDOWN", this.locationDOWN);
+        map.put("TicksPerSecond", this.ticksPerSecond);
+        map.put("DoorHolderTicksPerSecond", this.doorHolderTicksPerSecond);
+        map.put("ElevatorWaiterTicksPerSecond", this.elevatorWaiterTicksPerSecond);
         return map;
     }
 
     public static ElevatorMovement deserialize(Map<String, Object> map) {
-        return new ElevatorMovement((Integer) map.get("floor"), (Location) map.get("atDoor"), (Location) map.get("locationDOWN"), (Location) map.get("locationUP"), ((Integer) map.get("ticksPerSecond")).longValue(), ((Integer) map.get("doorHolderTicksPerSecond")).longValue(), ((Integer) map.get("elevatorWaiterTicksPerSecond")).longValue());
-    }
-
-    //JAVA
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        ElevatorMovement that = (ElevatorMovement) o;
-        return ticksPerSecond == that.ticksPerSecond &&
-                doorHolderTicksPerSecond == that.doorHolderTicksPerSecond &&
-                elevatorWaiterTicksPerSecond == that.elevatorWaiterTicksPerSecond &&
-                Objects.equals(floor, that.floor) &&
-                Objects.equals(atDoor, that.atDoor) &&
-                Objects.equals(locationDOWN, that.locationDOWN) &&
-                Objects.equals(locationUP, that.locationUP);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(floor, atDoor, locationDOWN, locationUP, ticksPerSecond, doorHolderTicksPerSecond, elevatorWaiterTicksPerSecond);
-    }
-
-    @Override
-    public String toString() {
-        return "ElevatorMovement{" +
-                "floor=" + floor +
-                ", atDoor=" + atDoor +
-                ", locationDOWN=" + locationDOWN +
-                ", locationUP=" + locationUP +
-                ", ticksPerSecond=" + ticksPerSecond +
-                ", doorHolderTicksPerSecond=" + doorHolderTicksPerSecond +
-                ", elevatorWaiterTicksPerSecond=" + elevatorWaiterTicksPerSecond +
-                '}';
+        return new ElevatorMovement((Integer) map.get("Floor"), (Location) map.get("AtDoor"), (Location) map.get("LocationUP"), (Location) map.get("LocationDOWN"), ((Integer) map.get("TicksPerSecond")).longValue(), ((Integer) map.get("DoorHolderTicksPerSecond")).longValue(), ((Integer) map.get("ElevatorWaiterTicksPerSecond")).longValue());
     }
 }
