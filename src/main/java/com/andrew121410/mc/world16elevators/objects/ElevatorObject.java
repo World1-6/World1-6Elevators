@@ -108,7 +108,7 @@ public class ElevatorObject implements ConfigurationSerializable {
         //Helpers
         this.elevatorMessageHelper = new ElevatorMessageHelper(plugin, this);
 
-        if (this.floorsMap.isEmpty()) this.addFloor(FloorObject.from(elevatorMovement));
+        if (this.floorsMap.isEmpty()) this.floorsMap.put(0, FloorObject.from(elevatorMovement));
     }
 
     public Collection<Entity> getEntities() {
@@ -160,11 +160,12 @@ public class ElevatorObject implements ConfigurationSerializable {
         this.whereItsCurrentlyGoing = new FloorQueueObject(floorNum, elevatorStatus);
 
         //Start ticking the elevator.
-        new ElevatorRunnable(plugin, this, goUp, floorNum, elevatorStatus).runTask(plugin);
+        new ElevatorRunnable(plugin, this, goUp, floorObject, elevatorStatus).runTask(plugin);
     }
 
-    protected void floorStop(int floorNum, FloorObject floorObject, ElevatorStatus elevatorStatus) {
-        elevatorMovement.setFloor(floorNum);
+    //Ran when it actually reaches a floor.
+    protected void floorStop(FloorObject floorObject, ElevatorStatus elevatorStatus) {
+        this.elevatorMovement.setFloor(floorObject.getFloor());
         this.whereItsCurrentlyGoing = null;
         if (!isPlayersInItBefore) elevatorMessageHelper.start();
         floorDone(floorObject, elevatorStatus);
@@ -172,10 +173,11 @@ public class ElevatorObject implements ConfigurationSerializable {
         isGoing = false;
     }
 
-    protected void floorStop(int floorNum, ElevatorStatus elevatorStatus, StopBy stopBy, FloorObject stopByFloorOp) {
+    //Ran when it reaches a StopBy floor.
+    protected void floorStop(FloorObject floorObject, ElevatorStatus elevatorStatus, StopBy stopBy, FloorObject stopByFloorOp) {
         isIdling = true;
         stopBy.getStopByQueue().remove();
-        elevatorMovement.setFloor(floorNum);
+        elevatorMovement.setFloor(stopByFloorOp.getFloor());
         floorDone(stopByFloorOp, elevatorStatus);
         doFloorIdle();
     }
@@ -313,15 +315,14 @@ public class ElevatorObject implements ConfigurationSerializable {
     }
 
     public void addFloor(FloorObject floorObject) {
+        if (this.floorsMap.get(floorObject.getFloor()) != null) return; //Don't add the floor if we already have it.
+
         if (floorObject.getFloor() >= 1) {
             this.topFloor++;
         } else if (floorObject.getFloor() < 0) {
             this.topBottomFloor--;
-        } else if (floorObject.getFloor() == 0) {
-            this.floorsMap.remove(0);
         }
-
-        this.floorsMap.putIfAbsent(floorObject.getFloor(), floorObject);
+        this.floorsMap.put(floorObject.getFloor(), floorObject);
     }
 
     public void deleteFloor(int floor) {
