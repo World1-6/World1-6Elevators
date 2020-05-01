@@ -18,7 +18,6 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.util.BoundingBox;
-import org.bukkit.util.Vector;
 
 import java.util.Map;
 
@@ -116,20 +115,24 @@ public class ElevatorCMD implements CommandExecutor {
         }
 
         Player p = (Player) sender;
-        if (!p.hasPermission("world16.elevator")) {
-            p.sendMessage(com.andrew121410.mc.world16utils.chat.Translate.chat("&bYou don't have permission to use this comamnd."));
+        if (!p.hasPermission("world16elevators.elevator")) {
+            p.sendMessage(com.andrew121410.mc.world16utils.chat.Translate.chat("&bYou don't have permission to use this command."));
             return true;
         }
 
         if (args.length == 0) {
-            p.sendMessage(Translate.chat("Elevator Help"));
-            p.sendMessage(Translate.chat("/elevator controller <Shows help for creation of a controller.>"));
-            p.sendMessage(Translate.chat("/elevator create <Shows help for creation of a elevator.>"));
-            p.sendMessage(Translate.chat("/elevator delete <Controller> <ElevatorName>"));
-            p.sendMessage(Translate.chat("/elevator floor <Shows help for the floor."));
-            p.sendMessage(Translate.chat("/elevator call <Shows help to call the elevator."));
-            p.sendMessage(Translate.chat("/elevator rename <Controller> <ElevatorName> <TOElevatorName>"));
-            p.sendMessage(Translate.chat("/elevator shaft <Shows help for the shaft.>"));
+            p.sendMessage(Translate.chat("&6/elevator create &e<Controller> &9<Elevator>"));
+            p.sendMessage(Translate.chat("&6/elevator delete &e<Controller> &9<Elevator>"));
+            p.sendMessage(Translate.chat("&6/elevator stop &e<Controller> &9<Elevator>"));
+            p.sendMessage(Translate.chat("&6/elevator click &e<Controller> &9<Elevator>"));
+            p.sendMessage(Translate.chat("&6/elevator rename &e<Controller> &9<Elevator> &a<TOElevatorName>"));
+            p.sendMessage("");
+            p.sendMessage(Translate.chat("&a&lMORE HELP COMMANDS..."));
+            p.sendMessage("");
+            p.sendMessage(Translate.chat("&6/elevator controller &d<Shows help for creation of a controller.>"));
+            p.sendMessage(Translate.chat("&6/elevator floor &d<Shows help for the floor."));
+            p.sendMessage(Translate.chat("&6/elevator shaft &d<Shows help for the shaft.>"));
+            p.sendMessage(Translate.chat("&6/elevator call &d<Shows help to call the elevator."));
             return true;
             //CREATE
         } else if (args[0].equalsIgnoreCase("controller")) {
@@ -163,25 +166,15 @@ public class ElevatorCMD implements CommandExecutor {
             return true;
         } else if (args[0].equalsIgnoreCase("create")) {
             if (args.length == 1) {
-                p.sendMessage(Translate.chat("[Elevator creation]"));
-                p.sendMessage(Translate.chat("/elevator create <Controller> <ElevatorName> <XAX> <XAY> <XAZ> <XBX> <XBY> <XAZ>"));
+                p.sendMessage(Translate.chat("/elevator create <Controller> <ElevatorName>"));
                 return true;
-            } else if (args.length == 9) {
+            } else if (args.length == 3) {
                 String controllerName = args[1].toLowerCase();
                 String elevatorName = args[2].toLowerCase();
-
-                int XAX = api.asIntOrDefault(args[3], 0);
-                int XAY = api.asIntOrDefault(args[4], 0);
-                int XAZ = api.asIntOrDefault(args[5], 0);
-
-                int XBX = api.asIntOrDefault(args[6], 0);
-                int XBY = api.asIntOrDefault(args[7], 0);
-                int XBZ = api.asIntOrDefault(args[8], 0);
-
                 Region region = getSelection(p);
 
                 if (region == null) {
-                    p.sendMessage("Please make a selection with WorldEdit and then redo the command please.");
+                    p.sendMessage(Translate.chat("&cYou didn't make a WorldEdit selection... [FAILED]"));
                     return true;
                 }
 
@@ -195,8 +188,9 @@ public class ElevatorCMD implements CommandExecutor {
                 Location two = new Location(p.getWorld(), region.getMaximumPoint().getX(), region.getMaximumPoint().getY(), region.getMaximumPoint().getZ());
 
                 ElevatorMovement elevatorMovement = new ElevatorMovement(0, this.api.getBlockPlayerIsLookingAt(p).getLocation(), one, two);
-                BoundingBox boundingBox = SimpleMath.toBoundingBox(new Vector(XAX, XAY, XAZ), new Vector(XBX, XBY, XBZ));
-                ElevatorObject elevatorObject = new ElevatorObject(false, plugin, p.getWorld().getName(), elevatorName, elevatorMovement, boundingBox);
+                BoundingBox boundingBox = BoundingBox.of(one, two);
+                boundingBox.expand(1);
+                ElevatorObject elevatorObject = new ElevatorObject(this.plugin, elevatorName, p.getWorld().getName(), elevatorMovement, boundingBox);
 
                 elevatorController.registerElevator(elevatorName, elevatorObject);
                 p.sendMessage(Translate.chat("The elevator: " + elevatorName + " has been registered to " + controllerName));
@@ -204,11 +198,11 @@ public class ElevatorCMD implements CommandExecutor {
             }
         } else if (args[0].equalsIgnoreCase("floor")) {
             if (args.length == 1) {
-                p.sendMessage(Translate.chat("[Elevator Floor Setup]"));
-                p.sendMessage(Translate.chat("/elevator floor create <Controller> <ElevatorName> <FloorNumber>"));
-                p.sendMessage(Translate.chat("/elevator floor delete <Controller> <ElevatorName> <FloorNumber>"));
-                p.sendMessage(Translate.chat("/elevator floor sign <Controller> <ElevatorName> <FloorNumber>"));
-                p.sendMessage(Translate.chat("/elevator floor door <Controller> <ElevatorName> <ADD OR DELETE> <Floor>"));
+                p.sendMessage(Translate.chat("&a&l&o[Elevator Floor Help]"));
+                p.sendMessage(Translate.chat("&6/elevator floor create &e<Controller> &9<Elevator> &a<FloorNumber>"));
+                p.sendMessage(Translate.chat("&6/elevator floor delete &e<Controller> &9<Elevator> &a<FloorNumber>"));
+                p.sendMessage(Translate.chat("&6/elevator floor sign &e<Controller> &9<Elevator> &a<FloorNumber>"));
+                p.sendMessage(Translate.chat("&6/elevator floor door &e<Controller> &9<Elevator> &b<ADD OR DELETE> &3<FloorNumber>"));
                 return true;
             } else if (args.length == 5 && args[1].equalsIgnoreCase("create")) {
                 String controllerName = args[2].toLowerCase();
@@ -403,9 +397,10 @@ public class ElevatorCMD implements CommandExecutor {
             return true;
         } else if (args[0].equalsIgnoreCase("call")) {
             if (args.length == 1) {
-                p.sendMessage(Translate.chat("/elevator call <Controller> <ElevatorName> <FloorNumber>"));
-                p.sendMessage(Translate.chat("/elevator call <Controller> <FloorNumber>"));
-                p.sendMessage(Translate.chat("/elevator call <Controller> <FloorNumber> <Goup?>"));
+                p.sendMessage(Translate.chat("&a&l&o[Elevator Call Help]"));
+                p.sendMessage(Translate.chat("&6/elevator call &e<Controller> &9<ElevatorName> &b<FloorNumber>"));
+                p.sendMessage(Translate.chat("&6/elevator call &e<Controller> &a<FloorNumber>"));
+                p.sendMessage(Translate.chat("&6/elevator call &e<Controller> &a<FloorNumber> &b<Goup?>"));
             } else if (args.length == 4 && !api.isBoolean(args[3])) {
                 String controllerName = args[1].toLowerCase();
                 String elevatorName = args[2].toLowerCase();
@@ -480,9 +475,10 @@ public class ElevatorCMD implements CommandExecutor {
             return true;
         } else if (args[0].equalsIgnoreCase("shaft")) {
             if (args.length == 1) {
-                p.sendMessage(Translate.chat("/elevator shaft <Controller> <ElevatorName> ticksPerSecond <Value>"));
-                p.sendMessage(Translate.chat("/elevator shaft <Controller> <ElevatorName> doorHolderTicksPerSecond <Value>"));
-                p.sendMessage(Translate.chat("/elevator shaft <Controller> <ElevatorName> elevatorWaiterTicksPerSecond <Value>"));
+                p.sendMessage(Translate.chat("&a&l&o[Elevator Shaft Help]"));
+                p.sendMessage(Translate.chat("&6/elevator shaft &e<Controller> &9<Elevator> &bticksPerSecond &3<Value>"));
+                p.sendMessage(Translate.chat("&6/elevator shaft &e<Controller> &9<Elevator> &bdoorHolderTicksPerSecond &3<Value>"));
+                p.sendMessage(Translate.chat("&6/elevator shaft &e<Controller> &9<Elevator> &belevatorWaiterTicksPerSecond &3<Value>"));
             } else if (args.length > 2) {
                 String controllerName = args[1].toLowerCase();
                 String elevatorName = args[2].toLowerCase();

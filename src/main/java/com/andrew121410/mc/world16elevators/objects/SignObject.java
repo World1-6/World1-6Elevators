@@ -3,6 +3,9 @@ package com.andrew121410.mc.world16elevators.objects;
 
 import com.andrew121410.mc.world16utils.chat.Translate;
 import com.andrew121410.mc.world16utils.sign.SignUtils;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.ToString;
 import org.bukkit.Location;
 import org.bukkit.block.Sign;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
@@ -11,6 +14,9 @@ import org.bukkit.configuration.serialization.SerializableAs;
 import java.util.HashMap;
 import java.util.Map;
 
+@EqualsAndHashCode
+@ToString
+@Getter
 @SerializableAs("SignObject")
 public class SignObject implements ConfigurationSerializable {
 
@@ -51,14 +57,6 @@ public class SignObject implements ConfigurationSerializable {
         sign.setLine(2, "");
         sign.setLine(3, "");
         sign.update();
-    }
-
-    public Location getLocation() {
-        return location;
-    }
-
-    public void setLocation(Location location) {
-        this.location = location;
     }
 
     @Override

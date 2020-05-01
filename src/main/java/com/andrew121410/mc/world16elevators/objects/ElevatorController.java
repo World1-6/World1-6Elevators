@@ -18,10 +18,14 @@ public class ElevatorController implements ConfigurationSerializable {
     private Map<String, ElevatorObject> elevatorsMap;
 
     public ElevatorController(Main plugin, String controllerName) {
+        this(plugin, controllerName, new HashMap<>());
+    }
+
+    public ElevatorController(Main plugin, String controllerName, Map<String, ElevatorObject> elevatorsMap) {
         this.plugin = plugin;
         this.controllerName = controllerName;
-
-        this.elevatorsMap = new HashMap<>();
+        this.elevatorsMap = elevatorsMap;
+        this.elevatorsMap.forEach((k, v) -> v.setElevatorControllerName(this.controllerName));
     }
 
     public void callElevatorClosest(int floorNum, ElevatorStatus elevatorStatus, ElevatorWho elevatorWho) {
@@ -68,10 +72,11 @@ public class ElevatorController implements ConfigurationSerializable {
     public Map<String, Object> serialize() {
         Map<String, Object> map = new HashMap<>();
         map.put("ControllerName", this.controllerName);
+        map.put("ElevatorMap", this.elevatorsMap);
         return map;
     }
 
     public static ElevatorController deserialize(Map<String, Object> map) {
-        return new ElevatorController(Main.getInstance(), (String) map.get("ControllerName"));
+        return new ElevatorController(Main.getInstance(), (String) map.get("ControllerName"), (Map<String, ElevatorObject>) map.get("ElevatorMap"));
     }
 }
