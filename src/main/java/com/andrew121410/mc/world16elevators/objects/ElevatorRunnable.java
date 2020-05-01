@@ -3,7 +3,6 @@ package com.andrew121410.mc.world16elevators.objects;
 
 import com.andrew121410.mc.world16elevators.Main;
 import com.andrew121410.mc.world16utils.player.SmoothTeleport;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -39,13 +38,10 @@ public class ElevatorRunnable extends BukkitRunnable {
 
 //        Check's if at the floor if so then stop the elevator.
         if (elevatorObject.getElevatorMovement().getAtDoor().getY() == floorObject.getMainDoor().getY()) {
-            Bukkit.getServer().broadcastMessage("Floor done has been ran.");
-            counter = 0;
             this.cancel();
             elevatorObject.floorStop(floorObject, elevatorStatus);
             return;
         } else if (stopByFloor != null && elevatorObject.getElevatorMovement().getAtDoor().getY() == stopByFloor.getMainDoor().getY()) {
-            Bukkit.getServer().broadcastMessage("StopBy has been ran.");
             elevatorObject.floorStop(floorObject, elevatorStatus, elevatorObject.getStopBy(), stopByFloor);
             return;
         }

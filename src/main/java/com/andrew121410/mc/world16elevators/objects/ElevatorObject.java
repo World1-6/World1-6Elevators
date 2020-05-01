@@ -333,10 +333,7 @@ public class ElevatorObject implements ConfigurationSerializable {
     }
 
     public FloorObject getFloor(int floor) {
-        if (this.floorsMap.get(floor) != null) {
-            return this.floorsMap.get(floor);
-        }
-        return null;
+        return this.floorsMap.get(floor);
     }
 
     public Integer[] listAllFloorsInt() {
