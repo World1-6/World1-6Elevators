@@ -12,6 +12,7 @@ import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import com.sk89q.worldedit.regions.Region;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
+import org.bukkit.block.CommandBlock;
 import org.bukkit.command.BlockCommandSender;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -50,63 +51,45 @@ public class ElevatorCMD implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
         if (!(sender instanceof Player)) {
-
             if (!(sender instanceof BlockCommandSender)) {
                 return true;
             }
-
-            BlockCommandSender cmdblock = (BlockCommandSender) sender;
-            Block commandblock = cmdblock.getBlock();
-
+            BlockCommandSender commandBlockSender = (BlockCommandSender) sender;
+            Block commandBlock = commandBlockSender.getBlock();
+            CommandBlock realCommandBlock = (CommandBlock) commandBlock.getState();
             if (args[0].equalsIgnoreCase("call")) {
-                if (args.length == 4) {
+                if (args.length >= 3) {
                     String controllerName = args[1].toLowerCase();
-                    String elevatorName = args[2].toLowerCase();
-                    int floorNum = api.asIntOrDefault(args[3], 0);
+                    Integer floorNumber = api.isInteger(args[2]) ? Integer.parseInt(args[2]) : null;
+                    String elevatorName = floorNumber == null ? args[2] : null;
+                    Boolean isGoingUp = null;
+                    if (floorNumber == null) {
+                        floorNumber = api.isInteger(args[3]) ? Integer.parseInt(args[3]) : null;
+                        if (floorNumber == null) {
+                            commandBlockSender.sendMessage("floorNumber == null");
+                            return true;
+                        }
+                        if (args.length == 5) isGoingUp = api.isBoolean(args[4]) ? Boolean.parseBoolean(args[4]) : null;
+                    } else {
+                        if (args.length == 4) isGoingUp = api.isBoolean(args[3]) ? Boolean.parseBoolean(args[3]) : null;
+                    }
 
                     ElevatorController elevatorController = this.elevatorControllerMap.get(controllerName);
-                    if (elevatorController == null) return true;
-
-                    ElevatorObject elevatorObject = elevatorController.getElevator(elevatorName);
-                    if (elevatorObject == null) return true;
-
-                    if (elevatorObject.getFloor(floorNum) == null) return true;
-
-                    elevatorObject.goToFloor(floorNum, ElevatorStatus.DONT_KNOW, ElevatorWho.COMMAND_BLOCK);
-                    return true;
-                } else if (args.length == 5 && api.isBoolean(args[4])) {
-                    String controllerName = args[1].toLowerCase();
-                    String elevatorName = args[2].toLowerCase();
-                    int floorNum = api.asIntOrDefault(args[3], 0);
-                    boolean goUp = api.asBooleanOrDefault(args[4], false);
-
-                    ElevatorController elevatorController = this.elevatorControllerMap.get(controllerName);
-                    if (elevatorController == null) return true;
-
-                    ElevatorObject elevatorObject = elevatorController.getElevator(elevatorName);
-                    if (elevatorObject == null) return true;
-
-                    if (elevatorObject.getFloor(floorNum) == null) return true;
-
-                    ElevatorStatus elevatorStatus = ElevatorStatus.DONT_KNOW;
-                    elevatorObject.goToFloor(floorNum, elevatorStatus.upOrDown(goUp), ElevatorWho.COMMAND_BLOCK);
-                    return true;
-                } else if (args.length == 5 && !api.isBoolean(args[3])) {
-                    String controllerName = args[1].toLowerCase();
-                    String elevatorName = args[2].toLowerCase();
-                    int floorNum = api.asIntOrDefault(args[3], 0);
-                    int toFloorNum = api.asIntOrDefault(args[4], 0);
-
-                    ElevatorController elevatorController = this.elevatorControllerMap.get(controllerName);
-                    if (elevatorController == null) return true;
-
-                    ElevatorObject elevatorObject = elevatorController.getElevator(elevatorName);
-                    if (elevatorObject == null) return true;
-
-                    if (elevatorObject.getFloor(floorNum) == null || elevatorObject.getFloor(toFloorNum) == null)
+                    if (elevatorController == null) {
+                        commandBlockSender.sendMessage("elevatorController == null");
                         return true;
+                    }
 
-                    elevatorObject.callElevator(floorNum, toFloorNum, ElevatorWho.COMMAND_BLOCK);
+                    if (elevatorName != null) {
+                        ElevatorObject elevatorObject = elevatorController.getElevator(elevatorName);
+                        if (elevatorObject == null) {
+                            commandBlockSender.sendMessage("elevatorObject == null");
+                            return true;
+                        }
+                        elevatorObject.goToFloor(floorNumber, isGoingUp != null ? ElevatorStatus.upOrDown(isGoingUp) : ElevatorStatus.DONT_KNOW, ElevatorWho.COMMAND_BLOCK);
+                    } else {
+                        elevatorController.callElevatorClosest(floorNumber, isGoingUp != null ? ElevatorStatus.upOrDown(isGoingUp) : ElevatorStatus.DONT_KNOW, ElevatorWho.COMMAND_BLOCK);
+                    }
                     return true;
                 }
                 return true;
