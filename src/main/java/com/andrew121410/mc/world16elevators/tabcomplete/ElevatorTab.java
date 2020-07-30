@@ -53,18 +53,21 @@ public class ElevatorTab implements TabCompleter {
             return getContainsString(args[0], tabCompleteList);
         } else if (args[0].equalsIgnoreCase("create")) {
             if (args.length == 2) {
-                getContainsString(args[1], controllerList);
+                return getContainsString(args[1], controllerList);
             }
+            return null;
         } else if (args[0].equalsIgnoreCase("controller")) {
             if (args.length == 2) {
                 return getContainsString(args[1], Arrays.asList("create", "delete"));
             } else if (args[1].equalsIgnoreCase("delete")) {
                 return getContainsString(args[2], controllerList);
             }
+            return null;
         } else if (args[0].equalsIgnoreCase("delete")) {
             if (args.length == 2) {
                 return getContainsString(args[1], controllerList);
             }
+            return null;
         } else if (args[0].equalsIgnoreCase("rename")) {
             if (args.length == 2) {
                 return getContainsString(args[1], controllerList);
@@ -98,6 +101,7 @@ public class ElevatorTab implements TabCompleter {
             if (args.length == 2) {
                 return getContainsString(args[1], controllerList);
             }
+            return null;
         }
         return null;
     }
