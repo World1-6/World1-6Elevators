@@ -120,8 +120,8 @@ public class ElevatorCMD implements CommandExecutor {
             //CREATE
         } else if (args[0].equalsIgnoreCase("controller")) {
             if (args.length == 1) {
-                p.sendMessage(Translate.chat("/elevator controller create <NAME>"));
-                p.sendMessage(Translate.chat("/elevator controller delete <NAME>"));
+                p.sendMessage(Translate.chat("&6/elevator controller create &e<Controller>"));
+                p.sendMessage(Translate.chat("&6/elevator controller delete &e<Controller>"));
                 return true;
             } else if (args.length == 3 && args[1].equalsIgnoreCase("create")) {
                 String controllerName = args[2].toLowerCase();
@@ -149,7 +149,7 @@ public class ElevatorCMD implements CommandExecutor {
             return true;
         } else if (args[0].equalsIgnoreCase("create")) {
             if (args.length == 1) {
-                p.sendMessage(Translate.chat("/elevator create <Controller> <ElevatorName>"));
+                p.sendMessage(Translate.chat("&6/elevator create &e<Controller> &9<ElevatorName>"));
                 return true;
             } else if (args.length == 3) {
                 String controllerName = args[1].toLowerCase();

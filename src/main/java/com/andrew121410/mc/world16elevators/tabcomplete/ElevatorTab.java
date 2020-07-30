@@ -37,7 +37,7 @@ public class ElevatorTab implements TabCompleter {
     }
 
     @Override
-    public List<String> onTabComplete(CommandSender sender, Command cmd, String alies, String[] args) {
+    public List<String> onTabComplete(CommandSender sender, Command cmd, String ailes, String[] args) {
         if (!(sender instanceof Player)) {
             return null;
         }
@@ -51,6 +51,10 @@ public class ElevatorTab implements TabCompleter {
 
         if (args.length == 1) {
             return getContainsString(args[0], tabCompleteList);
+        } else if (args[0].equalsIgnoreCase("create")) {
+            if (args.length == 2) {
+                getContainsString(args[1], controllerList);
+            }
         } else if (args[0].equalsIgnoreCase("controller")) {
             if (args.length == 2) {
                 return getContainsString(args[1], Arrays.asList("create", "delete"));
