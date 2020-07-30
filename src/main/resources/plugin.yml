@@ -1,7 +1,7 @@
 name: World1-6Elevators
 version: ${project.version}
 main: com.andrew121410.mc.world16elevators.Main
-api-version: 1.15
+api-version: 1.16
 authors: [Andrew121410]
 description: A plugin that i made for my private mc server to add custom elevators.
 
