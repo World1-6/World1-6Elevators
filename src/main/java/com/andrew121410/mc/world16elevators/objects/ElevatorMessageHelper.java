@@ -1,6 +1,7 @@
 package com.andrew121410.mc.world16elevators.objects;
 
 import com.andrew121410.mc.world16elevators.Main;
+import com.andrew121410.mc.world16utils.chat.Translate;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -62,6 +63,13 @@ public class ElevatorMessageHelper {
                         return;
                     }
 
+                    if (elevatorObject.getElevatorMovement().isOnlyTwoFloors() && getNextFloor(elevatorObject.getElevatorMovement().getFloor()) != null) {
+                        FloorQueueObject floorQueueObject = getNextFloor(elevatorObject.getElevatorMovement().getFloor());
+                        elevatorObject.goToFloor(floorQueueObject.getFloorNumber(), floorQueueObject.getElevatorStatus(), ElevatorWho.PLAYER_COMMAND);
+                        player.sendMessage(Translate.chat("&6ElevatorMessageHelper: &9Going to floor: " + floorQueueObject.getFloorNumber()));
+                        players.add(player.getUniqueId());
+                        return;
+                    }
                     elevatorObject.clickMessageGoto(player);
                     players.add(player.getUniqueId());
                 }
@@ -78,5 +86,16 @@ public class ElevatorMessageHelper {
 
     public void stop() {
         this.isRunning = false;
+    }
+
+    public FloorQueueObject getNextFloor(int floorNumber) {
+        FloorQueueObject floorQueueObject;
+        FloorObject floorObject = elevatorObject.getFloor(floorNumber + 1);
+        if (floorObject == null) {
+            floorObject = elevatorObject.getFloor(floorNumber - 1);
+            floorQueueObject = new FloorQueueObject(floorNumber - 1, ElevatorStatus.UP);
+        } else floorQueueObject = new FloorQueueObject(floorNumber + 1, ElevatorStatus.DOWN);
+        if (floorObject == null) return null;
+        return floorQueueObject;
     }
 }

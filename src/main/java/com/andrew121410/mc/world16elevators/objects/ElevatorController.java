@@ -1,6 +1,10 @@
 package com.andrew121410.mc.world16elevators.objects;
 
 import com.andrew121410.mc.world16elevators.Main;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.configuration.serialization.SerializableAs;
 
@@ -9,6 +13,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+@EqualsAndHashCode
+@ToString
+@Getter
+@Setter
 @SerializableAs("ElevatorController")
 public class ElevatorController implements ConfigurationSerializable {
 
@@ -17,15 +25,15 @@ public class ElevatorController implements ConfigurationSerializable {
     private String controllerName;
     private Map<String, ElevatorObject> elevatorsMap;
 
-    public ElevatorController(Main plugin, String controllerName) {
-        this(plugin, controllerName, new HashMap<>());
-    }
-
     public ElevatorController(Main plugin, String controllerName, Map<String, ElevatorObject> elevatorsMap) {
         this.plugin = plugin;
         this.controllerName = controllerName;
         this.elevatorsMap = elevatorsMap;
         this.elevatorsMap.forEach((k, v) -> v.setElevatorControllerName(this.controllerName));
+    }
+
+    public ElevatorController(Main plugin, String controllerName) {
+        this(plugin, controllerName, new HashMap<>());
     }
 
     public void callElevatorClosest(int floorNum, ElevatorStatus elevatorStatus, ElevatorWho elevatorWho) {
@@ -52,20 +60,8 @@ public class ElevatorController implements ConfigurationSerializable {
         this.elevatorsMap.putIfAbsent(name.toLowerCase(), elevatorObject);
     }
 
-    public Map<String, ElevatorObject> getElevatorsMap() {
-        return this.elevatorsMap;
-    }
-
     public boolean isSingle() {
         return this.elevatorsMap.size() == 0;
-    }
-
-    public String getControllerName() {
-        return controllerName;
-    }
-
-    public void setControllerName(String controllerName) {
-        this.controllerName = controllerName;
     }
 
     @Override

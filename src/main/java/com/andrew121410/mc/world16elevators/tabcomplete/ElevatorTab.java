@@ -89,7 +89,7 @@ public class ElevatorTab implements TabCompleter {
             if (args.length == 2) {
                 return getContainsString(args[1], controllerList);
             } else if (args.length == 4) {
-                return getContainsString(args[3], Arrays.asList("ticksPerSecond", "doorHolderTicksPerSecond", "elevatorWaiterTicksPerSecond"));
+                return getContainsString(args[3], Arrays.asList("ticksPerSecond", "doorHolderTicksPerSecond", "elevatorWaiterTicksPerSecond", "doElevatorLeveling", "onlyTwoFloors"));
             }
             return null;
         } else if (args[0].equalsIgnoreCase("stop")) {

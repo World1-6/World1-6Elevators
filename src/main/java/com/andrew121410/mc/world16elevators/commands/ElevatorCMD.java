@@ -462,6 +462,7 @@ public class ElevatorCMD implements CommandExecutor {
                 p.sendMessage(Translate.chat("&6/elevator shaft &e<Controller> &9<Elevator> &bticksPerSecond &3<Value>"));
                 p.sendMessage(Translate.chat("&6/elevator shaft &e<Controller> &9<Elevator> &bdoorHolderTicksPerSecond &3<Value>"));
                 p.sendMessage(Translate.chat("&6/elevator shaft &e<Controller> &9<Elevator> &belevatorWaiterTicksPerSecond &3<Value>"));
+                p.sendMessage(Translate.chat("&6/elevator shaft &e<Controller> &9<Elevator> &bdoElevatorLeveling &3<Value>"));
             } else if (args.length > 2) {
                 String controllerName = args[1].toLowerCase();
                 String elevatorName = args[2].toLowerCase();
@@ -483,14 +484,27 @@ public class ElevatorCMD implements CommandExecutor {
                     long value1 = api.asLongOrDefault(value, ElevatorMovement.DEFAULT_TICKS_PER_SECOND);
                     elevatorObject.getElevatorMovement().setTicksPerSecond(value1);
                     p.sendMessage(Translate.chat("The ticks per second has been updated to: " + value1));
+                    return true;
                 } else if (args[3].equalsIgnoreCase("doorHolderTicksPerSecond")) {
                     long value1 = api.asLongOrDefault(value, ElevatorMovement.DEFAULT_DOOR_HOLDER_TICKS_PER_SECOND);
                     elevatorObject.getElevatorMovement().setDoorHolderTicksPerSecond(value1);
                     p.sendMessage(Translate.chat("The door holder ticks per second has been updated to: " + value1));
+                    return true;
                 } else if (args[3].equalsIgnoreCase("elevatorWaiterTicksPerSecond")) {
                     long value1 = api.asLongOrDefault(value, ElevatorMovement.DEFAULT_ELEVATOR_WAITER_TICKS_PER_SECOND);
                     elevatorObject.getElevatorMovement().setElevatorWaiterTicksPerSecond(value1);
                     p.sendMessage(Translate.chat("The elevator waiter ticks per second has been updated to: " + value1));
+                    return true;
+                } else if (args[3].equalsIgnoreCase("doElevatorLeveling")) {
+                    boolean bool = api.asBooleanOrDefault(args[4], true);
+                    elevatorObject.getElevatorMovement().setDoElevatorLeveling(bool);
+                    p.sendMessage(Translate.chat("The doLevelingSystem has been set to: " + bool));
+                    return true;
+                } else if (args[3].equalsIgnoreCase("onlyTwoFloors")) {
+                    boolean bool = api.asBooleanOrDefault(args[4], false);
+                    elevatorObject.getElevatorMovement().setOnlyTwoFloors(bool);
+                    p.sendMessage(Translate.chat("onlyTwoFloors has been set to: " + bool));
+                    return true;
                 }
             }
         }

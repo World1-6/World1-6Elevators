@@ -63,11 +63,13 @@ public class ElevatorRunnable extends BukkitRunnable {
                 SmoothTeleport.teleport(player, player.getLocation().add(0, 1, 0));
             }
 
-            int x = elevatorObject.getElevatorMovement().getAtDoor().getBlockY();
-            int z = floorObject.getMainDoor().getBlockY();
-            x += 5;
-            if (x >= z) {
-                counter += 1;
+            if (elevatorObject.getElevatorMovement().isDoElevatorLeveling()) {
+                int x = elevatorObject.getElevatorMovement().getAtDoor().getBlockY();
+                int z = floorObject.getMainDoor().getBlockY();
+                x += 5;
+                if (x >= z) {
+                    counter += 1;
+                }
             }
         } else {
             elevatorObject.worldEditMoveDOWN();
@@ -77,11 +79,13 @@ public class ElevatorRunnable extends BukkitRunnable {
                 SmoothTeleport.teleport(player, player.getLocation().subtract(0, 1, 0));
             }
 
-            int x = elevatorObject.getElevatorMovement().getAtDoor().getBlockY();
-            int z = floorObject.getMainDoor().getBlockY();
-            x -= 5;
-            if (x <= z) {
-                counter += 1;
+            if (elevatorObject.getElevatorMovement().isDoElevatorLeveling()) {
+                int x = elevatorObject.getElevatorMovement().getAtDoor().getBlockY();
+                int z = floorObject.getMainDoor().getBlockY();
+                x -= 5;
+                if (x <= z) {
+                    counter += 1;
+                }
             }
         }
         this.cancel();

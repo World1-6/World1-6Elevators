@@ -24,6 +24,9 @@ public class ElevatorMovement implements ConfigurationSerializable {
     private Location locationDOWN;
     private Location locationUP;
 
+    private boolean doElevatorLeveling;
+    private boolean onlyTwoFloors;
+
     //Config
     private long ticksPerSecond;
     private long doorHolderTicksPerSecond;
@@ -35,10 +38,10 @@ public class ElevatorMovement implements ConfigurationSerializable {
     //...
 
     public ElevatorMovement(Integer floor, Location atDoor, Location locationDOWN, Location locationUP) {
-        this(floor, atDoor, locationDOWN, locationUP, DEFAULT_TICKS_PER_SECOND, DEFAULT_DOOR_HOLDER_TICKS_PER_SECOND, DEFAULT_ELEVATOR_WAITER_TICKS_PER_SECOND);
+        this(floor, atDoor, locationDOWN, locationUP, DEFAULT_TICKS_PER_SECOND, DEFAULT_DOOR_HOLDER_TICKS_PER_SECOND, DEFAULT_ELEVATOR_WAITER_TICKS_PER_SECOND, true, false);
     }
 
-    public ElevatorMovement(Integer floor, Location atDoor, Location locationDOWN, Location locationUP, long ticksPerSecond, long doorHolderTicksPerSecond, long elevatorWaiterTicksPerSecond) {
+    public ElevatorMovement(Integer floor, Location atDoor, Location locationDOWN, Location locationUP, long ticksPerSecond, long doorHolderTicksPerSecond, long elevatorWaiterTicksPerSecond, boolean doElevatorLeveling, boolean onlyTwoFloors) {
         this.floor = floor;
         this.atDoor = atDoor;
         this.locationDOWN = locationDOWN;
@@ -46,6 +49,8 @@ public class ElevatorMovement implements ConfigurationSerializable {
         this.ticksPerSecond = ticksPerSecond;
         this.doorHolderTicksPerSecond = doorHolderTicksPerSecond;
         this.elevatorWaiterTicksPerSecond = elevatorWaiterTicksPerSecond;
+        this.doElevatorLeveling = doElevatorLeveling;
+        this.onlyTwoFloors = onlyTwoFloors;
     }
 
     public void moveUP() {
@@ -70,10 +75,20 @@ public class ElevatorMovement implements ConfigurationSerializable {
         map.put("TicksPerSecond", this.ticksPerSecond);
         map.put("DoorHolderTicksPerSecond", this.doorHolderTicksPerSecond);
         map.put("ElevatorWaiterTicksPerSecond", this.elevatorWaiterTicksPerSecond);
+        map.put("DoElevatorLeveling", this.doElevatorLeveling);
+        map.put("OnlyTwoFloors", this.onlyTwoFloors);
         return map;
     }
 
     public static ElevatorMovement deserialize(Map<String, Object> map) {
-        return new ElevatorMovement((Integer) map.get("Floor"), (Location) map.get("AtDoor"), (Location) map.get("LocationUP"), (Location) map.get("LocationDOWN"), ((Integer) map.get("TicksPerSecond")).longValue(), ((Integer) map.get("DoorHolderTicksPerSecond")).longValue(), ((Integer) map.get("ElevatorWaiterTicksPerSecond")).longValue());
+        return new ElevatorMovement((Integer) map.get("Floor"),
+                (Location) map.get("AtDoor"),
+                (Location) map.get("LocationUP"),
+                (Location) map.get("LocationDOWN"),
+                ((Integer) map.get("TicksPerSecond")).longValue(),
+                ((Integer) map.get("DoorHolderTicksPerSecond")).longValue(),
+                ((Integer) map.get("ElevatorWaiterTicksPerSecond")).longValue(),
+                (Boolean) map.get("DoElevatorLeveling"),
+                (Boolean) map.get("OnlyTwoFloors"));
     }
 }
