@@ -14,9 +14,10 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
+import net.md_5.bungee.api.chat.HoverEvent;
+import net.md_5.bungee.api.chat.hover.content.Text;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -110,8 +111,6 @@ public class ElevatorObject implements ConfigurationSerializable {
 
         //Helpers
         this.elevatorMessageHelper = new ElevatorMessageHelper(plugin, this);
-
-        if (this.floorsMap.isEmpty()) this.floorsMap.put(0, FloorObject.from(elevatorMovement));
     }
 
     public Collection<Entity> getEntities() {
@@ -127,6 +126,22 @@ public class ElevatorObject implements ConfigurationSerializable {
         goToFloor(toWhatFloor, ElevatorStatus.DONT_KNOW, elevatorWho);
     }
 
+    public void goToFloor(String name, ElevatorStatus elevatorStatus, ElevatorWho elevatorWho) {
+        Integer isIntInt = null;
+        try {
+            Integer.parseInt(name);
+            isIntInt = Integer.valueOf(name);
+        } catch (Exception ignored) {
+        }
+        if (isIntInt != null) {
+            goToFloor(isIntInt, elevatorStatus, elevatorWho);
+            return;
+        }
+        FloorObject floorObject = getFloor(name);
+        if (floorObject == null) return;
+        goToFloor(floorObject.getFloor(), elevatorStatus, elevatorWho);
+    }
+
     public void goToFloor(int floorNum, ElevatorStatus elevatorStatus, ElevatorWho elevatorWho) {
         boolean goUp;
 
@@ -138,7 +153,7 @@ public class ElevatorObject implements ConfigurationSerializable {
 
         //Add to the queue if elevator is running or idling.
         if (isGoing || isIdling) {
-            if (this.floorBuffer.contains(floorNum) && this.stopBy.toElevatorStatus() == elevatorStatus) {
+            if (this.floorBuffer.contains(floorNum) && elevatorStatus != ElevatorStatus.DONT_KNOW && this.stopBy.toElevatorStatus() == elevatorStatus) {
                 this.stopBy.getStopByQueue().add(floorNum);
             } else {
                 floorQueueBuffer.add(new FloorQueueObject(floorNum, elevatorStatus));
@@ -288,12 +303,12 @@ public class ElevatorObject implements ConfigurationSerializable {
     protected void reCalculateFloorBuffer(boolean goUp) {
         Integer peek = this.floorBuffer.peek();
         if (peek == null) return;
-
+        FloorObject floorObject = getFloor(peek);
         if (goUp) {
-            if (this.elevatorMovement.getAtDoor().getY() >= getFloor(peek).getMainDoor().getY())
+            if (this.elevatorMovement.getAtDoor().getBlockY() >= floorObject.getMainDoor().getBlockY())
                 this.floorBuffer.remove();
         } else {
-            if (this.elevatorMovement.getAtDoor().getY() <= getFloor(peek).getMainDoor().getY())
+            if (this.elevatorMovement.getAtDoor().getBlockY() <= floorObject.getMainDoor().getBlockY())
                 this.floorBuffer.remove();
         }
     }
@@ -321,15 +336,20 @@ public class ElevatorObject implements ConfigurationSerializable {
         }.runTaskTimer(plugin, 40L, 40L);
     }
 
-    private void arrivalChime(Location location) {
-        getBukkitWorld().playSound(location, Sound.BLOCK_NOTE_BLOCK_PLING, 10F, 1.8F);
-    }
-
-    private void passingChime(Location location) {
-        getBukkitWorld().playSound(location, Sound.BLOCK_NOTE_BLOCK_PLING, 10F, 1.3F);
-    }
-
     public void addFloor(FloorObject floorObject) {
+        //We have to find out the elevator floor by ourself.
+        if (floorObject.getFloor() == Integer.MIN_VALUE) {
+            //Checks if the elevator should go up or down.
+            boolean goUp = floorObject.getMainDoor().getY() > this.elevatorMovement.getAtDoor().getY();
+            int a = goUp ? 1 : -1;
+            do {
+                a = goUp ? a++ : a--;
+            }
+            while (getFloor(a) != null);
+            floorObject.setFloor(a);
+            Bukkit.getServer().broadcastMessage("New floor has been set to " + a);
+        }
+
         if (this.floorsMap.get(floorObject.getFloor()) != null) return; //Don't add the floor if we already have it.
 
         if (floorObject.getFloor() >= 1) {
@@ -351,6 +371,10 @@ public class ElevatorObject implements ConfigurationSerializable {
         return this.floorsMap.get(floor);
     }
 
+    public FloorObject getFloor(String name) {
+        return this.floorsMap.values().stream().filter(floorObject -> floorObject.getName().equalsIgnoreCase(name)).findFirst().orElse(null);
+    }
+
     public Integer[] listAllFloorsInt() {
         Set<Integer> homeSet = this.floorsMap.keySet();
         Integer[] integers = homeSet.toArray(new Integer[0]);
@@ -359,20 +383,27 @@ public class ElevatorObject implements ConfigurationSerializable {
     }
 
     public void clickMessageGoto(Player player) {
-        String messageD = "- Click a Floor to take the elevator to. -";
-
-        List<BaseComponent[]> componentBuilders = new ArrayList<>();
+        ComponentBuilder componentBuilder = new ComponentBuilder().append("[").color(ChatColor.WHITE).append("BexarSystems").color(ChatColor.GOLD).append(" - ").color(ChatColor.RED).append("Please click a floor in the chat to take the elevator to.").color(ChatColor.BLUE).append("]").color(ChatColor.WHITE).append("\n");
         for (Integer integer : listAllFloorsInt()) {
-            componentBuilders.add(new ComponentBuilder(String.valueOf(integer)).color(ChatColor.GOLD).bold(true).event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/elevator call " + elevatorControllerName + " " + elevatorName + " " + integer)).create());
+            FloorObject floorObject = getFloor(integer);
+            componentBuilder.append(new ComponentBuilder((floorObject.getName() != null ? floorObject.getName() : String.valueOf(integer)) + ",")
+                    .color(ChatColor.GOLD)
+                    .bold(true)
+                    .event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/elevator call " + elevatorControllerName + " " + elevatorName + " " + (floorObject.getName() != null ? floorObject.getName() : integer)))
+                    .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text("Click me to go to: " + (floorObject.getName() != null ? floorObject.getName() : integer))))
+                    .append(" ")
+                    .reset()
+                    .create());
         }
-
-        ComponentBuilder componentBuilder = new ComponentBuilder(messageD).color(ChatColor.YELLOW).bold(true).append("\n");
-        for (BaseComponent[] builder : componentBuilders) {
-            componentBuilder.append(" ");
-            componentBuilder.append(builder);
-        }
-
         player.spigot().sendMessage(componentBuilder.create());
+    }
+
+    private void arrivalChime(Location location) {
+        getBukkitWorld().playSound(location, Sound.BLOCK_NOTE_BLOCK_PLING, 10F, 1.8F);
+    }
+
+    private void passingChime(Location location) {
+        getBukkitWorld().playSound(location, Sound.BLOCK_NOTE_BLOCK_PLING, 10F, 1.3F);
     }
 
     public static Door isDoor(Location location) {

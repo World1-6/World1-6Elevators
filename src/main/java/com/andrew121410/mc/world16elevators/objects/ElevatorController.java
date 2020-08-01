@@ -45,6 +45,11 @@ public class ElevatorController implements ConfigurationSerializable {
         elevatorObject.goToFloor(floorNum, elevatorStatus, elevatorWho);
     }
 
+    public void callElevatorClosest(String floorName, ElevatorStatus elevatorStatus, ElevatorWho elevatorWho) {
+        ElevatorObject elevatorObject = getClosestElevator(floorName, true, elevatorStatus);
+        elevatorObject.goToFloor(floorName, elevatorStatus, elevatorWho);
+    }
+
     public void callAllElevators(int floorNum, ElevatorStatus elevatorStatus, ElevatorWho elevatorWho) {
         this.elevatorsMap.forEach((k, v) -> v.goToFloor(floorNum, elevatorStatus, elevatorWho));
     }
@@ -52,6 +57,12 @@ public class ElevatorController implements ConfigurationSerializable {
     public ElevatorObject getClosestElevator(int floorNumber, boolean smart, ElevatorStatus elevatorStatus) {
         Optional<ElevatorObject> optionalElevatorObject = this.elevatorsMap.values().stream().filter(elevatorObject -> !elevatorObject.isGoing()).min(Comparator.comparingInt(i -> Math.abs(i.getElevatorMovement().getAtDoor().getBlockY() - i.getFloor(floorNumber).getMainDoor().getBlockY())));
         Optional<ElevatorObject> optionalElevatorObject1 = this.elevatorsMap.values().stream().filter(ElevatorObject::isGoing).filter(elevatorObject -> elevatorObject.getFloorBuffer().contains(floorNumber) && elevatorObject.getStopBy().toElevatorStatus() == elevatorStatus).findFirst();
+        return optionalElevatorObject1.orElseGet(optionalElevatorObject::get);
+    }
+
+    public ElevatorObject getClosestElevator(String floorName, boolean smart, ElevatorStatus elevatorStatus) {
+        Optional<ElevatorObject> optionalElevatorObject = this.elevatorsMap.values().stream().filter(elevatorObject -> !elevatorObject.isGoing()).min(Comparator.comparingInt(i -> Math.abs(i.getElevatorMovement().getAtDoor().getBlockY() - i.getFloor(floorName).getMainDoor().getBlockY())));
+        Optional<ElevatorObject> optionalElevatorObject1 = this.elevatorsMap.values().stream().filter(ElevatorObject::isGoing).filter(elevatorObject -> elevatorObject.getFloorBuffer().contains(elevatorObject.getFloor(floorName).getFloor()) && elevatorObject.getStopBy().toElevatorStatus() == elevatorStatus).findFirst();
         return optionalElevatorObject1.orElseGet(optionalElevatorObject::get);
     }
 

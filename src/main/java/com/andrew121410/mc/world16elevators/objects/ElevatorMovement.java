@@ -68,8 +68,8 @@ public class ElevatorMovement implements ConfigurationSerializable {
     @Override
     public Map<String, Object> serialize() {
         Map<String, Object> map = new HashMap<>();
-        map.put("Floor", floor);
-        map.put("AtDoor", atDoor);
+        map.put("Floor", this.floor);
+        map.put("AtDoor", this.atDoor);
         map.put("LocationDOWN", this.locationDOWN);
         map.put("LocationUP", this.locationUP);
         map.put("TicksPerSecond", this.ticksPerSecond);

@@ -2,7 +2,6 @@ package com.andrew121410.mc.world16elevators.manager;
 
 import com.andrew121410.mc.world16elevators.Main;
 import com.andrew121410.mc.world16elevators.objects.ElevatorController;
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 
 import java.util.Iterator;
@@ -31,16 +30,12 @@ public class ElevatorChunkSmartManager implements Runnable {
             boolean isChunkLoaded = location.getWorld().isChunkLoaded(location.getBlockX(), location.getBlockZ());
             if (isChunkLoaded && !this.elevatorControllerMap.containsKey(controllerName)) {
                 this.plugin.getElevatorManager().loadElevatorController(controllerName);
-                Bukkit.getServer().broadcastMessage("ElevatorChunkSmartManager: Loaded " + controllerName);
             } else if (!isChunkLoaded && this.elevatorControllerMap.containsKey(controllerName)) {
                 ElevatorController elevatorController = this.elevatorControllerMap.get(controllerName);
                 long numberOfElevatorsThatAreRunning = elevatorController.getElevatorsMap().entrySet().stream().filter(entry1 -> entry1.getValue().isGoing()).count();
                 //It's safe to remove the elevator controller because all elevators in the elevator controller aren't running.
                 if (numberOfElevatorsThatAreRunning == 0) {
                     this.plugin.getElevatorManager().saveAndUnloadElevatorController(elevatorController);
-                    Bukkit.getServer().broadcastMessage("ElevatorChunkSmartManager: Unloaded " + controllerName);
-                } else {
-                    Bukkit.getServer().broadcastMessage("ElevatorChunkSmartManager: Couldn't unload " + controllerName + " because one of it's elevators were running. Trying next time.");
                 }
             }
         }

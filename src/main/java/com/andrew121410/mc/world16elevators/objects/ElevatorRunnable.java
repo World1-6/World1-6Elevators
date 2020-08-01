@@ -37,7 +37,7 @@ public class ElevatorRunnable extends BukkitRunnable {
         FloorObject stopByFloor = !elevatorObject.getStopBy().getStopByQueue().isEmpty() ? elevatorObject.getFloor(elevatorObject.getStopBy().getStopByQueue().peek()) : null;
 
 //        Check's if at the floor if so then stop the elevator.
-        if (elevatorObject.getElevatorMovement().getAtDoor().getY() == floorObject.getMainDoor().getY()) {
+        if (elevatorObject.getElevatorMovement().getAtDoor().getBlockY() == floorObject.getMainDoor().getBlockY()) {
             this.cancel();
             elevatorObject.floorStop(floorObject, elevatorStatus);
             return;

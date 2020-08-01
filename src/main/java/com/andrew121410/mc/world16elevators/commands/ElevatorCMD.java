@@ -68,11 +68,7 @@ public class ElevatorCMD implements CommandExecutor {
             if (args[0].equalsIgnoreCase("call")) {
                 if (args.length >= 3) {
                     ElevatorCommandCustomArguments eleArgs = getArgumentsElevators(args, 2);
-                    Integer floorNumber = api.isInteger(eleArgs.getOtherArgs().get(0)) ? Integer.parseInt(eleArgs.getOtherArgs().get(0)) : null;
-                    if (floorNumber == null) {
-                        commandBlockSender.sendMessage(Translate.chat("FloorNumber can't be null."));
-                        return true;
-                    }
+                    String stringFloor = eleArgs.getOtherArgs().get(0);
                     Boolean isGoingUp = api.getIndexFromStringArrayList(eleArgs.getOtherArgs(), 1) != null ? api.isBoolean(eleArgs.getOtherArgs().get(1)) ? Boolean.parseBoolean(eleArgs.getOtherArgs().get(1)) : null : null;
 
                     ElevatorController elevatorController = eleArgs.getElevatorController();
@@ -87,9 +83,13 @@ public class ElevatorCMD implements CommandExecutor {
                             commandBlockSender.sendMessage("elevatorObject == null");
                             return true;
                         }
-                        elevatorObject.goToFloor(floorNumber, isGoingUp != null ? ElevatorStatus.upOrDown(isGoingUp) : ElevatorStatus.DONT_KNOW, ElevatorWho.COMMAND_BLOCK);
+                        if (elevatorObject.getFloor(stringFloor) == null) {
+                            commandBlockSender.sendMessage("getFloor == null");
+                            return true;
+                        }
+                        elevatorObject.goToFloor(stringFloor, isGoingUp != null ? ElevatorStatus.upOrDown(isGoingUp) : ElevatorStatus.DONT_KNOW, ElevatorWho.COMMAND_BLOCK);
                     } else {
-                        elevatorController.callElevatorClosest(floorNumber, isGoingUp != null ? ElevatorStatus.upOrDown(isGoingUp) : ElevatorStatus.DONT_KNOW, ElevatorWho.COMMAND_BLOCK);
+                        elevatorController.callElevatorClosest(stringFloor, isGoingUp != null ? ElevatorStatus.upOrDown(isGoingUp) : ElevatorStatus.DONT_KNOW, ElevatorWho.COMMAND_BLOCK);
                     }
                     return true;
                 }
@@ -105,7 +105,7 @@ public class ElevatorCMD implements CommandExecutor {
         }
 
         if (args.length == 0) {
-            p.sendMessage(Translate.chat("&6/elevator create &e<Controller> &9<Elevator>"));
+            p.sendMessage(Translate.chat("&6/elevator create &e<Controller> &9<Elevator> &a<FloorName>"));
             p.sendMessage(Translate.chat("&6/elevator delete &e<Controller> &9<Elevator>"));
             p.sendMessage(Translate.chat("&6/elevator stop &e<Controller> &9<Elevator>"));
             p.sendMessage(Translate.chat("&6/elevator click &e<Controller> &9<Elevator>"));
@@ -151,11 +151,13 @@ public class ElevatorCMD implements CommandExecutor {
             //Create elevator
         } else if (args[0].equalsIgnoreCase("create")) {
             if (args.length == 1) {
-                p.sendMessage(Translate.chat("&6/elevator create &e<Controller> &9<ElevatorName>"));
+                p.sendMessage(Translate.chat("&6/elevator create &e<Controller> &9<ElevatorName> &a<FloorName>"));
                 return true;
-            } else if (args.length == 3) {
+            } else if (args.length == 4) {
                 String controllerName = args[1].toLowerCase();
                 String elevatorName = args[2].toLowerCase();
+                String floorName = args[3];
+                Block block = api.getBlockPlayerIsLookingAt(p);
                 Region region = getSelection(p);
 
                 if (region == null) {
@@ -172,10 +174,12 @@ public class ElevatorCMD implements CommandExecutor {
                 Location one = new Location(p.getWorld(), region.getMinimumPoint().getX(), region.getMinimumPoint().getY(), region.getMinimumPoint().getZ());
                 Location two = new Location(p.getWorld(), region.getMaximumPoint().getX(), region.getMaximumPoint().getY(), region.getMaximumPoint().getZ());
 
-                ElevatorMovement elevatorMovement = new ElevatorMovement(0, this.api.getBlockPlayerIsLookingAt(p).getLocation(), one, two);
+                ElevatorMovement elevatorMovement = new ElevatorMovement(0, block.getLocation().clone(), one, two);
                 BoundingBox boundingBox = BoundingBox.of(one, two);
                 boundingBox.expand(1);
                 ElevatorObject elevatorObject = new ElevatorObject(this.plugin, elevatorName, p.getWorld().getName(), elevatorMovement, boundingBox);
+                FloorObject floorObject = new FloorObject(0, floorName, block.getLocation().clone());
+                elevatorObject.addFloor(floorObject);
 
                 elevatorController.registerElevator(elevatorName, elevatorObject);
                 p.sendMessage(Translate.chat("The elevator: " + elevatorName + " has been registered to " + controllerName));
@@ -184,15 +188,15 @@ public class ElevatorCMD implements CommandExecutor {
         } else if (args[0].equalsIgnoreCase("floor")) {
             if (args.length == 1) {
                 p.sendMessage(Translate.chat("&a&l&o[Elevator Floor Help]"));
-                p.sendMessage(Translate.chat("&6/elevator floor create &e<Controller> &9<Elevator> &a<FloorNumber>"));
-                p.sendMessage(Translate.chat("&6/elevator floor delete &e<Controller> &9<Elevator> &a<FloorNumber>"));
-                p.sendMessage(Translate.chat("&6/elevator floor sign &e<Controller> &9<Elevator> &a<FloorNumber>"));
-                p.sendMessage(Translate.chat("&6/elevator floor door &e<Controller> &9<Elevator> &b<ADD OR DELETE> &3<FloorNumber>"));
+                p.sendMessage(Translate.chat("&6/elevator floor create &e<Controller> &9<Elevator> &a<Floor>"));
+                p.sendMessage(Translate.chat("&6/elevator floor delete &e<Controller> &9<Elevator> &a<Floor>"));
+                p.sendMessage(Translate.chat("&6/elevator floor sign &e<Controller> &9<Elevator> &a<Floor>"));
+                p.sendMessage(Translate.chat("&6/elevator floor door &e<Controller> &9<Elevator> &b<ADD OR DELETE> &3<Floor>"));
                 return true;
             } else if (args.length == 5 && args[1].equalsIgnoreCase("create")) {
                 String controllerName = args[2].toLowerCase();
                 String elevatorName = args[3].toLowerCase();
-                int floorNum = api.asIntOrDefault(args[4], 0);
+                String floorName = args[4];
 
                 ElevatorController elevatorController = this.elevatorControllerMap.get(controllerName);
                 if (elevatorController == null) {
@@ -206,13 +210,13 @@ public class ElevatorCMD implements CommandExecutor {
                     return true;
                 }
 
-                elevatorObject.addFloor(new FloorObject(floorNum, api.getBlockPlayerIsLookingAt(p).getLocation()));
-                p.sendMessage(Translate.chat("[Create] Floor: " + floorNum + " has been added to the elevator: " + elevatorName));
+                elevatorObject.addFloor(new FloorObject(floorName, api.getBlockPlayerIsLookingAt(p).getLocation()));
+                p.sendMessage(Translate.chat("[Create] Floor: " + floorName + " has been added to the elevator: " + elevatorName));
                 return true;
             } else if (args.length == 5 && args[1].equalsIgnoreCase("delete")) {
                 String controllerName = args[2].toLowerCase();
                 String elevatorName = args[3].toLowerCase();
-                int floorNum = api.asIntOrDefault(args[4], 0);
+                String floorName = args[4];
 
                 ElevatorController elevatorController = this.elevatorControllerMap.get(controllerName);
                 if (elevatorController == null) {
@@ -226,18 +230,19 @@ public class ElevatorCMD implements CommandExecutor {
                     return true;
                 }
 
-                if (elevatorObject.getFloorsMap().get(floorNum) == null) {
+                if (elevatorObject.getFloor(floorName) == null) {
                     p.sendMessage(Translate.chat("This floor doesn't exist."));
                     return true;
                 }
 
-                this.elevatorManager.deleteFloorOfElevator(controllerName, elevatorName, floorNum);
-                p.sendMessage(Translate.chat("The floor: " + floorNum + " has been removed from the elevator: " + elevatorName));
+                FloorObject floorObject = elevatorObject.getFloor(floorName);
+                this.elevatorManager.deleteFloorOfElevator(controllerName, elevatorName, floorObject.getFloor());
+                p.sendMessage(Translate.chat("The floor: " + floorName + " has been removed from the elevator: " + elevatorName));
                 return true;
             } else if (args.length == 5 && args[1].equalsIgnoreCase("sign")) {
                 String controllerName = args[2].toLowerCase();
                 String elevatorName = args[3].toLowerCase();
-                int floorNum = api.asIntOrDefault(args[4], 0);
+                String floorName = args[4];
 
                 ElevatorController elevatorController = this.elevatorControllerMap.get(controllerName);
                 if (elevatorController == null) {
@@ -251,7 +256,7 @@ public class ElevatorCMD implements CommandExecutor {
                     return true;
                 }
 
-                FloorObject floorObject = elevatorObject.getFloorsMap().get(floorNum);
+                FloorObject floorObject = elevatorObject.getFloor(floorName);
                 if (floorObject == null) {
                     p.sendMessage(Translate.chat("This floor doesn't exist."));
                     return true;
@@ -266,7 +271,7 @@ public class ElevatorCMD implements CommandExecutor {
                 String controllerName = args[2].toLowerCase();
                 String elevatorName = args[3].toLowerCase();
                 String addOrRemove = args[4];
-                int floorNum = api.asIntOrDefault(args[5], 0);
+                String floorName = args[5];
 
                 ElevatorController elevatorController = this.elevatorControllerMap.get(controllerName);
                 if (elevatorController == null) {
@@ -280,7 +285,7 @@ public class ElevatorCMD implements CommandExecutor {
                     return true;
                 }
 
-                FloorObject floorObject = elevatorObject.getFloorsMap().get(floorNum);
+                FloorObject floorObject = elevatorObject.getFloor(floorName);
                 if (floorObject == null) {
                     p.sendMessage(Translate.chat("This floor doesn't exist."));
                     return true;
@@ -288,10 +293,10 @@ public class ElevatorCMD implements CommandExecutor {
 
                 if (addOrRemove.equalsIgnoreCase("add")) {
                     floorObject.getDoorList().add(location);
-                    p.sendMessage(Translate.chat("The door for the floor: " + floorNum + " has been added to the elevator: " + elevatorName));
+                    p.sendMessage(Translate.chat("The door for the floor: " + floorObject.getFloor() + " has been added to the elevator: " + elevatorName));
                 } else if (addOrRemove.equalsIgnoreCase("remove") || addOrRemove.equalsIgnoreCase("delete")) {
                     floorObject.getDoorList().remove(location);
-                    p.sendMessage(Translate.chat("The door for the floor: " + floorNum + " has been deleted for the elvator: " + elevatorName));
+                    p.sendMessage(Translate.chat("The door for the floor: " + floorObject.getFloor() + " has been deleted for the elevator: " + elevatorName));
                 }
                 return true;
             }
@@ -365,59 +370,35 @@ public class ElevatorCMD implements CommandExecutor {
         } else if (args[0].equalsIgnoreCase("call")) {
             if (args.length == 1) {
                 p.sendMessage(Translate.chat("&a&l&o[Elevator Call Help]"));
-                p.sendMessage(Translate.chat("&6/elevator call &e<Controller> &9<ElevatorName> &b<FloorNumber>"));
-                p.sendMessage(Translate.chat("&6/elevator call &e<Controller> &a<FloorNumber>"));
-                p.sendMessage(Translate.chat("&6/elevator call &e<Controller> &a<FloorNumber> &b<Goup?>"));
-            } else if (args.length == 4 && !api.isBoolean(args[3])) {
-                String controllerName = args[1].toLowerCase();
-                String elevatorName = args[2].toLowerCase();
-                int floorNum = api.asIntOrDefault(args[3], 0);
-
-                ElevatorController elevatorController = this.elevatorControllerMap.get(controllerName);
-                if (elevatorController == null) {
-                    p.sendMessage("Elevator controller was not found.");
-                    return true;
-                }
-
-                ElevatorObject elevatorObject = elevatorController.getElevator(elevatorName);
-                if (elevatorObject == null) {
-                    p.sendMessage(Translate.chat("That elevator doesn't exist in the controller."));
-                    return true;
-                }
-
-                elevatorObject.goToFloor(floorNum, ElevatorStatus.DONT_KNOW, ElevatorWho.PLAYER_COMMAND);
-                p.sendMessage(Translate.chat("Going to floor: " + floorNum + " for the Elevator: " + elevatorName));
+                p.sendMessage(Translate.chat("&6/elevator call &e<Controller> &9<ElevatorName> &b<Floor>"));
+                p.sendMessage(Translate.chat("&6/elevator call &e<Controller> &9<ElevatorName> &a<Floor> &b<Goup?>"));
+                p.sendMessage(Translate.chat("&6/elevator call &e<Controller> &a<Floor>"));
+                p.sendMessage(Translate.chat("&6/elevator call &e<Controller> &a<Floor> &b<Goup?>"));
                 return true;
-            } else if (args.length == 3) {
-                String controllerName = args[1].toLowerCase();
-                int floorNum = api.asIntOrDefault(args[2], 0);
-
-                ElevatorController elevatorController = this.elevatorControllerMap.get(controllerName);
+            } else {
+                ElevatorCommandCustomArguments eleArgs = getArgumentsElevators(args, 2);
+                ElevatorController elevatorController = eleArgs.getElevatorController();
+                ElevatorObject elevatorObject = eleArgs.getElevatorObject();
+                String floorName = api.getIndexFromStringArrayList(eleArgs.getOtherArgs(), 0);
+                Boolean goUp = api.getIndexFromStringArrayList(eleArgs.getOtherArgs(), 1) != null ? api.isBoolean(eleArgs.getOtherArgs().get(1)) ? Boolean.parseBoolean(eleArgs.getOtherArgs().get(1)) : null : null;
                 if (elevatorController == null) {
-                    p.sendMessage("Elevator controller was not found.");
+                    p.sendMessage(Translate.chat("elevatorController cannot be null."));
+                    return true;
+                }
+                if (floorName == null) {
+                    p.sendMessage(Translate.chat("floorName cannot be null."));
                     return true;
                 }
 
-                elevatorController.callElevatorClosest(floorNum, ElevatorStatus.DONT_KNOW, ElevatorWho.PLAYER_COMMAND);
-                p.sendMessage(Translate.chat("Going to floor: " + floorNum + " on controller " + controllerName));
-                return true;
-            } else if (args.length == 4 && api.isBoolean(args[3])) {
-                String controllerName = args[1].toLowerCase();
-                int floorNum = api.asIntOrDefault(args[2], 0);
-                boolean booleanOrDefault = api.asBooleanOrDefault(args[3], false);
-
-                ElevatorController elevatorController = this.elevatorControllerMap.get(controllerName);
-                if (elevatorController == null) {
-                    p.sendMessage("Elevator controller was not found.");
+                if (elevatorObject != null) {
+                    elevatorObject.goToFloor(floorName, goUp != null ? ElevatorStatus.upOrDown(goUp) : ElevatorStatus.DONT_KNOW, ElevatorWho.PLAYER_COMMAND);
+                    p.sendMessage(Translate.chat("Calling: " + elevatorObject.getElevatorName() + " to go to floor: " + floorName));
                     return true;
                 }
-
-                ElevatorStatus elevatorStatus = ElevatorStatus.upOrDown(booleanOrDefault);
-                elevatorController.callElevatorClosest(floorNum, elevatorStatus, ElevatorWho.PLAYER_COMMAND);
-                p.sendMessage(Translate.chat("Called the nearest elevator on controller: " + controllerName + " to go to floor: " + floorNum + " and it when go; " + elevatorStatus.upOrDown(booleanOrDefault)));
+                elevatorController.callElevatorClosest(floorName, goUp != null ? ElevatorStatus.upOrDown(goUp) : ElevatorStatus.DONT_KNOW, ElevatorWho.PLAYER_COMMAND);
+                p.sendMessage(Translate.chat("Called for the nearest elevator to go to floor: " + floorName + " on controller: " + elevatorController.getControllerName()));
                 return true;
             }
-            return true;
         } else if (args.length == 4 && args[0].equalsIgnoreCase("rename")) {
             String controllerName = args[1].toLowerCase();
             String elevatorName = args[2].toLowerCase();
