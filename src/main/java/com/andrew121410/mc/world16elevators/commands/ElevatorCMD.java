@@ -10,6 +10,12 @@ import com.andrew121410.mc.world16utils.math.SimpleMath;
 import com.sk89q.worldedit.bukkit.BukkitAdapter;
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import com.sk89q.worldedit.regions.Region;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.chat.ComponentBuilder;
+import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.block.CommandBlock;
@@ -20,6 +26,8 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.util.BoundingBox;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Map;
 
 public class ElevatorCMD implements CommandExecutor {
@@ -59,29 +67,22 @@ public class ElevatorCMD implements CommandExecutor {
             CommandBlock realCommandBlock = (CommandBlock) commandBlock.getState();
             if (args[0].equalsIgnoreCase("call")) {
                 if (args.length >= 3) {
-                    String controllerName = args[1].toLowerCase();
-                    Integer floorNumber = api.isInteger(args[2]) ? Integer.parseInt(args[2]) : null;
-                    String elevatorName = floorNumber == null ? args[2] : null;
-                    Boolean isGoingUp = null;
+                    ElevatorCommandCustomArguments eleArgs = getArgumentsElevators(args, 2);
+                    Integer floorNumber = api.isInteger(eleArgs.getOtherArgs().get(0)) ? Integer.parseInt(eleArgs.getOtherArgs().get(0)) : null;
                     if (floorNumber == null) {
-                        floorNumber = api.isInteger(args[3]) ? Integer.parseInt(args[3]) : null;
-                        if (floorNumber == null) {
-                            commandBlockSender.sendMessage("floorNumber == null");
-                            return true;
-                        }
-                        if (args.length == 5) isGoingUp = api.isBoolean(args[4]) ? Boolean.parseBoolean(args[4]) : null;
-                    } else {
-                        if (args.length == 4) isGoingUp = api.isBoolean(args[3]) ? Boolean.parseBoolean(args[3]) : null;
+                        commandBlockSender.sendMessage(Translate.chat("FloorNumber can't be null."));
+                        return true;
                     }
+                    Boolean isGoingUp = api.getIndexFromStringArrayList(eleArgs.getOtherArgs(), 1) != null ? api.isBoolean(eleArgs.getOtherArgs().get(1)) ? Boolean.parseBoolean(eleArgs.getOtherArgs().get(1)) : null : null;
 
-                    ElevatorController elevatorController = this.elevatorControllerMap.get(controllerName);
+                    ElevatorController elevatorController = eleArgs.getElevatorController();
                     if (elevatorController == null) {
                         commandBlockSender.sendMessage("elevatorController == null");
                         return true;
                     }
 
-                    if (elevatorName != null) {
-                        ElevatorObject elevatorObject = elevatorController.getElevator(elevatorName);
+                    if (eleArgs.getElevatorObject() != null) {
+                        ElevatorObject elevatorObject = eleArgs.getElevatorObject();
                         if (elevatorObject == null) {
                             commandBlockSender.sendMessage("elevatorObject == null");
                             return true;
@@ -117,7 +118,7 @@ public class ElevatorCMD implements CommandExecutor {
             p.sendMessage(Translate.chat("&6/elevator shaft &d<Shows help for the shaft.>"));
             p.sendMessage(Translate.chat("&6/elevator call &d<Shows help to call the elevator."));
             return true;
-            //CREATE
+            //Create controller
         } else if (args[0].equalsIgnoreCase("controller")) {
             if (args.length == 1) {
                 p.sendMessage(Translate.chat("&6/elevator controller create &e<Controller>"));
@@ -147,6 +148,7 @@ public class ElevatorCMD implements CommandExecutor {
                 return true;
             }
             return true;
+            //Create elevator
         } else if (args[0].equalsIgnoreCase("create")) {
             if (args.length == 1) {
                 p.sendMessage(Translate.chat("&6/elevator create &e<Controller> &9<ElevatorName>"));
@@ -360,24 +362,6 @@ public class ElevatorCMD implements CommandExecutor {
             elevatorObject.emergencyStop();
             p.sendMessage(Translate.chat("emergency stop has been activated."));
             return true;
-        } else if (args.length == 3 && args[0].equalsIgnoreCase("click")) {
-            String controllerName = args[1].toLowerCase();
-            String elevatorName = args[2].toLowerCase();
-
-            ElevatorController elevatorController = this.elevatorControllerMap.get(controllerName);
-            if (elevatorController == null) {
-                p.sendMessage("Elevator controller was not found.");
-                return true;
-            }
-
-            ElevatorObject elevatorObject = elevatorController.getElevator(elevatorName);
-            if (elevatorObject == null) {
-                p.sendMessage(Translate.chat("That elevator doesn't exist in the controller."));
-                return true;
-            }
-
-            elevatorObject.clickMessageGoto(p);
-            return true;
         } else if (args[0].equalsIgnoreCase("call")) {
             if (args.length == 1) {
                 p.sendMessage(Translate.chat("&a&l&o[Elevator Call Help]"));
@@ -428,8 +412,8 @@ public class ElevatorCMD implements CommandExecutor {
                     return true;
                 }
 
-                ElevatorStatus elevatorStatus = ElevatorStatus.DONT_KNOW;
-                elevatorController.callElevatorClosest(floorNum, elevatorStatus.upOrDown(booleanOrDefault), ElevatorWho.PLAYER_COMMAND);
+                ElevatorStatus elevatorStatus = ElevatorStatus.upOrDown(booleanOrDefault);
+                elevatorController.callElevatorClosest(floorNum, elevatorStatus, ElevatorWho.PLAYER_COMMAND);
                 p.sendMessage(Translate.chat("Called the nearest elevator on controller: " + controllerName + " to go to floor: " + floorNum + " and it when go; " + elevatorStatus.upOrDown(booleanOrDefault)));
                 return true;
             }
@@ -507,8 +491,99 @@ public class ElevatorCMD implements CommandExecutor {
                     return true;
                 }
             }
+        } else if (args[0].equalsIgnoreCase("queue")) {
+            if (args.length == 1) {
+                p.sendMessage(Translate.chat("&6/elevator queue &e<Controller> floorQueueBuffer list/clear"));
+                p.sendMessage(Translate.chat("&6/elevator queue &e<Controller> &9<Elevator> floorQueueBuffer list/clear"));
+                return true;
+            } else {
+                ElevatorCommandCustomArguments eleArgs = getArgumentsElevators(args, 2);
+                ElevatorController elevatorController = eleArgs.getElevatorController();
+                if (elevatorController == null) {
+                    p.sendMessage("Elevator controller was not found.");
+                    return true;
+                }
+                ElevatorObject elevatorObject = eleArgs.getElevatorObject();
+                String whatToRemove = api.getIndexFromStringArrayList(eleArgs.getOtherArgs(), 0);
+                if (whatToRemove == null) {
+                    p.sendMessage("whatToBeRemoved cannot be null.");
+                    return true;
+                }
+                String setting = api.getIndexFromStringArrayList(eleArgs.getOtherArgs(), 1);
+                if (setting == null) {
+                    p.sendMessage(Translate.chat("setting cannot be null."));
+                    return true;
+                }
+                if (whatToRemove.equalsIgnoreCase("floorQueueBuffer")) {
+                    if (setting.equalsIgnoreCase("list")) {
+                        ComponentBuilder mainComponentBuilder = new ComponentBuilder();
+                        TextComponent mainText = new TextComponent("Elevator queue system.");
+                        mainText.setColor(ChatColor.GOLD);
+                        mainText.setBold(true);
+                        mainComponentBuilder.append(mainText).append("\n");
+                        if (elevatorObject == null) {
+                            elevatorController.getElevatorsMap().forEach((eleName, eleObject) -> mainComponentBuilder.append(makeQueueChatComponent(eleObject).create()));
+                        } else
+                            mainComponentBuilder.append(makeQueueChatComponent(elevatorObject).create());
+                        p.spigot().sendMessage(mainComponentBuilder.create());
+                        return true;
+                    } else if (setting.equalsIgnoreCase("clear")) {
+                        if (elevatorObject == null) {
+                            elevatorController.getElevatorsMap().forEach((eleName, eleObject) -> eleObject.getFloorQueueBuffer().clear());
+                            p.sendMessage(Translate.chat("FloorQueueBuffer has been cleared on all elevators on the controller."));
+                        } else {
+                            elevatorObject.getFloorQueueBuffer().clear();
+                            p.sendMessage(Translate.chat("FloorQueueBuffer has been cleared for " + elevatorObject.getElevatorName() + " elevator."));
+                        }
+                        return true;
+                    }
+                    return true;
+                }
+                return true;
+            }
+        } else if (args[0].equalsIgnoreCase("test")) {
+            ElevatorCommandCustomArguments elevatorCommandCustomArguments = getArgumentsElevators(args, 2);
+            if (elevatorCommandCustomArguments.getElevatorController() != null) {
+                p.sendMessage(Translate.chat("ElevatorController: " + elevatorCommandCustomArguments.getElevatorController().getControllerName()));
+            } else p.sendMessage(Translate.chat("ElevatorController: null"));
+            if (elevatorCommandCustomArguments.getElevatorObject() != null) {
+                p.sendMessage(Translate.chat("ElevatorObject: " + elevatorCommandCustomArguments.getElevatorObject().getElevatorName()));
+            } else p.sendMessage(Translate.chat("ElevatorObject: null"));
+            if (elevatorCommandCustomArguments.getOtherArgs() != null) {
+                p.sendMessage(Translate.chat("OtherArgs: " + elevatorCommandCustomArguments.getOtherArgs()));
+            } else p.sendMessage(Translate.chat("OtherArgs: null"));
         }
         return true;
+    }
+
+    private ElevatorCommandCustomArguments getArgumentsElevators(String[] args, int start) {
+        ElevatorCommandCustomArguments elevatorCommandCustomArguments = new ElevatorCommandCustomArguments();
+        String[] newStringArray = Arrays.copyOfRange(args, start - 1, args.length);
+        ArrayList<String> otherArgs = new ArrayList<>();
+        for (int i = 0; i < newStringArray.length; i++) {
+            if (i == 0) {
+                elevatorCommandCustomArguments.setElevatorController(this.elevatorControllerMap.get(newStringArray[0]));
+            } else if (i == 1 && elevatorCommandCustomArguments.getElevatorController() != null && elevatorCommandCustomArguments.getElevatorController().getElevatorsMap().containsKey((newStringArray[1]))) {
+                elevatorCommandCustomArguments.setElevatorObject(elevatorCommandCustomArguments.getElevatorController().getElevatorsMap().get(newStringArray[1]));
+            } else otherArgs.add(newStringArray[i]);
+        }
+        elevatorCommandCustomArguments.setOtherArgs(otherArgs);
+        return elevatorCommandCustomArguments;
+    }
+
+    private ComponentBuilder makeQueueChatComponent(ElevatorObject eleObject) {
+        ComponentBuilder floorQueueObjectStringBuilder = new ComponentBuilder();
+        floorQueueObjectStringBuilder.color(ChatColor.BLUE).bold(false);
+        floorQueueObjectStringBuilder.append("Elevator: " + eleObject.getElevatorName()).append("\n").color(ChatColor.YELLOW).bold(false);
+        for (FloorQueueObject floorQueueObject : eleObject.getFloorQueueBuffer()) {
+            ComponentBuilder removeFloorFromFloorQueueBuffer = new ComponentBuilder()
+                    .append("Floor: " + floorQueueObject.getFloorNumber())
+                    .append(" ")
+                    .append("Status: " + floorQueueObject.getElevatorStatus().name())
+                    .append("\n");
+            floorQueueObjectStringBuilder.append(removeFloorFromFloorQueueBuffer.create());
+        }
+        return floorQueueObjectStringBuilder;
     }
 
     private Region getSelection(Player player) {
@@ -520,4 +595,13 @@ public class ElevatorCMD implements CommandExecutor {
         }
         return region;
     }
+}
+
+@Getter
+@Setter
+@NoArgsConstructor
+class ElevatorCommandCustomArguments {
+    private ElevatorController elevatorController = null;
+    private ElevatorObject elevatorObject = null;
+    private ArrayList<String> otherArgs = null;
 }

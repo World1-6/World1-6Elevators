@@ -28,11 +28,10 @@ public class ElevatorTab implements TabCompleter {
         tabCompleteList.add("delete");
         tabCompleteList.add("call");
         tabCompleteList.add("stop");
-        tabCompleteList.add("queue");
-        tabCompleteList.add("click");
         tabCompleteList.add("rename");
-        tabCompleteList.add("tostring");
         tabCompleteList.add("shaft");
+        tabCompleteList.add("queue");
+        tabCompleteList.add("tostring");
         this.elevatorControllerMap = this.plugin.getSetListMap().getElevatorControllerMap();
     }
 
@@ -95,6 +94,15 @@ public class ElevatorTab implements TabCompleter {
         } else if (args[0].equalsIgnoreCase("stop")) {
             if (args.length == 2) {
                 return getContainsString(args[1], controllerList);
+            }
+            return null;
+        } else if (args[0].equalsIgnoreCase("queue")) {
+            if (args.length == 2) {
+                return getContainsString(args[1], controllerList);
+            } else if (args.length == 3) {
+                return getContainsString(args[2], Arrays.asList("floorQueueBuffer"));
+            } else if (args.length == 4 && args[2].equalsIgnoreCase("floorQueueBuffer")) {
+                return getContainsString(args[3], Arrays.asList("list", "clear"));
             }
             return null;
         } else if (args[0].equalsIgnoreCase("tostring")) {

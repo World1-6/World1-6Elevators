@@ -4,6 +4,8 @@ import com.andrew121410.mc.world16elevators.Main;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 
+import java.util.List;
+
 public class API {
 
     private Main plugin;
@@ -80,5 +82,12 @@ public class API {
         } catch (Exception e) {
             return default1;
         }
+    }
+
+    public String getIndexFromStringArrayList(List<String> stringList, int index) {
+        if (index >= 0 && index < stringList.size()) {
+            return stringList.get(index);
+        }
+        return null;
     }
 }
