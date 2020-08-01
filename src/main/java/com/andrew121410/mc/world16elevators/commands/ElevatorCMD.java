@@ -542,16 +542,9 @@ public class ElevatorCMD implements CommandExecutor {
                 return true;
             }
         } else if (args[0].equalsIgnoreCase("test")) {
-            ElevatorCommandCustomArguments elevatorCommandCustomArguments = getArgumentsElevators(args, 2);
-            if (elevatorCommandCustomArguments.getElevatorController() != null) {
-                p.sendMessage(Translate.chat("ElevatorController: " + elevatorCommandCustomArguments.getElevatorController().getControllerName()));
-            } else p.sendMessage(Translate.chat("ElevatorController: null"));
-            if (elevatorCommandCustomArguments.getElevatorObject() != null) {
-                p.sendMessage(Translate.chat("ElevatorObject: " + elevatorCommandCustomArguments.getElevatorObject().getElevatorName()));
-            } else p.sendMessage(Translate.chat("ElevatorObject: null"));
-            if (elevatorCommandCustomArguments.getOtherArgs() != null) {
-                p.sendMessage(Translate.chat("OtherArgs: " + elevatorCommandCustomArguments.getOtherArgs()));
-            } else p.sendMessage(Translate.chat("OtherArgs: null"));
+            if (ElevatorObject.isDoor(api.getBlockPlayerIsLookingAt(p).getLocation()) != null) {
+                p.sendMessage(Translate.chat("Is a door.."));
+            } else p.sendMessage(Translate.chat("Isn't a door."));
         }
         return true;
     }

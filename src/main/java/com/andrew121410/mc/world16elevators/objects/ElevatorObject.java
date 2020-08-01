@@ -21,6 +21,9 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
+import org.bukkit.block.data.type.Door;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.configuration.serialization.SerializableAs;
 import org.bukkit.entity.Entity;
@@ -231,16 +234,23 @@ public class ElevatorObject implements ConfigurationSerializable {
     private void floorDone(FloorObject floorObject, ElevatorStatus elevatorStatus) {
         Map<Location, Material> oldBlocks = new HashMap<>();
 
+        //For door list.
         for (Location location : floorObject.getDoorList()) {
+            Block block = location.getBlock().getRelative(BlockFace.UP);
             oldBlocks.put(location, location.getBlock().getType());
-            location.getBlock().setType(Material.REDSTONE_BLOCK);
+            if (!IfDoorThenDoIfNotThenFalse(block, true)) {
+                location.getBlock().setType(Material.REDSTONE_BLOCK);
+            }
         }
 
-        Material oldBlock = floorObject.getMainDoor().getBlock().getType();
-        oldBlocks.put(floorObject.getMainDoor(), oldBlock);
-        floorObject.getMainDoor().getBlock().setType(Material.REDSTONE_BLOCK);
+        //For main door.
+        oldBlocks.put(floorObject.getMainDoor(), floorObject.getMainDoor().getBlock().getType());
+        Block block = floorObject.getMainDoor().getBlock().getRelative(BlockFace.UP);
+        if (!IfDoorThenDoIfNotThenFalse(block, true)) {
+            floorObject.getMainDoor().getBlock().setType(Material.REDSTONE_BLOCK);
+        }
 
-        //SIGNS
+        //Signs
         if (elevatorStatus == ElevatorStatus.UP) {
             for (SignObject signObject : floorObject.getSignList()) signObject.doUpArrow();
         } else if (elevatorStatus == ElevatorStatus.DOWN) {
@@ -252,7 +262,12 @@ public class ElevatorObject implements ConfigurationSerializable {
             public void run() {
                 for (SignObject signObject : floorObject.getSignList()) signObject.clearSign();
 
-                oldBlocks.forEach((k, v) -> k.getBlock().setType(v));
+                oldBlocks.forEach((k, v) -> {
+                    Block block = floorObject.getMainDoor().getBlock().getRelative(BlockFace.UP);
+                    if (!IfDoorThenDoIfNotThenFalse(block, false)) {
+                        k.getBlock().setType(v);
+                    }
+                });
                 isPlayersInItAfter = !getPlayers().isEmpty();
                 if (!isPlayersInItAfter) elevatorMessageHelper.stop();
                 oldBlocks.clear();
@@ -358,6 +373,22 @@ public class ElevatorObject implements ConfigurationSerializable {
         }
 
         player.spigot().sendMessage(componentBuilder.create());
+    }
+
+    public static Door isDoor(Location location) {
+        Door door = null;
+        if (location.getBlock().getType() == Material.IRON_DOOR) {
+            door = (Door) location.getBlock().getBlockData();
+        }
+        return door;
+    }
+
+    public boolean IfDoorThenDoIfNotThenFalse(Block block, boolean b) {
+        Door door = isDoor(block.getLocation());
+        if (door == null) return false;
+        door.setOpen(b);
+        block.setBlockData(door);
+        return true;
     }
 
     public org.bukkit.World getBukkitWorld() {
