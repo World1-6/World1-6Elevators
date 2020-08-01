@@ -5,6 +5,8 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import org.bukkit.Chunk;
+import org.bukkit.Location;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.configuration.serialization.SerializableAs;
 
@@ -23,17 +25,19 @@ public class ElevatorController implements ConfigurationSerializable {
     private Main plugin;
 
     private String controllerName;
+    private Location mainChunk;
     private Map<String, ElevatorObject> elevatorsMap;
 
-    public ElevatorController(Main plugin, String controllerName, Map<String, ElevatorObject> elevatorsMap) {
+    public ElevatorController(Main plugin, String controllerName, Location mainChunk, Map<String, ElevatorObject> elevatorsMap) {
         this.plugin = plugin;
         this.controllerName = controllerName;
+        this.mainChunk = mainChunk;
         this.elevatorsMap = elevatorsMap;
         this.elevatorsMap.forEach((k, v) -> v.setElevatorControllerName(this.controllerName));
     }
 
     public ElevatorController(Main plugin, String controllerName) {
-        this(plugin, controllerName, new HashMap<>());
+        this(plugin, controllerName, null, new HashMap<>());
     }
 
     public void callElevatorClosest(int floorNum, ElevatorStatus elevatorStatus, ElevatorWho elevatorWho) {
@@ -56,6 +60,10 @@ public class ElevatorController implements ConfigurationSerializable {
     }
 
     public void registerElevator(String name, ElevatorObject elevatorObject) {
+        if (this.mainChunk == null) {
+            Chunk chunk = elevatorObject.getFloor(0).getMainDoor().getChunk();
+            this.mainChunk = new Location(chunk.getWorld(), chunk.getX(), 0, chunk.getZ());
+        }
         elevatorObject.setElevatorControllerName(this.controllerName);
         this.elevatorsMap.putIfAbsent(name.toLowerCase(), elevatorObject);
     }
@@ -68,11 +76,12 @@ public class ElevatorController implements ConfigurationSerializable {
     public Map<String, Object> serialize() {
         Map<String, Object> map = new HashMap<>();
         map.put("ControllerName", this.controllerName);
+        map.put("MainChunk", this.mainChunk);
         map.put("ElevatorMap", this.elevatorsMap);
         return map;
     }
 
     public static ElevatorController deserialize(Map<String, Object> map) {
-        return new ElevatorController(Main.getInstance(), (String) map.get("ControllerName"), (Map<String, ElevatorObject>) map.get("ElevatorMap"));
+        return new ElevatorController(Main.getInstance(), (String) map.get("ControllerName"), (Location) map.get("MainChunk"), (Map<String, ElevatorObject>) map.get("ElevatorMap"));
     }
 }

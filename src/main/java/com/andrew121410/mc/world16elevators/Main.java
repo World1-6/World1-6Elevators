@@ -1,6 +1,7 @@
 package com.andrew121410.mc.world16elevators;
 
 import com.andrew121410.mc.world16elevators.commands.ElevatorCMD;
+import com.andrew121410.mc.world16elevators.manager.ElevatorChunkSmartManager;
 import com.andrew121410.mc.world16elevators.manager.ElevatorManager;
 import com.andrew121410.mc.world16elevators.objects.*;
 import com.andrew121410.mc.world16elevators.utils.OtherPlugins;
@@ -25,14 +26,26 @@ public final class Main extends JavaPlugin {
     private OtherPlugins otherPlugins;
     private SetListMap setListMap;
 
+    private boolean chunkSmartManagement = false;
+
     @Override
     public void onEnable() {
         instance = this;
         this.otherPlugins = new OtherPlugins(this);
         this.setListMap = new SetListMap();
 
+        this.getConfig().options().copyDefaults(true);
+        this.saveConfig();
+        this.reloadConfig();
+
+        this.chunkSmartManagement = this.getConfig().getBoolean("ChunkSmartManagement");
+
         this.elevatorManager = new ElevatorManager(this);
         this.elevatorManager.loadAllElevators();
+
+        if (chunkSmartManagement) {
+            this.getServer().getScheduler().scheduleSyncRepeatingTask(this, new ElevatorChunkSmartManager(this), 200L, 200L);
+        }
 
         regCommands();
     }
@@ -60,5 +73,9 @@ public final class Main extends JavaPlugin {
 
     public ElevatorManager getElevatorManager() {
         return elevatorManager;
+    }
+
+    public boolean isChunkSmartManagement() {
+        return chunkSmartManagement;
     }
 }
