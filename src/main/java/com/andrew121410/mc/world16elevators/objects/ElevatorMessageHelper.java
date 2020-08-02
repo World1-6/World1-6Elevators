@@ -99,6 +99,12 @@ public class ElevatorMessageHelper {
             } else {
                 elevatorStatus = ElevatorStatus.UP;
             }
+        } else if (floorNumber == 2) {
+            floorObject = elevatorObject.getFloor(1);
+            elevatorStatus = ElevatorStatus.DOWN;
+        } else if (floorNumber == -1) {
+            floorObject = elevatorObject.getFloor(1);
+            elevatorStatus = ElevatorStatus.UP;
         }
         if (floorObject == null) return null;
         return new FloorQueueObject(floorObject.getFloor(), elevatorStatus);
