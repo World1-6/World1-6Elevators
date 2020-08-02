@@ -95,16 +95,16 @@ public class ElevatorMessageHelper {
             floorObject = elevatorObject.getFloor(2);
             if (floorObject == null) {
                 floorObject = elevatorObject.getFloor(-1);
-                elevatorStatus = ElevatorStatus.DOWN;
-            } else {
                 elevatorStatus = ElevatorStatus.UP;
+            } else {
+                elevatorStatus = ElevatorStatus.DOWN;
             }
         } else if (floorNumber == 2) {
             floorObject = elevatorObject.getFloor(1);
-            elevatorStatus = ElevatorStatus.DOWN;
+            elevatorStatus = ElevatorStatus.DONT_KNOW;
         } else if (floorNumber == -1) {
             floorObject = elevatorObject.getFloor(1);
-            elevatorStatus = ElevatorStatus.UP;
+            elevatorStatus = ElevatorStatus.DONT_KNOW;
         }
         if (floorObject == null) return null;
         return new FloorQueueObject(floorObject.getFloor(), elevatorStatus);
