@@ -11,6 +11,7 @@ depend:
 commands:
   elevator:
     permission: world16elevators.elevator
+    aliases: [ele]
 
 permissions:
   world16elevators.elevator:

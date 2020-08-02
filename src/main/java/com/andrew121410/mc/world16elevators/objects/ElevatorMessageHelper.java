@@ -63,7 +63,7 @@ public class ElevatorMessageHelper {
                         return;
                     }
 
-                    if (elevatorObject.getElevatorMovement().isOnlyTwoFloors() && getNextFloor(elevatorObject.getElevatorMovement().getFloor()) != null) {
+                    if (elevatorObject.getElevatorSettings().isOnlyTwoFloors() && getNextFloor(elevatorObject.getElevatorMovement().getFloor()) != null) {
                         FloorQueueObject floorQueueObject = getNextFloor(elevatorObject.getElevatorMovement().getFloor());
                         elevatorObject.goToFloor(floorQueueObject.getFloorNumber(), floorQueueObject.getElevatorStatus(), ElevatorWho.PLAYER_COMMAND);
                         player.sendMessage(Translate.chat("&6ElevatorMessageHelper: &9Going to floor: " + floorQueueObject.getFloorNumber()));

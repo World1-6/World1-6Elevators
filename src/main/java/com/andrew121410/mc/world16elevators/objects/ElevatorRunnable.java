@@ -27,7 +27,7 @@ public class ElevatorRunnable extends BukkitRunnable {
     }
 
     public ElevatorRunnable(Main plugin, ElevatorObject elevatorObject, boolean goUp, FloorObject floorObject, ElevatorStatus elevatorStatus) {
-        this(plugin, elevatorObject, goUp, floorObject, elevatorStatus, (int) elevatorObject.getElevatorMovement().getTicksPerSecond());
+        this(plugin, elevatorObject, goUp, floorObject, elevatorStatus, (int) elevatorObject.getElevatorSettings().getTicksPerSecond());
     }
 
     @Override
@@ -35,6 +35,17 @@ public class ElevatorRunnable extends BukkitRunnable {
         if (elevatorObject.isIdling()) return;
         elevatorObject.reCalculateFloorBuffer(goUP);
         FloorObject stopByFloor = !elevatorObject.getStopBy().getStopByQueue().isEmpty() ? elevatorObject.getFloor(elevatorObject.getStopBy().getStopByQueue().peek()) : null;
+        Integer intFloorThatWeAreGoingToPass = elevatorObject.getFloorBuffer().peek();
+        FloorObject floorThatWeAreGoingToPass = intFloorThatWeAreGoingToPass != null ? elevatorObject.getFloor(intFloorThatWeAreGoingToPass) : null;
+        if (floorThatWeAreGoingToPass != null) {
+            //We are passing a floor.
+            if (elevatorObject.getElevatorMovement().getAtDoor().getBlockY() == floorThatWeAreGoingToPass.getMainDoor().getBlockY()) {
+                //Sound
+                if (elevatorObject.getElevatorSettings().getPassingByFloorSound() != null) {
+                    elevatorObject.getElevatorMovement().getAtDoor().getWorld().playSound(floorObject.getMainDoor(), elevatorObject.getElevatorSettings().getPassingByFloorSound().getSound(), elevatorObject.getElevatorSettings().getPassingByFloorSound().getVolume(), elevatorObject.getElevatorSettings().getPassingByFloorSound().getPitch());
+                }
+            }
+        }
 
 //        Check's if at the floor if so then stop the elevator.
         if (elevatorObject.getElevatorMovement().getAtDoor().getBlockY() == floorObject.getMainDoor().getBlockY()) {
@@ -63,7 +74,7 @@ public class ElevatorRunnable extends BukkitRunnable {
                 SmoothTeleport.teleport(player, player.getLocation().add(0, 1, 0));
             }
 
-            if (elevatorObject.getElevatorMovement().isDoElevatorLeveling()) {
+            if (elevatorObject.getElevatorSettings().isDoElevatorLeveling()) {
                 int x = elevatorObject.getElevatorMovement().getAtDoor().getBlockY();
                 int z = floorObject.getMainDoor().getBlockY();
                 x += 5;
@@ -79,7 +90,7 @@ public class ElevatorRunnable extends BukkitRunnable {
                 SmoothTeleport.teleport(player, player.getLocation().subtract(0, 1, 0));
             }
 
-            if (elevatorObject.getElevatorMovement().isDoElevatorLeveling()) {
+            if (elevatorObject.getElevatorSettings().isDoElevatorLeveling()) {
                 int x = elevatorObject.getElevatorMovement().getAtDoor().getBlockY();
                 int z = floorObject.getMainDoor().getBlockY();
                 x -= 5;

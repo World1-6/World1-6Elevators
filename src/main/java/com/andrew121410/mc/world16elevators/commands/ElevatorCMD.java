@@ -17,6 +17,7 @@ import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Location;
+import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.block.CommandBlock;
 import org.bukkit.command.BlockCommandSender;
@@ -421,56 +422,95 @@ public class ElevatorCMD implements CommandExecutor {
             elevatorController.registerElevator(toElevatorName, elevatorObject);
             p.sendMessage(Translate.chat("Old Name: " + elevatorName + " new Name: " + toElevatorName));
             return true;
-        } else if (args[0].equalsIgnoreCase("shaft")) {
+        } else if (args[0].equalsIgnoreCase("settings")) {
             if (args.length == 1) {
-                p.sendMessage(Translate.chat("&a&l&o[Elevator Shaft Help]"));
-                p.sendMessage(Translate.chat("&6/elevator shaft &e<Controller> &9<Elevator> &bticksPerSecond &3<Value>"));
-                p.sendMessage(Translate.chat("&6/elevator shaft &e<Controller> &9<Elevator> &bdoorHolderTicksPerSecond &3<Value>"));
-                p.sendMessage(Translate.chat("&6/elevator shaft &e<Controller> &9<Elevator> &belevatorWaiterTicksPerSecond &3<Value>"));
-                p.sendMessage(Translate.chat("&6/elevator shaft &e<Controller> &9<Elevator> &bdoElevatorLeveling &3<Value>"));
+                p.sendMessage(Translate.chat("&a&l&o[Elevator Settings Help]"));
+                p.sendMessage(Translate.chat("&6/elevator settings &e<Controller> &9<Elevator> &bticksPerSecond &3<Value>"));
+                p.sendMessage(Translate.chat("&6/elevator settings &e<Controller> &9<Elevator> &bdoorHolderTicksPerSecond &3<Value>"));
+                p.sendMessage(Translate.chat("&6/elevator settings &e<Controller> &9<Elevator> &belevatorWaiterTicksPerSecond &3<Value>"));
+                p.sendMessage(Translate.chat("&6/elevator settings &e<Controller> &9<Elevator> &bdoElevatorLeveling &3<Value>"));
+                p.sendMessage(Translate.chat("&6/elevator settings &e<Controller> &9<Elevator> &barrivalSound &3<Sound> <Volume> <Pitch>"));
+                p.sendMessage(Translate.chat("&6/elevator settings &e<Controller> &9<Elevator> &bpassingByFloorSound &3<Sound> <Volume> <Pitch"));
             } else if (args.length > 2) {
-                String controllerName = args[1].toLowerCase();
-                String elevatorName = args[2].toLowerCase();
-                String value = args[4];
-
-                ElevatorController elevatorController = this.elevatorControllerMap.get(controllerName);
+                ElevatorCommandCustomArguments eleArgs = getArgumentsElevators(args, 2);
+                ElevatorController elevatorController = eleArgs.getElevatorController();
+                ElevatorObject elevatorObject = eleArgs.getElevatorObject();
+                String setting = api.getIndexFromStringArrayList(eleArgs.getOtherArgs(), 0);
                 if (elevatorController == null) {
                     p.sendMessage("Elevator controller was not found.");
                     return true;
                 }
-
-                ElevatorObject elevatorObject = elevatorController.getElevator(elevatorName);
                 if (elevatorObject == null) {
                     p.sendMessage(Translate.chat("That elevator doesn't exist in the controller."));
                     return true;
                 }
-
-                if (args[3].equalsIgnoreCase("ticksPerSecond")) {
-                    long value1 = api.asLongOrDefault(value, ElevatorMovement.DEFAULT_TICKS_PER_SECOND);
-                    elevatorObject.getElevatorMovement().setTicksPerSecond(value1);
-                    p.sendMessage(Translate.chat("The ticks per second has been updated to: " + value1));
-                    return true;
-                } else if (args[3].equalsIgnoreCase("doorHolderTicksPerSecond")) {
-                    long value1 = api.asLongOrDefault(value, ElevatorMovement.DEFAULT_DOOR_HOLDER_TICKS_PER_SECOND);
-                    elevatorObject.getElevatorMovement().setDoorHolderTicksPerSecond(value1);
-                    p.sendMessage(Translate.chat("The door holder ticks per second has been updated to: " + value1));
-                    return true;
-                } else if (args[3].equalsIgnoreCase("elevatorWaiterTicksPerSecond")) {
-                    long value1 = api.asLongOrDefault(value, ElevatorMovement.DEFAULT_ELEVATOR_WAITER_TICKS_PER_SECOND);
-                    elevatorObject.getElevatorMovement().setElevatorWaiterTicksPerSecond(value1);
-                    p.sendMessage(Translate.chat("The elevator waiter ticks per second has been updated to: " + value1));
-                    return true;
-                } else if (args[3].equalsIgnoreCase("doElevatorLeveling")) {
-                    boolean bool = api.asBooleanOrDefault(args[4], true);
-                    elevatorObject.getElevatorMovement().setDoElevatorLeveling(bool);
-                    p.sendMessage(Translate.chat("The doLevelingSystem has been set to: " + bool));
-                    return true;
-                } else if (args[3].equalsIgnoreCase("onlyTwoFloors")) {
-                    boolean bool = api.asBooleanOrDefault(args[4], false);
-                    elevatorObject.getElevatorMovement().setOnlyTwoFloors(bool);
-                    p.sendMessage(Translate.chat("onlyTwoFloors has been set to: " + bool));
+                if (setting == null) {
+                    p.sendMessage(Translate.chat("Setting option cannot be null."));
                     return true;
                 }
+
+                if (setting.equalsIgnoreCase("ticksPerSecond")) {
+                    long valueLong = api.asLongOrDefault(api.getIndexFromStringArrayList(eleArgs.getOtherArgs(), 1), ElevatorSettings.DEFAULT_TICKS_PER_SECOND);
+                    elevatorObject.getElevatorSettings().setTicksPerSecond(valueLong);
+                    p.sendMessage(Translate.chat("The ticks per second has been updated to: " + valueLong));
+                    return true;
+                } else if (setting.equalsIgnoreCase("doorHolderTicksPerSecond")) {
+                    long valueLong = api.asLongOrDefault(api.getIndexFromStringArrayList(eleArgs.getOtherArgs(), 1), ElevatorSettings.DEFAULT_DOOR_HOLDER_TICKS_PER_SECOND);
+                    elevatorObject.getElevatorSettings().setDoorHolderTicksPerSecond(valueLong);
+                    p.sendMessage(Translate.chat("The door holder ticks per second has been updated to: " + valueLong));
+                    return true;
+                } else if (setting.equalsIgnoreCase("elevatorWaiterTicksPerSecond")) {
+                    long valueLong = api.asLongOrDefault(api.getIndexFromStringArrayList(eleArgs.getOtherArgs(), 1), ElevatorSettings.DEFAULT_ELEVATOR_WAITER_TICKS_PER_SECOND);
+                    elevatorObject.getElevatorSettings().setElevatorWaiterTicksPerSecond(valueLong);
+                    p.sendMessage(Translate.chat("The elevator waiter ticks per second has been updated to: " + valueLong));
+                    return true;
+                } else if (setting.equalsIgnoreCase("doElevatorLeveling")) {
+                    boolean bool = api.asBooleanOrDefault(api.getIndexFromStringArrayList(eleArgs.getOtherArgs(), 1), true);
+                    elevatorObject.getElevatorSettings().setDoElevatorLeveling(bool);
+                    p.sendMessage(Translate.chat("The doLevelingSystem has been set to: " + bool));
+                    return true;
+                } else if (setting.equalsIgnoreCase("onlyTwoFloors")) {
+                    boolean bool = api.asBooleanOrDefault(api.getIndexFromStringArrayList(eleArgs.getOtherArgs(), 1), false);
+                    elevatorObject.getElevatorSettings().setOnlyTwoFloors(bool);
+                    p.sendMessage(Translate.chat("onlyTwoFloors has been set to: " + bool));
+                    return true;
+                } else if (setting.equalsIgnoreCase("arrivalSound") || setting.equalsIgnoreCase("passingByFloorSound")) {
+                    String fakeSound = api.getIndexFromStringArrayList(eleArgs.getOtherArgs(), 1);
+                    String fakeVolume = api.getIndexFromStringArrayList(eleArgs.getOtherArgs(), 2);
+                    String fakePitch = api.getIndexFromStringArrayList(eleArgs.getOtherArgs(), 3);
+                    if (fakeSound == null || fakeVolume == null || fakePitch == null) {
+                        p.sendMessage(Translate.chat("sound is null or volume is null or pitch is null."));
+                        return true;
+                    }
+                    if (fakeSound.equalsIgnoreCase("null")) {
+                        if (setting.equalsIgnoreCase("arrivalSound")) {
+                            elevatorObject.getElevatorSettings().setArrivalSound(null);
+                            p.sendMessage(Translate.chat("Removed arrival sound."));
+                        } else if (setting.equalsIgnoreCase("passingByFloorSound")) {
+                            elevatorObject.getElevatorSettings().setPassingByFloorSound(null);
+                            p.sendMessage(Translate.chat("Removed passing by floor sound."));
+                        }
+                        return true;
+                    }
+
+                    Sound sound = Sound.valueOf(fakeSound);
+                    float volume = api.asFloatOrDefault(fakeVolume, 99.1F);
+                    float pitch = api.asFloatOrDefault(fakePitch, 99.1F);
+
+                    if (volume == 91.1F || pitch == 91.1F) {
+                        p.sendMessage(Translate.chat("Volume or pitch is messed up."));
+                        return true;
+                    }
+                    ElevatorSound elevatorSound = new ElevatorSound(sound, volume, pitch);
+                    if (setting.equalsIgnoreCase("arrivalSound")) {
+                        elevatorObject.getElevatorSettings().setArrivalSound(elevatorSound);
+                    } else if (setting.equalsIgnoreCase("passingByFloorSound")) {
+                        elevatorObject.getElevatorSettings().setPassingByFloorSound(elevatorSound);
+                    }
+
+                    return true;
+                }
+                return true;
             }
         } else if (args[0].equalsIgnoreCase("queue")) {
             if (args.length == 1) {

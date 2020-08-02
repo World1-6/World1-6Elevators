@@ -47,6 +47,7 @@ public class ElevatorObject implements ConfigurationSerializable {
     private String elevatorName;
     private String world;
     private ElevatorMovement elevatorMovement;
+    private ElevatorSettings elevatorSettings;
 
     //Bounding BOX
     private Location locationDownPLUS;
@@ -80,10 +81,10 @@ public class ElevatorObject implements ConfigurationSerializable {
     private FloorQueueObject whereItsCurrentlyGoing;
 
     public ElevatorObject(Main plugin, String nameOfElevator, String world, ElevatorMovement elevatorMovement, BoundingBox boundingBox) {
-        this(plugin, nameOfElevator, world, elevatorMovement, boundingBox, new HashMap<>());
+        this(plugin, nameOfElevator, world, elevatorMovement, new ElevatorSettings(), boundingBox, new HashMap<>());
     }
 
-    public ElevatorObject(Main plugin, String name, String world, ElevatorMovement elevatorMovement, BoundingBox boundingBox, Map<Integer, FloorObject> floorsMap) {
+    public ElevatorObject(Main plugin, String name, String world, ElevatorMovement elevatorMovement, ElevatorSettings elevatorSettings, BoundingBox boundingBox, Map<Integer, FloorObject> floorsMap) {
         if (plugin != null) this.plugin = plugin;
 
         this.world = world; //NEEDS TO BE SECOND.
@@ -95,6 +96,7 @@ public class ElevatorObject implements ConfigurationSerializable {
 
         this.elevatorName = name;
         this.elevatorMovement = elevatorMovement;
+        this.elevatorSettings = elevatorSettings;
 
         this.locationDownPLUS = boundingBox.getMin().toLocation(getBukkitWorld());
         this.locationUpPLUS = boundingBox.getMax().toLocation(getBukkitWorld());
@@ -186,6 +188,10 @@ public class ElevatorObject implements ConfigurationSerializable {
         this.elevatorMovement.setFloor(floorObject.getFloor());
         this.whereItsCurrentlyGoing = null;
         if (!isPlayersInItBefore) elevatorMessageHelper.start();
+        //Sound
+        if (elevatorSettings.getArrivalSound() != null) {
+            floorObject.getMainDoor().getWorld().playSound(floorObject.getMainDoor(), elevatorSettings.getArrivalSound().getSound(), elevatorSettings.getArrivalSound().getVolume(), elevatorSettings.getArrivalSound().getPitch());
+        }
         floorDone(floorObject, elevatorStatus);
         doFloorIdle();
         isGoing = false;
@@ -287,12 +293,12 @@ public class ElevatorObject implements ConfigurationSerializable {
                 if (!isPlayersInItAfter) elevatorMessageHelper.stop();
                 oldBlocks.clear();
             }
-        }.runTaskLater(plugin, elevatorMovement.getDoorHolderTicksPerSecond());
+        }.runTaskLater(plugin, elevatorSettings.getDoorHolderTicksPerSecond());
     }
 
     private void doFloorIdle() {
         isIdling = true;
-        this.plugin.getServer().getScheduler().scheduleSyncDelayedTask(plugin, () -> isIdling = false, elevatorMovement.getElevatorWaiterTicksPerSecond());
+        this.plugin.getServer().getScheduler().scheduleSyncDelayedTask(plugin, () -> isIdling = false, elevatorSettings.getElevatorWaiterTicksPerSecond());
     }
 
     private void calculateFloorBuffer(int floor, boolean isUp) {
@@ -429,15 +435,16 @@ public class ElevatorObject implements ConfigurationSerializable {
     @Override
     public Map<String, Object> serialize() {
         Map<String, Object> map = new HashMap<>();
-        map.put("Name", elevatorName);
-        map.put("World", world);
-        map.put("Shaft", elevatorMovement);
+        map.put("Name", this.elevatorName);
+        map.put("World", this.world);
+        map.put("Shaft", this.elevatorMovement);
+        map.put("Settings", this.elevatorSettings);
         map.put("ShaftPlus", SimpleMath.toBoundingBox(locationDownPLUS.toVector(), locationUpPLUS.toVector()));
         map.put("FloorMap", this.floorsMap);
         return map;
     }
 
     public static ElevatorObject deserialize(Map<String, Object> map) {
-        return new ElevatorObject(Main.getInstance(), (String) map.get("Name"), (String) map.get("World"), (ElevatorMovement) map.get("Shaft"), (BoundingBox) map.get("ShaftPlus"), (Map<Integer, FloorObject>) map.get("FloorMap"));
+        return new ElevatorObject(Main.getInstance(), (String) map.get("Name"), (String) map.get("World"), (ElevatorMovement) map.get("Shaft"), (ElevatorSettings) map.get("Settings"), (BoundingBox) map.get("ShaftPlus"), (Map<Integer, FloorObject>) map.get("FloorMap"));
     }
 }

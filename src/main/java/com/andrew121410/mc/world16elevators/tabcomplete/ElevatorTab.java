@@ -2,10 +2,12 @@ package com.andrew121410.mc.world16elevators.tabcomplete;
 
 import com.andrew121410.mc.world16elevators.Main;
 import com.andrew121410.mc.world16elevators.objects.ElevatorController;
+import org.bukkit.Sound;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
+import org.bukkit.util.StringUtil;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -16,6 +18,8 @@ public class ElevatorTab implements TabCompleter {
 
     private List<String> tabCompleteList;
     private Map<String, ElevatorController> elevatorControllerMap;
+
+    private List<String> soundList;
 
     private Main plugin;
 
@@ -29,10 +33,14 @@ public class ElevatorTab implements TabCompleter {
         tabCompleteList.add("call");
         tabCompleteList.add("stop");
         tabCompleteList.add("rename");
-        tabCompleteList.add("shaft");
+        tabCompleteList.add("settings");
         tabCompleteList.add("queue");
         tabCompleteList.add("tostring");
         this.elevatorControllerMap = this.plugin.getSetListMap().getElevatorControllerMap();
+        this.soundList = new ArrayList<>();
+        for (Sound value : Sound.values()) {
+            this.soundList.add(value.name());
+        }
     }
 
     @Override
@@ -84,11 +92,15 @@ public class ElevatorTab implements TabCompleter {
                 return getContainsString(args[1], controllerList);
             }
             return null;
-        } else if (args[0].equalsIgnoreCase("shaft")) {
+        } else if (args[0].equalsIgnoreCase("settings")) {
             if (args.length == 2) {
                 return getContainsString(args[1], controllerList);
             } else if (args.length == 4) {
-                return getContainsString(args[3], Arrays.asList("ticksPerSecond", "doorHolderTicksPerSecond", "elevatorWaiterTicksPerSecond", "doElevatorLeveling", "onlyTwoFloors"));
+                return getContainsString(args[3], Arrays.asList("ticksPerSecond", "doorHolderTicksPerSecond", "elevatorWaiterTicksPerSecond", "doElevatorLeveling", "onlyTwoFloors", "arrivalSound", "passingByFloorSound"));
+            } else if (args.length == 5) {
+                if (args[3].equals("arrivalSound") || args[3].equals("passingByFloorSound")) {
+                    return StringUtil.copyPartialMatches(args[4], this.soundList, new ArrayList<>());
+                }
             }
             return null;
         } else if (args[0].equalsIgnoreCase("stop")) {
@@ -116,13 +128,11 @@ public class ElevatorTab implements TabCompleter {
 
     public static List<String> getContainsString(String args, List<String> oldArrayList) {
         List<String> list = new ArrayList<>();
-
         for (String mat : oldArrayList) {
             if (mat.contains(args.toLowerCase())) {
                 list.add(mat);
             }
         }
-
         return list;
     }
 }

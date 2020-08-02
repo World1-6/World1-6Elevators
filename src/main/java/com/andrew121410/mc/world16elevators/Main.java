@@ -12,11 +12,13 @@ import org.bukkit.plugin.java.JavaPlugin;
 public final class Main extends JavaPlugin {
 
     static {
-        ConfigurationSerialization.registerClass(ElevatorController.class, "ElevatorController");
         ConfigurationSerialization.registerClass(SignObject.class, "SignObject");
         ConfigurationSerialization.registerClass(ElevatorMovement.class, "ElevatorMovement");
+        ConfigurationSerialization.registerClass(ElevatorSettings.class, "ElevatorSettings");
+        ConfigurationSerialization.registerClass(ElevatorSound.class, "ElevatorSound");
         ConfigurationSerialization.registerClass(FloorObject.class, "FloorObject");
         ConfigurationSerialization.registerClass(ElevatorObject.class, "ElevatorObject");
+        ConfigurationSerialization.registerClass(ElevatorController.class, "ElevatorController");
     }
 
     private static Main instance;
