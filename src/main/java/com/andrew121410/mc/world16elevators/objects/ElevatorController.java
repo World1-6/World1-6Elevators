@@ -72,7 +72,7 @@ public class ElevatorController implements ConfigurationSerializable {
 
     public void registerElevator(String name, ElevatorObject elevatorObject) {
         if (this.mainChunk == null) {
-            Chunk chunk = elevatorObject.getFloor(0).getMainDoor().getChunk();
+            Chunk chunk = elevatorObject.getFloor(1).getMainDoor().getChunk();
             this.mainChunk = new Location(chunk.getWorld(), chunk.getX(), 0, chunk.getZ());
         }
         elevatorObject.setElevatorControllerName(this.controllerName);

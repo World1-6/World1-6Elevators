@@ -302,8 +302,14 @@ public class ElevatorObject implements ConfigurationSerializable {
     }
 
     private void calculateFloorBuffer(int floor, boolean isUp) {
-        if (isUp) for (int num = this.elevatorMovement.getFloor() + 1; num < floor; num++) floorBuffer.add(num);
-        else for (int num = this.elevatorMovement.getFloor() - 1; num > floor; num--) floorBuffer.add(num);
+        if (isUp) for (int num = this.elevatorMovement.getFloor() + 1; num < floor; num++) {
+            if (num == 0) return; //0 won't be used as a floor anymore.
+            floorBuffer.add(num);
+        }
+        else for (int num = this.elevatorMovement.getFloor() - 1; num > floor; num--) {
+            if (num == 0) return; //0 won't be used as a floor anymore.
+            floorBuffer.add(num);
+        }
     }
 
     protected void reCalculateFloorBuffer(boolean goUp) {
@@ -348,7 +354,7 @@ public class ElevatorObject implements ConfigurationSerializable {
             //Checks if the elevator should go up or down.
             boolean goUp = floorObject.getMainDoor().getY() > this.elevatorMovement.getAtDoor().getY();
             int a = goUp ? 1 : -1;
-            while (this.getFloorsMap().containsKey(a)) {
+            while (this.getFloorsMap().containsKey(a) && a != 0) {
                 if (goUp) a++;
                 else a--;
             }
@@ -357,6 +363,7 @@ public class ElevatorObject implements ConfigurationSerializable {
         }
 
         if (this.floorsMap.get(floorObject.getFloor()) != null) return; //Don't add the floor if we already have it.
+        if (floorObject.getFloor() == 0) return; //0 won't be used as a floor anymore.
 
         if (floorObject.getFloor() >= 1) {
             this.topFloor++;
@@ -368,13 +375,19 @@ public class ElevatorObject implements ConfigurationSerializable {
 
     public void deleteFloor(int floor) {
         if (floor >= 1) this.topFloor--;
-        else if (floor < 0) this.topBottomFloor++;
+        else if (floor < 0) {
+            this.topBottomFloor++;
+            if (topBottomFloor == 0) this.topBottomFloor++; //0 won't be used as a floor anymore.
+        }
 
         this.floorsMap.remove(floor);
     }
 
     public FloorObject getFloor(int floor) {
-        return this.floorsMap.get(floor);
+        if (this.floorsMap.containsKey(floor)) {
+            return this.floorsMap.get(floor);
+        }
+        return null;
     }
 
     public FloorObject getFloor(String name) {

@@ -89,13 +89,18 @@ public class ElevatorMessageHelper {
     }
 
     public FloorQueueObject getNextFloor(int floorNumber) {
-        FloorQueueObject floorQueueObject;
-        FloorObject floorObject = elevatorObject.getFloor(floorNumber + 1);
-        if (floorObject == null) {
-            floorObject = elevatorObject.getFloor(floorNumber - 1);
-            floorQueueObject = new FloorQueueObject(floorNumber - 1, ElevatorStatus.UP);
-        } else floorQueueObject = new FloorQueueObject(floorNumber + 1, ElevatorStatus.DOWN);
+        FloorObject floorObject = null;
+        ElevatorStatus elevatorStatus = null;
+        if (floorNumber == 1) {
+            floorObject = elevatorObject.getFloor(2);
+            if (floorObject == null) {
+                floorObject = elevatorObject.getFloor(-1);
+                elevatorStatus = ElevatorStatus.DOWN;
+            } else {
+                elevatorStatus = ElevatorStatus.UP;
+            }
+        }
         if (floorObject == null) return null;
-        return floorQueueObject;
+        return new FloorQueueObject(floorObject.getFloor(), elevatorStatus);
     }
 }
