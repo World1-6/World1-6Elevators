@@ -348,10 +348,10 @@ public class ElevatorObject implements ConfigurationSerializable {
             //Checks if the elevator should go up or down.
             boolean goUp = floorObject.getMainDoor().getY() > this.elevatorMovement.getAtDoor().getY();
             int a = goUp ? 1 : -1;
-            do {
-                a = goUp ? a++ : a--;
+            while (this.getFloorsMap().containsKey(a)) {
+                if (goUp) a++;
+                else a--;
             }
-            while (getFloor(a) != null);
             floorObject.setFloor(a);
             Bukkit.getServer().broadcastMessage("New floor has been set to " + a);
         }
