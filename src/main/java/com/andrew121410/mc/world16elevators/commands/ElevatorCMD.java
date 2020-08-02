@@ -175,11 +175,11 @@ public class ElevatorCMD implements CommandExecutor {
                 Location one = new Location(p.getWorld(), region.getMinimumPoint().getX(), region.getMinimumPoint().getY(), region.getMinimumPoint().getZ());
                 Location two = new Location(p.getWorld(), region.getMaximumPoint().getX(), region.getMaximumPoint().getY(), region.getMaximumPoint().getZ());
 
-                ElevatorMovement elevatorMovement = new ElevatorMovement(0, block.getLocation().clone(), one, two);
+                ElevatorMovement elevatorMovement = new ElevatorMovement(1, block.getLocation().clone(), one, two);
                 BoundingBox boundingBox = BoundingBox.of(one, two);
                 boundingBox.expand(1);
                 ElevatorObject elevatorObject = new ElevatorObject(this.plugin, elevatorName, p.getWorld().getName(), elevatorMovement, boundingBox);
-                FloorObject floorObject = new FloorObject(0, floorName, block.getLocation().clone());
+                FloorObject floorObject = new FloorObject(1, floorName, block.getLocation().clone());
                 elevatorObject.addFloor(floorObject);
 
                 elevatorController.registerElevator(elevatorName, elevatorObject);
