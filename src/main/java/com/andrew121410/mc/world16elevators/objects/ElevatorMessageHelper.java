@@ -101,10 +101,10 @@ public class ElevatorMessageHelper {
             }
         } else if (floorNumber == 2) {
             floorObject = elevatorObject.getFloor(1);
-            elevatorStatus = ElevatorStatus.DONT_KNOW;
+            elevatorStatus = ElevatorStatus.UP;
         } else if (floorNumber == -1) {
             floorObject = elevatorObject.getFloor(1);
-            elevatorStatus = ElevatorStatus.DONT_KNOW;
+            elevatorStatus = ElevatorStatus.DOWN;
         }
         if (floorObject == null) return null;
         return new FloorQueueObject(floorObject.getFloor(), elevatorStatus);
