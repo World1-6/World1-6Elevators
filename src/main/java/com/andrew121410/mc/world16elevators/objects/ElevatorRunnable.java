@@ -3,6 +3,7 @@ package com.andrew121410.mc.world16elevators.objects;
 
 import com.andrew121410.mc.world16elevators.Main;
 import com.andrew121410.mc.world16utils.player.SmoothTeleport;
+import com.andrew121410.mc.world16utils.player.SmoothTeleport_V1_16_R1;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -10,6 +11,7 @@ public class ElevatorRunnable extends BukkitRunnable {
 
     private Main plugin;
     private ElevatorObject elevatorObject;
+    private SmoothTeleport smoothTeleport;
 
     private boolean goUP;
     private FloorObject floorObject;
@@ -20,6 +22,7 @@ public class ElevatorRunnable extends BukkitRunnable {
     public ElevatorRunnable(Main plugin, ElevatorObject elevatorObject, boolean goUP, FloorObject floorObject, ElevatorStatus elevatorStatus, int counter) {
         this.plugin = plugin;
         this.elevatorObject = elevatorObject;
+        this.smoothTeleport = new SmoothTeleport_V1_16_R1();
         this.goUP = goUP;
         this.floorObject = floorObject;
         this.elevatorStatus = elevatorStatus;
@@ -71,7 +74,7 @@ public class ElevatorRunnable extends BukkitRunnable {
 
             //TP THEM UP 1
             for (Player player : elevatorObject.getPlayers()) {
-                SmoothTeleport.teleport(player, player.getLocation().add(0, 1, 0));
+                smoothTeleport.teleport(player, player.getLocation().add(0, 1, 0));
             }
 
             if (elevatorObject.getElevatorSettings().isDoElevatorLeveling()) {
@@ -87,7 +90,7 @@ public class ElevatorRunnable extends BukkitRunnable {
 
             //TP THEM DOWN 1
             for (Player player : elevatorObject.getPlayers()) {
-                SmoothTeleport.teleport(player, player.getLocation().subtract(0, 1, 0));
+                smoothTeleport.teleport(player, player.getLocation().subtract(0, 1, 0));
             }
 
             if (elevatorObject.getElevatorSettings().isDoElevatorLeveling()) {

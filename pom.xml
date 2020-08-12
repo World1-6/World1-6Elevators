@@ -89,7 +89,7 @@
 
         <dependency>
             <groupId>com.andrew121410.mc</groupId>
-            <artifactId>world1-6utils</artifactId>
+            <artifactId>World1-6Utils-Plugin</artifactId>
             <version>1.0-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
