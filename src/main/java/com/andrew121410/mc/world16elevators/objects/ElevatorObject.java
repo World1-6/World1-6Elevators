@@ -303,11 +303,11 @@ public class ElevatorObject implements ConfigurationSerializable {
 
     private void calculateFloorBuffer(int floor, boolean isUp) {
         if (isUp) for (int num = this.elevatorMovement.getFloor() + 1; num < floor; num++) {
-            if (num == 0) return; //0 won't be used as a floor anymore.
+            if (num == 0) continue; //0 won't be used as a floor anymore.
             floorBuffer.add(num);
         }
         else for (int num = this.elevatorMovement.getFloor() - 1; num > floor; num--) {
-            if (num == 0) return; //0 won't be used as a floor anymore.
+            if (num == 0) continue; //0 won't be used as a floor anymore.
             floorBuffer.add(num);
         }
     }
