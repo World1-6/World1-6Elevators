@@ -3,7 +3,7 @@ package com.andrew121410.mc.world16elevators.objects;
 
 import com.andrew121410.mc.world16elevators.Main;
 import com.andrew121410.mc.world16utils.player.SmoothTeleport;
-import com.andrew121410.mc.world16utils.player.SmoothTeleport_V1_16_R1;
+import com.andrew121410.mc.world16utils.player.SmoothTeleport_V1_16_R2;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -22,7 +22,7 @@ public class ElevatorRunnable extends BukkitRunnable {
     public ElevatorRunnable(Main plugin, ElevatorObject elevatorObject, boolean goUP, FloorObject floorObject, ElevatorStatus elevatorStatus, int counter) {
         this.plugin = plugin;
         this.elevatorObject = elevatorObject;
-        this.smoothTeleport = new SmoothTeleport_V1_16_R1();
+        this.smoothTeleport = new SmoothTeleport_V1_16_R2();
         this.goUP = goUP;
         this.floorObject = floorObject;
         this.elevatorStatus = elevatorStatus;
