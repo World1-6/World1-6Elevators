@@ -3,7 +3,6 @@ package com.andrew121410.mc.world16elevators.objects;
 
 import com.andrew121410.mc.world16elevators.Main;
 import com.andrew121410.mc.world16utils.blocks.sign.SignUtils;
-import com.andrew121410.mc.world16utils.blocks.sign.SignUtils_V1_16_R2;
 import com.andrew121410.mc.world16utils.chat.Translate;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -27,7 +26,7 @@ public class SignObject implements ConfigurationSerializable {
 
     public SignObject(Location location) {
         this.location = location;
-        this.signUtils = new SignUtils_V1_16_R2(Main.getInstance());
+        this.signUtils = Main.getInstance().getOtherPlugins().getWorld16Utils().getClassWrappers().getSignUtils();
     }
 
     public void doUpArrow() {

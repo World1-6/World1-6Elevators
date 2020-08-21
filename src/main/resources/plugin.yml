@@ -6,6 +6,7 @@ authors: [Andrew121410]
 description: A plugin that i made for my private mc server to add custom elevators.
 
 depend:
+  - World1-6Utils
   - WorldEdit
 
 commands:
