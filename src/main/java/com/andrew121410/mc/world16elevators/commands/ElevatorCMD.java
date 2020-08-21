@@ -106,18 +106,19 @@ public class ElevatorCMD implements CommandExecutor {
         }
 
         if (args.length == 0) {
-            p.sendMessage(Translate.chat("&6/elevator create &e<Controller> &9<Elevator> &a<FloorName>"));
-            p.sendMessage(Translate.chat("&6/elevator delete &e<Controller> &9<Elevator>"));
-            p.sendMessage(Translate.chat("&6/elevator stop &e<Controller> &9<Elevator>"));
-            p.sendMessage(Translate.chat("&6/elevator click &e<Controller> &9<Elevator>"));
-            p.sendMessage(Translate.chat("&6/elevator rename &e<Controller> &9<Elevator> &a<TOElevatorName>"));
+            p.sendMessage(Translate.color("&6/elevator create &e<Controller> &9<Elevator> &a<FloorName>"));
+            p.sendMessage(Translate.color("&6/elevator delete &e<Controller> &9<Elevator>"));
+            p.sendMessage(Translate.color("&6/elevator stop &e<Controller> &9<Elevator>"));
+            p.sendMessage(Translate.color("&6/elevator click &e<Controller> &9<Elevator>"));
+            p.sendMessage(Translate.color("&6/elevator rename &e<Controller> &9<Elevator> &a<TOElevatorName>"));
             p.sendMessage("");
-            p.sendMessage(Translate.chat("&a&lMORE HELP COMMANDS..."));
+            p.sendMessage(Translate.color("&a&lMORE HELP COMMANDS..."));
             p.sendMessage("");
-            p.sendMessage(Translate.chat("&6/elevator controller &d<Shows help for creation of a controller.>"));
-            p.sendMessage(Translate.chat("&6/elevator floor &d<Shows help for the floor."));
-            p.sendMessage(Translate.chat("&6/elevator shaft &d<Shows help for the shaft.>"));
-            p.sendMessage(Translate.chat("&6/elevator call &d<Shows help to call the elevator."));
+            p.sendMessage(Translate.color("&6/elevator controller &d<Shows help for creation of a controller.>"));
+            p.sendMessage(Translate.color("&6/elevator floor &d<Shows help for the floor."));
+            p.sendMessage(Translate.color("&6/elevator shaft &d<Shows help for the shaft.>"));
+            p.sendMessage(Translate.color("&6/elevator call &d<Shows help to call the elevator.>"));
+            p.sendMessage(Translate.color("&6/elevator settings &d<Shows help to change the settings.>"));
             return true;
             //Create controller
         } else if (args[0].equalsIgnoreCase("controller")) {

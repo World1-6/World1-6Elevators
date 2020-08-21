@@ -18,7 +18,9 @@ public class ElevatorRunnable extends BukkitRunnable {
 
     private int counter;
 
-    public ElevatorRunnable(Main plugin, ElevatorObject elevatorObject, boolean goUP, FloorObject floorObject, ElevatorStatus elevatorStatus, int counter) {
+    private FloorObject floorThatWeAreGoingToPass;
+
+    public ElevatorRunnable(Main plugin, ElevatorObject elevatorObject, boolean goUP, FloorObject floorObject, ElevatorStatus elevatorStatus, int counter, FloorObject floorThatWeAreGoingToPass) {
         this.plugin = plugin;
         this.elevatorObject = elevatorObject;
         this.smoothTeleport = this.plugin.getOtherPlugins().getWorld16Utils().getClassWrappers().getSmoothTeleport();
@@ -26,10 +28,11 @@ public class ElevatorRunnable extends BukkitRunnable {
         this.floorObject = floorObject;
         this.elevatorStatus = elevatorStatus;
         this.counter = counter;
+        this.floorThatWeAreGoingToPass = floorThatWeAreGoingToPass;
     }
 
     public ElevatorRunnable(Main plugin, ElevatorObject elevatorObject, boolean goUp, FloorObject floorObject, ElevatorStatus elevatorStatus) {
-        this(plugin, elevatorObject, goUp, floorObject, elevatorStatus, (int) elevatorObject.getElevatorSettings().getTicksPerSecond());
+        this(plugin, elevatorObject, goUp, floorObject, elevatorStatus, (int) elevatorObject.getElevatorSettings().getTicksPerSecond(), null);
     }
 
     @Override
@@ -37,14 +40,15 @@ public class ElevatorRunnable extends BukkitRunnable {
         if (elevatorObject.isIdling()) return;
         elevatorObject.reCalculateFloorBuffer(goUP);
         FloorObject stopByFloor = !elevatorObject.getStopBy().getStopByQueue().isEmpty() ? elevatorObject.getFloor(elevatorObject.getStopBy().getStopByQueue().peek()) : null;
-        Integer intFloorThatWeAreGoingToPass = elevatorObject.getFloorBuffer().peek();
-        FloorObject floorThatWeAreGoingToPass = intFloorThatWeAreGoingToPass != null ? elevatorObject.getFloor(intFloorThatWeAreGoingToPass) : null;
-        if (floorThatWeAreGoingToPass != null) {
+
+        if (floorThatWeAreGoingToPass == null) {
+            Integer intFloorThatWeAreGoingToPass = elevatorObject.getFloorBuffer().peek();
+            floorThatWeAreGoingToPass = intFloorThatWeAreGoingToPass != null ? elevatorObject.getFloor(intFloorThatWeAreGoingToPass) : null;
+        } else {
             //We are passing a floor.
             if (elevatorObject.getElevatorMovement().getAtDoor().getBlockY() == floorThatWeAreGoingToPass.getMainDoor().getBlockY()) {
-                //Sound
                 if (elevatorObject.getElevatorSettings().getPassingByFloorSound() != null) {
-                    elevatorObject.getElevatorMovement().getAtDoor().getWorld().playSound(floorObject.getMainDoor(), elevatorObject.getElevatorSettings().getPassingByFloorSound().getSound(), elevatorObject.getElevatorSettings().getPassingByFloorSound().getVolume(), elevatorObject.getElevatorSettings().getPassingByFloorSound().getPitch());
+                    elevatorObject.getElevatorMovement().getAtDoor().getWorld().playSound(elevatorObject.getElevatorMovement().getAtDoor(), elevatorObject.getElevatorSettings().getPassingByFloorSound().getSound(), elevatorObject.getElevatorSettings().getPassingByFloorSound().getVolume(), elevatorObject.getElevatorSettings().getPassingByFloorSound().getPitch());
                 }
             }
         }
@@ -102,6 +106,6 @@ public class ElevatorRunnable extends BukkitRunnable {
             }
         }
         this.cancel();
-        new ElevatorRunnable(plugin, elevatorObject, goUP, floorObject, elevatorStatus, counter).runTaskLater(plugin, counter);
+        new ElevatorRunnable(plugin, elevatorObject, goUP, floorObject, elevatorStatus, counter, floorThatWeAreGoingToPass).runTaskLater(plugin, counter);
     }
 }
