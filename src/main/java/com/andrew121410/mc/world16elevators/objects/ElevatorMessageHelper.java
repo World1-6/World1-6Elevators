@@ -44,16 +44,11 @@ public class ElevatorMessageHelper {
                     if (!uuidArrayList.contains(uuid)) iterator.remove();
                 }
 
-                //20 seconds -> After 20 seconds check the elevator if no one is in it and it's not running or idling.
+                //After 20 seconds check if players are in the elevator if not then stop the message helper.
                 if (counter >= 20) {
                     if (players.isEmpty() && !elevatorObject.isGoing() && !elevatorObject.isIdling()) {
                         stop();
                         return;
-//                    } else if (!players.isEmpty() && !elevatorObject.isGoing() && !elevatorObject.isIdling()) {
-//                        elevatorObject.getPlayers().forEach(player -> player.sendMessage(Translate.chat("&cYou have been in the elevator for 20 seconds or higher without the elevator moving &eSending you back to floor 0.")));
-//                        elevatorObject.goToFloor(0, ElevatorStatus.DONT_KNOW);
-//                        stop();
-//                        return;
                     }
                 }
 
@@ -63,10 +58,15 @@ public class ElevatorMessageHelper {
                         return;
                     }
 
-                    if (elevatorObject.getElevatorSettings().isOnlyTwoFloors() && getNextFloor(elevatorObject.getElevatorMovement().getFloor()) != null) {
-                        FloorQueueObject floorQueueObject = getNextFloor(elevatorObject.getElevatorMovement().getFloor());
-                        elevatorObject.goToFloor(floorQueueObject.getFloorNumber(), floorQueueObject.getElevatorStatus(), ElevatorWho.PLAYER_COMMAND);
-                        player.sendMessage(Translate.chat("&6ElevatorMessageHelper: &9Going to floor: " + floorQueueObject.getFloorNumber()));
+                    FloorQueueObject floorQueueObject = getNextFloor(elevatorObject.getElevatorMovement().getFloor());
+                    if (elevatorObject.getElevatorSettings().isOnlyTwoFloors() && floorQueueObject != null) {
+                        FloorObject floorObject = elevatorObject.getFloor(floorQueueObject.getFloorNumber());
+                        elevatorObject.goToFloor(floorQueueObject.getFloorNumber(), floorQueueObject.getElevatorStatus(), ElevatorWho.MESSAGE_HELPER);
+                        if (floorObject.getName() != null) {
+                            player.sendMessage(Translate.color("&6ElevatorMessageHelper: &9Going to floor: " + floorObject.getName()));
+                        } else {
+                            player.sendMessage(Translate.color("&6ElevatorMessageHelper: &9Going to floor: " + floorObject.getFloor()));
+                        }
                         players.add(player.getUniqueId());
                         return;
                     }
@@ -74,12 +74,13 @@ public class ElevatorMessageHelper {
                     players.add(player.getUniqueId());
                 }
             }
-        }.runTaskTimer(plugin, 1, 20);
+        }.runTaskTimer(plugin, 1L, 20L);
     }
 
     public void start() {
         if (isRunning) return;
         this.counter = 0;
+        this.players = new ArrayList<>();
         this.isRunning = true;
         messageSetup();
     }
@@ -108,5 +109,9 @@ public class ElevatorMessageHelper {
         }
         if (floorObject == null) return null;
         return new FloorQueueObject(floorObject.getFloor(), elevatorStatus);
+    }
+
+    public boolean isRunning() {
+        return isRunning;
     }
 }

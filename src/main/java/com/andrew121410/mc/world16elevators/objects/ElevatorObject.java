@@ -184,7 +184,7 @@ public class ElevatorObject implements ConfigurationSerializable {
     protected void floorStop(FloorObject floorObject, ElevatorStatus elevatorStatus) {
         this.elevatorMovement.setFloor(floorObject.getFloor());
         this.whereItsCurrentlyGoing = null;
-        if (!isPlayersInItBefore) elevatorMessageHelper.start();
+        if (!this.elevatorMessageHelper.isRunning()) elevatorMessageHelper.start();
         //Sound
         if (elevatorSettings.getArrivalSound() != null) {
             floorObject.getMainDoor().getWorld().playSound(floorObject.getMainDoor(), elevatorSettings.getArrivalSound().getSound(), elevatorSettings.getArrivalSound().getVolume(), elevatorSettings.getArrivalSound().getPitch());
