@@ -18,10 +18,7 @@ import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.hover.content.Text;
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.Sound;
+import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.type.Door;
@@ -438,9 +435,8 @@ public class ElevatorObject implements ConfigurationSerializable {
         if (door == null) return false;
         door.setOpen(value);
         block.setBlockData(door);
-        if (value) {
-            getBukkitWorld().playSound(block.getLocation(), Sound.BLOCK_IRON_DOOR_OPEN, 1F, 1F);
-        } else getBukkitWorld().playSound(block.getLocation(), Sound.BLOCK_IRON_DOOR_CLOSE, 1F, 1F);
+        if (value) block.getWorld().playEffect(block.getLocation(), Effect.IRON_DOOR_TOGGLE, 0);
+        else block.getWorld().playEffect(block.getLocation(), Effect.IRON_DOOR_CLOSE, 0);
         return true;
     }
 
