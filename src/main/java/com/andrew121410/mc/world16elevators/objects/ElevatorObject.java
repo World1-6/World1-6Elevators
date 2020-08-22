@@ -259,7 +259,7 @@ public class ElevatorObject implements ConfigurationSerializable {
         for (Location location : floorObject.getDoorList()) {
             Block block = location.getBlock().getRelative(BlockFace.UP);
             oldBlocks.put(location, location.getBlock().getType());
-            if (!IfDoorThenDoIfNotThenFalse(block, true)) {
+            if (!ifDoorThenDoIfNotThenFalse(block, true)) {
                 location.getBlock().setType(Material.REDSTONE_BLOCK);
             }
         }
@@ -267,7 +267,7 @@ public class ElevatorObject implements ConfigurationSerializable {
         //For main door.
         oldBlocks.put(floorObject.getMainDoor(), floorObject.getMainDoor().getBlock().getType());
         Block block = floorObject.getMainDoor().getBlock().getRelative(BlockFace.UP);
-        if (!IfDoorThenDoIfNotThenFalse(block, true)) {
+        if (!ifDoorThenDoIfNotThenFalse(block, true)) {
             floorObject.getMainDoor().getBlock().setType(Material.REDSTONE_BLOCK);
         }
 
@@ -285,7 +285,7 @@ public class ElevatorObject implements ConfigurationSerializable {
 
                 oldBlocks.forEach((k, v) -> {
                     Block block = floorObject.getMainDoor().getBlock().getRelative(BlockFace.UP);
-                    if (!IfDoorThenDoIfNotThenFalse(block, false)) {
+                    if (!ifDoorThenDoIfNotThenFalse(block, false)) {
                         k.getBlock().setType(v);
                     }
                 });
@@ -433,11 +433,14 @@ public class ElevatorObject implements ConfigurationSerializable {
         return door;
     }
 
-    public boolean IfDoorThenDoIfNotThenFalse(Block block, boolean b) {
+    public boolean ifDoorThenDoIfNotThenFalse(Block block, boolean value) {
         Door door = isDoor(block.getLocation());
         if (door == null) return false;
-        door.setOpen(b);
+        door.setOpen(value);
         block.setBlockData(door);
+        if (value) {
+            getBukkitWorld().playSound(block.getLocation(), Sound.BLOCK_IRON_DOOR_OPEN, 1F, 1F);
+        } else getBukkitWorld().playSound(block.getLocation(), Sound.BLOCK_IRON_DOOR_CLOSE, 1F, 1F);
         return true;
     }
 
