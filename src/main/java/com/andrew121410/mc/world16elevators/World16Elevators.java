@@ -9,7 +9,7 @@ import com.andrew121410.mc.world16elevators.utils.SetListMap;
 import org.bukkit.configuration.serialization.ConfigurationSerialization;
 import org.bukkit.plugin.java.JavaPlugin;
 
-public final class Main extends JavaPlugin {
+public final class World16Elevators extends JavaPlugin {
 
     static {
         ConfigurationSerialization.registerClass(SignObject.class, "SignObject");
@@ -21,7 +21,7 @@ public final class Main extends JavaPlugin {
         ConfigurationSerialization.registerClass(ElevatorController.class, "ElevatorController");
     }
 
-    private static Main instance;
+    private static World16Elevators instance;
 
     private ElevatorManager elevatorManager;
 
@@ -61,7 +61,7 @@ public final class Main extends JavaPlugin {
         new ElevatorCMD(this);
     }
 
-    public static Main getInstance() {
+    public static World16Elevators getInstance() {
         return instance;
     }
 

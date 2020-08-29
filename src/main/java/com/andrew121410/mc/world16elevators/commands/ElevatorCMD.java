@@ -1,6 +1,6 @@
 package com.andrew121410.mc.world16elevators.commands;
 
-import com.andrew121410.mc.world16elevators.Main;
+import com.andrew121410.mc.world16elevators.World16Elevators;
 import com.andrew121410.mc.world16elevators.manager.ElevatorManager;
 import com.andrew121410.mc.world16elevators.objects.*;
 import com.andrew121410.mc.world16elevators.tabcomplete.ElevatorTab;
@@ -33,7 +33,7 @@ import java.util.Map;
 
 public class ElevatorCMD implements CommandExecutor {
 
-    private Main plugin;
+    private World16Elevators plugin;
     private API api;
 
     private WorldEditPlugin worldEditPlugin;
@@ -43,7 +43,7 @@ public class ElevatorCMD implements CommandExecutor {
 
     private SimpleMath simpleMath;
 
-    public ElevatorCMD(Main plugin) {
+    public ElevatorCMD(World16Elevators plugin) {
         this.plugin = plugin;
 
         this.api = new API(this.plugin);

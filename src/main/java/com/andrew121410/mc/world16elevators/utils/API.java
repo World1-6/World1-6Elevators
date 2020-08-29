@@ -1,6 +1,6 @@
 package com.andrew121410.mc.world16elevators.utils;
 
-import com.andrew121410.mc.world16elevators.Main;
+import com.andrew121410.mc.world16elevators.World16Elevators;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 
@@ -8,9 +8,9 @@ import java.util.List;
 
 public class API {
 
-    private Main plugin;
+    private World16Elevators plugin;
 
-    public API(Main plugin) {
+    public API(World16Elevators plugin) {
         this.plugin = plugin;
     }
 

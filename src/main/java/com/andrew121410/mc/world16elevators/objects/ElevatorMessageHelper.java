@@ -1,6 +1,6 @@
 package com.andrew121410.mc.world16elevators.objects;
 
-import com.andrew121410.mc.world16elevators.Main;
+import com.andrew121410.mc.world16elevators.World16Elevators;
 import com.andrew121410.mc.world16utils.chat.Translate;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -13,14 +13,14 @@ import java.util.stream.Collectors;
 
 public class ElevatorMessageHelper {
 
-    private Main plugin;
+    private World16Elevators plugin;
     private ElevatorObject elevatorObject;
 
     private boolean isRunning;
     private List<UUID> players;
     private int counter;
 
-    public ElevatorMessageHelper(Main plugin, ElevatorObject elevatorObject) {
+    public ElevatorMessageHelper(World16Elevators plugin, ElevatorObject elevatorObject) {
         this.plugin = plugin;
         this.players = new ArrayList<>();
         this.elevatorObject = elevatorObject;

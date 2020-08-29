@@ -1,6 +1,6 @@
 package com.andrew121410.mc.world16elevators.manager;
 
-import com.andrew121410.mc.world16elevators.Main;
+import com.andrew121410.mc.world16elevators.World16Elevators;
 import com.andrew121410.mc.world16elevators.objects.ElevatorController;
 import org.bukkit.Location;
 
@@ -12,9 +12,9 @@ public class ElevatorChunkSmartManager implements Runnable {
     private Map<Location, String> chunksToControllerNameMap;
     private Map<String, ElevatorController> elevatorControllerMap;
 
-    private Main plugin;
+    private World16Elevators plugin;
 
-    public ElevatorChunkSmartManager(Main plugin) {
+    public ElevatorChunkSmartManager(World16Elevators plugin) {
         this.plugin = plugin;
         this.chunksToControllerNameMap = this.plugin.getSetListMap().getChunksToControllerNameMap();
         this.elevatorControllerMap = this.plugin.getSetListMap().getElevatorControllerMap();

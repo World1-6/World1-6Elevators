@@ -1,6 +1,6 @@
 package com.andrew121410.mc.world16elevators.objects;
 
-import com.andrew121410.mc.world16elevators.Main;
+import com.andrew121410.mc.world16elevators.World16Elevators;
 import com.andrew121410.mc.world16utils.math.SimpleMath;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.MaxChangedBlocksException;
@@ -54,7 +54,7 @@ public class ElevatorObject implements ConfigurationSerializable {
     private Map<Integer, FloorObject> floorsMap;
 
     //TEMP DON'T SAVE
-    private Main plugin;
+    private World16Elevators plugin;
 
     private boolean isGoing;
     private boolean isFloorQueueGoing;
@@ -77,11 +77,11 @@ public class ElevatorObject implements ConfigurationSerializable {
 
     private FloorQueueObject whereItsCurrentlyGoing;
 
-    public ElevatorObject(Main plugin, String nameOfElevator, String world, ElevatorMovement elevatorMovement, BoundingBox boundingBox) {
+    public ElevatorObject(World16Elevators plugin, String nameOfElevator, String world, ElevatorMovement elevatorMovement, BoundingBox boundingBox) {
         this(plugin, nameOfElevator, world, elevatorMovement, new ElevatorSettings(), boundingBox, new HashMap<>());
     }
 
-    public ElevatorObject(Main plugin, String name, String world, ElevatorMovement elevatorMovement, ElevatorSettings elevatorSettings, BoundingBox boundingBox, Map<Integer, FloorObject> floorsMap) {
+    public ElevatorObject(World16Elevators plugin, String name, String world, ElevatorMovement elevatorMovement, ElevatorSettings elevatorSettings, BoundingBox boundingBox, Map<Integer, FloorObject> floorsMap) {
         if (plugin != null) this.plugin = plugin;
 
         this.world = world; //NEEDS TO BE SECOND.
@@ -203,18 +203,15 @@ public class ElevatorObject implements ConfigurationSerializable {
         doFloorIdle();
     }
 
-    protected void worldEditMoveUP() {
+    protected void goUP() {
         WorldEditPlugin worldEditPlugin = this.plugin.getOtherPlugins().getWorldEditPlugin();
-
         World world = BukkitAdapter.adapt(getBukkitWorld());
         BlockVector3 blockVector31 = BlockVector3.at(elevatorMovement.getLocationDOWN().getBlockX(), elevatorMovement.getLocationDOWN().getBlockY(), elevatorMovement.getLocationDOWN().getBlockZ());
         BlockVector3 blockVector32 = BlockVector3.at(elevatorMovement.getLocationUP().getBlockX(), elevatorMovement.getLocationUP().getBlockY(), elevatorMovement.getLocationUP().getBlockZ());
-
         CuboidRegion cuboidRegion = new CuboidRegion(world, blockVector31, blockVector32);
-
         BlockVector3 blockVector3DIR = BlockVector3.at(0, 1, 0);
 
-        try (EditSession editSession = worldEditPlugin.getWorldEdit().getEditSessionFactory().getEditSession(world, -1)) {
+        try (EditSession editSession = worldEditPlugin.getWorldEdit().newEditSession(world)) {
             editSession.moveCuboidRegion(cuboidRegion, blockVector3DIR, 1, false, null);
         } catch (MaxChangedBlocksException e) {
             e.printStackTrace();
@@ -224,18 +221,15 @@ public class ElevatorObject implements ConfigurationSerializable {
         locationDownPLUS.add(0, 1, 0);
     }
 
-    protected void worldEditMoveDOWN() {
+    protected void goDOWN() {
         WorldEditPlugin worldEditPlugin = this.plugin.getOtherPlugins().getWorldEditPlugin();
-
         World world = BukkitAdapter.adapt(getBukkitWorld());
         BlockVector3 blockVector31 = BlockVector3.at(elevatorMovement.getLocationDOWN().getBlockX(), elevatorMovement.getLocationDOWN().getBlockY(), elevatorMovement.getLocationDOWN().getBlockZ());
         BlockVector3 blockVector32 = BlockVector3.at(elevatorMovement.getLocationUP().getBlockX(), elevatorMovement.getLocationUP().getBlockY(), elevatorMovement.getLocationUP().getBlockZ());
-
         CuboidRegion cuboidRegion = new CuboidRegion(world, blockVector31, blockVector32);
-
         BlockVector3 blockVector3DIR = BlockVector3.at(0, -1, 0);
 
-        try (EditSession editSession = worldEditPlugin.getWorldEdit().getEditSessionFactory().getEditSession(world, -1)) {
+        try (EditSession editSession = worldEditPlugin.getWorldEdit().newEditSession(world)) {
             editSession.moveCuboidRegion(cuboidRegion, blockVector3DIR, 1, false, null);
         } catch (MaxChangedBlocksException e) {
             e.printStackTrace();
@@ -457,6 +451,6 @@ public class ElevatorObject implements ConfigurationSerializable {
     }
 
     public static ElevatorObject deserialize(Map<String, Object> map) {
-        return new ElevatorObject(Main.getInstance(), (String) map.get("Name"), (String) map.get("World"), (ElevatorMovement) map.get("Shaft"), (ElevatorSettings) map.get("Settings"), (BoundingBox) map.get("ShaftPlus"), (Map<Integer, FloorObject>) map.get("FloorMap"));
+        return new ElevatorObject(World16Elevators.getInstance(), (String) map.get("Name"), (String) map.get("World"), (ElevatorMovement) map.get("Shaft"), (ElevatorSettings) map.get("Settings"), (BoundingBox) map.get("ShaftPlus"), (Map<Integer, FloorObject>) map.get("FloorMap"));
     }
 }

@@ -1,6 +1,6 @@
 package com.andrew121410.mc.world16elevators.manager;
 
-import com.andrew121410.mc.world16elevators.Main;
+import com.andrew121410.mc.world16elevators.World16Elevators;
 import com.andrew121410.mc.world16elevators.objects.ElevatorController;
 import com.andrew121410.mc.world16elevators.objects.ElevatorObject;
 import com.andrew121410.mc.world16utils.chat.Translate;
@@ -15,10 +15,10 @@ public class ElevatorManager {
     private Map<Location, String> chunksToControllerNameMap;
     private Map<String, ElevatorController> elevatorObjectMap;
 
-    private Main plugin;
+    private World16Elevators plugin;
     private CustomYmlManager elevatorsYml;
 
-    public ElevatorManager(Main plugin) {
+    public ElevatorManager(World16Elevators plugin) {
         this.plugin = plugin;
         this.chunksToControllerNameMap = this.plugin.getSetListMap().getChunksToControllerNameMap();
         this.elevatorObjectMap = this.plugin.getSetListMap().getElevatorControllerMap();

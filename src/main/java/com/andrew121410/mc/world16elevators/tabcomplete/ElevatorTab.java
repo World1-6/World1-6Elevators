@@ -1,6 +1,6 @@
 package com.andrew121410.mc.world16elevators.tabcomplete;
 
-import com.andrew121410.mc.world16elevators.Main;
+import com.andrew121410.mc.world16elevators.World16Elevators;
 import com.andrew121410.mc.world16elevators.objects.ElevatorController;
 import org.bukkit.Sound;
 import org.bukkit.command.Command;
@@ -21,9 +21,9 @@ public class ElevatorTab implements TabCompleter {
 
     private List<String> soundList;
 
-    private Main plugin;
+    private World16Elevators plugin;
 
-    public ElevatorTab(Main plugin) {
+    public ElevatorTab(World16Elevators plugin) {
         this.plugin = plugin;
         this.tabCompleteList = new ArrayList<>();
         tabCompleteList.add("controller");

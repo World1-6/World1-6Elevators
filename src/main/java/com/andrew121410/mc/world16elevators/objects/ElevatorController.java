@@ -1,6 +1,6 @@
 package com.andrew121410.mc.world16elevators.objects;
 
-import com.andrew121410.mc.world16elevators.Main;
+import com.andrew121410.mc.world16elevators.World16Elevators;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
@@ -22,13 +22,13 @@ import java.util.Optional;
 @SerializableAs("ElevatorController")
 public class ElevatorController implements ConfigurationSerializable {
 
-    private Main plugin;
+    private World16Elevators plugin;
 
     private String controllerName;
     private Location mainChunk;
     private Map<String, ElevatorObject> elevatorsMap;
 
-    public ElevatorController(Main plugin, String controllerName, Location mainChunk, Map<String, ElevatorObject> elevatorsMap) {
+    public ElevatorController(World16Elevators plugin, String controllerName, Location mainChunk, Map<String, ElevatorObject> elevatorsMap) {
         this.plugin = plugin;
         this.controllerName = controllerName;
         this.mainChunk = mainChunk;
@@ -36,7 +36,7 @@ public class ElevatorController implements ConfigurationSerializable {
         this.elevatorsMap.forEach((k, v) -> v.setElevatorControllerName(this.controllerName));
     }
 
-    public ElevatorController(Main plugin, String controllerName) {
+    public ElevatorController(World16Elevators plugin, String controllerName) {
         this(plugin, controllerName, null, new HashMap<>());
     }
 
@@ -93,6 +93,6 @@ public class ElevatorController implements ConfigurationSerializable {
     }
 
     public static ElevatorController deserialize(Map<String, Object> map) {
-        return new ElevatorController(Main.getInstance(), (String) map.get("ControllerName"), (Location) map.get("MainChunk"), (Map<String, ElevatorObject>) map.get("ElevatorMap"));
+        return new ElevatorController(World16Elevators.getInstance(), (String) map.get("ControllerName"), (Location) map.get("MainChunk"), (Map<String, ElevatorObject>) map.get("ElevatorMap"));
     }
 }

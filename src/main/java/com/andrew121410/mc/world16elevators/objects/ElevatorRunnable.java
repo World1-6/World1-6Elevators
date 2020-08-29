@@ -1,14 +1,14 @@
 package com.andrew121410.mc.world16elevators.objects;
 
 
-import com.andrew121410.mc.world16elevators.Main;
+import com.andrew121410.mc.world16elevators.World16Elevators;
 import com.andrew121410.mc.world16utils.player.SmoothTeleport;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
 public class ElevatorRunnable extends BukkitRunnable {
 
-    private Main plugin;
+    private World16Elevators plugin;
     private ElevatorObject elevatorObject;
     private SmoothTeleport smoothTeleport;
 
@@ -20,7 +20,7 @@ public class ElevatorRunnable extends BukkitRunnable {
 
     private FloorObject floorThatWeAreGoingToPass;
 
-    public ElevatorRunnable(Main plugin, ElevatorObject elevatorObject, boolean goUP, FloorObject floorObject, ElevatorStatus elevatorStatus, int counter, FloorObject floorThatWeAreGoingToPass) {
+    public ElevatorRunnable(World16Elevators plugin, ElevatorObject elevatorObject, boolean goUP, FloorObject floorObject, ElevatorStatus elevatorStatus, int counter, FloorObject floorThatWeAreGoingToPass) {
         this.plugin = plugin;
         this.elevatorObject = elevatorObject;
         this.smoothTeleport = this.plugin.getOtherPlugins().getWorld16Utils().getClassWrappers().getSmoothTeleport();
@@ -31,7 +31,7 @@ public class ElevatorRunnable extends BukkitRunnable {
         this.floorThatWeAreGoingToPass = floorThatWeAreGoingToPass;
     }
 
-    public ElevatorRunnable(Main plugin, ElevatorObject elevatorObject, boolean goUp, FloorObject floorObject, ElevatorStatus elevatorStatus) {
+    public ElevatorRunnable(World16Elevators plugin, ElevatorObject elevatorObject, boolean goUp, FloorObject floorObject, ElevatorStatus elevatorStatus) {
         this(plugin, elevatorObject, goUp, floorObject, elevatorStatus, (int) elevatorObject.getElevatorSettings().getTicksPerSecond(), null);
     }
 
@@ -73,7 +73,7 @@ public class ElevatorRunnable extends BukkitRunnable {
         }
 
         if (goUP) {
-            elevatorObject.worldEditMoveUP();
+            elevatorObject.goUP();
 
             //TP THEM UP 1
             for (Player player : elevatorObject.getPlayers()) {
@@ -89,7 +89,7 @@ public class ElevatorRunnable extends BukkitRunnable {
                 }
             }
         } else {
-            elevatorObject.worldEditMoveDOWN();
+            elevatorObject.goDOWN();
 
             //TP THEM DOWN 1
             for (Player player : elevatorObject.getPlayers()) {

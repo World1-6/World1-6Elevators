@@ -1,20 +1,20 @@
 package com.andrew121410.mc.world16elevators.utils;
 
-import com.andrew121410.mc.world16elevators.Main;
+import com.andrew121410.mc.world16elevators.World16Elevators;
 import com.andrew121410.mc.world16utils.World16Utils;
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import org.bukkit.plugin.Plugin;
 
 public class OtherPlugins {
 
-    private Main plugin;
+    private World16Elevators plugin;
 
     //Plugins
     private World16Utils world16Utils;
     //WorldEdit
     private WorldEditPlugin worldEditPlugin;
 
-    public OtherPlugins(Main plugin) {
+    public OtherPlugins(World16Elevators plugin) {
         this.plugin = plugin;
 
         setupWorld16Utils();
