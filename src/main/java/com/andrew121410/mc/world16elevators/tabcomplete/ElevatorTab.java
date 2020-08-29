@@ -73,11 +73,15 @@ public class ElevatorTab implements TabCompleter {
         } else if (args[0].equalsIgnoreCase("delete")) {
             if (args.length == 2) {
                 return getContainsString(args[1], controllerList);
+            } else if (args.length == 3) {
+                return this.elevatorControllerMap.containsKey(args[1]) ? new ArrayList<>(this.elevatorControllerMap.get(args[1]).getElevatorsMap().keySet()) : null;
             }
             return null;
         } else if (args[0].equalsIgnoreCase("rename")) {
             if (args.length == 2) {
                 return getContainsString(args[1], controllerList);
+            } else if (args.length == 3) {
+                return this.elevatorControllerMap.containsKey(args[1]) ? new ArrayList<>(this.elevatorControllerMap.get(args[1]).getElevatorsMap().keySet()) : null;
             }
             return null;
         } else if (args[0].equalsIgnoreCase("floor")) {
@@ -85,6 +89,8 @@ public class ElevatorTab implements TabCompleter {
                 return getContainsString(args[1], Arrays.asList("create", "door", "sign", "delete"));
             } else if (args.length == 3) {
                 return getContainsString(args[2], controllerList);
+            } else if (args.length == 4) {
+                return this.elevatorControllerMap.containsKey(args[2]) ? new ArrayList<>(this.elevatorControllerMap.get(args[2]).getElevatorsMap().keySet()) : null;
             }
             return null;
         } else if (args[0].equalsIgnoreCase("call")) {
@@ -95,6 +101,8 @@ public class ElevatorTab implements TabCompleter {
         } else if (args[0].equalsIgnoreCase("settings")) {
             if (args.length == 2) {
                 return getContainsString(args[1], controllerList);
+            } else if (args.length == 3) {
+                return this.elevatorControllerMap.containsKey(args[1]) ? new ArrayList<>(this.elevatorControllerMap.get(args[1]).getElevatorsMap().keySet()) : null;
             } else if (args.length == 4) {
                 return getContainsString(args[3], Arrays.asList("ticksPerSecond", "doorHolderTicksPerSecond", "elevatorWaiterTicksPerSecond", "doElevatorLeveling", "onlyTwoFloors", "arrivalSound", "passingByFloorSound"));
             } else if (args.length == 5) {
@@ -106,6 +114,8 @@ public class ElevatorTab implements TabCompleter {
         } else if (args[0].equalsIgnoreCase("stop")) {
             if (args.length == 2) {
                 return getContainsString(args[1], controllerList);
+            } else if (args.length == 3) {
+                return this.elevatorControllerMap.containsKey(args[1]) ? new ArrayList<>(this.elevatorControllerMap.get(args[1]).getElevatorsMap().keySet()) : null;
             }
             return null;
         } else if (args[0].equalsIgnoreCase("queue")) {
@@ -120,6 +130,8 @@ public class ElevatorTab implements TabCompleter {
         } else if (args[0].equalsIgnoreCase("tostring")) {
             if (args.length == 2) {
                 return getContainsString(args[1], controllerList);
+            } else if (args.length == 3) {
+                return this.elevatorControllerMap.containsKey(args[1]) ? new ArrayList<>(this.elevatorControllerMap.get(args[1]).getElevatorsMap().keySet()) : null;
             }
             return null;
         }
@@ -127,12 +139,6 @@ public class ElevatorTab implements TabCompleter {
     }
 
     public static List<String> getContainsString(String args, List<String> oldArrayList) {
-        List<String> list = new ArrayList<>();
-        for (String mat : oldArrayList) {
-            if (mat.contains(args.toLowerCase())) {
-                list.add(mat);
-            }
-        }
-        return list;
+        return StringUtil.copyPartialMatches(args, oldArrayList, new ArrayList<>());
     }
 }
