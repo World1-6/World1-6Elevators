@@ -2,6 +2,7 @@ package com.andrew121410.mc.world16elevators.tabcomplete;
 
 import com.andrew121410.mc.world16elevators.World16Elevators;
 import com.andrew121410.mc.world16elevators.objects.ElevatorController;
+import com.andrew121410.mc.world16elevators.objects.ElevatorObject;
 import org.bukkit.Sound;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -13,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class ElevatorTab implements TabCompleter {
 
@@ -35,6 +37,7 @@ public class ElevatorTab implements TabCompleter {
         tabCompleteList.add("rename");
         tabCompleteList.add("settings");
         tabCompleteList.add("queue");
+        tabCompleteList.add("opendoor");
         tabCompleteList.add("tostring");
         this.elevatorControllerMap = this.plugin.getSetListMap().getElevatorControllerMap();
         this.soundList = new ArrayList<>();
@@ -91,6 +94,12 @@ public class ElevatorTab implements TabCompleter {
                 return getContainsString(args[2], controllerList);
             } else if (args.length == 4) {
                 return this.elevatorControllerMap.containsKey(args[2]) ? new ArrayList<>(this.elevatorControllerMap.get(args[2]).getElevatorsMap().keySet()) : null;
+            } else if (args.length == 5 && !args[1].equalsIgnoreCase("create")) {
+                ElevatorController elevatorController = this.elevatorControllerMap.get(args[2]);
+                if (elevatorController == null) return null;
+                ElevatorObject elevatorObject = elevatorController.getElevatorsMap().get(args[3]);
+                if (elevatorObject == null) return null;
+                return elevatorObject.getFloorsMap().keySet().stream().map(String::valueOf).collect(Collectors.toList());
             }
             return null;
         } else if (args[0].equalsIgnoreCase("call")) {
@@ -125,6 +134,13 @@ public class ElevatorTab implements TabCompleter {
                 return getContainsString(args[2], Arrays.asList("floorQueueBuffer"));
             } else if (args.length == 4 && args[2].equalsIgnoreCase("floorQueueBuffer")) {
                 return getContainsString(args[3], Arrays.asList("list", "clear"));
+            }
+            return null;
+        } else if (args[0].equalsIgnoreCase("opendoor")) {
+            if (args.length == 2) {
+                return getContainsString(args[1], controllerList);
+            } else if (args.length == 3) {
+                return this.elevatorControllerMap.containsKey(args[1]) ? new ArrayList<>(this.elevatorControllerMap.get(args[1]).getElevatorsMap().keySet()) : null;
             }
             return null;
         } else if (args[0].equalsIgnoreCase("tostring")) {

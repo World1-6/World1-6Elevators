@@ -4,7 +4,12 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import org.bukkit.Effect;
 import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
+import org.bukkit.block.data.type.Door;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.configuration.serialization.SerializableAs;
 
@@ -25,6 +30,9 @@ public class FloorObject implements ConfigurationSerializable {
     private Location mainDoor;
     private List<Location> doorList;
     private List<SignObject> signList;
+
+    //Do not save
+    private Map<Location, Material> oldBlocks = new HashMap<>();
 
     public FloorObject(int floor, String name, Location mainDoor, List<Location> doorList, List<SignObject> signList) {
         this.floor = floor;
@@ -50,6 +58,53 @@ public class FloorObject implements ConfigurationSerializable {
     public static FloorObject from(ElevatorMovement elevatorMovement) {
         return new FloorObject(new Integer(elevatorMovement.getFloor()), elevatorMovement.getAtDoor().clone());
     }
+
+    public void doDoor(boolean open, boolean forAllDoors) {
+        if (open) {
+            //Before
+            this.oldBlocks.put(this.mainDoor, this.mainDoor.getBlock().getType());
+            if (forAllDoors)
+                for (Location location : this.doorList) this.oldBlocks.put(location, location.getBlock().getType());
+        }
+
+        //Main door
+        if (!ifDoorThenDoIfNotThenFalse(this.getMainDoor().getBlock().getRelative(BlockFace.UP), open)) {
+            if (open) this.mainDoor.getBlock().setType(Material.REDSTONE_BLOCK);
+            else this.mainDoor.getBlock().setType(this.oldBlocks.get(this.mainDoor));
+        }
+
+        //For all the other doors
+        if (forAllDoors) {
+            for (Location location : this.doorList) {
+                Block block = location.getBlock().getRelative(BlockFace.UP);
+                if (!ifDoorThenDoIfNotThenFalse(block, open)) {
+                    if (open) location.getBlock().setType(Material.REDSTONE_BLOCK);
+                    else location.getBlock().setType(this.oldBlocks.get(this.mainDoor));
+                }
+            }
+        }
+
+        if (!open) this.oldBlocks.clear();
+    }
+
+    public static Door isDoor(Location location) {
+        Door door = null;
+        if (location.getBlock().getType() == Material.IRON_DOOR) {
+            door = (Door) location.getBlock().getBlockData();
+        }
+        return door;
+    }
+
+    public static boolean ifDoorThenDoIfNotThenFalse(Block block, boolean value) {
+        Door door = isDoor(block.getLocation());
+        if (door == null) return false;
+        door.setOpen(value);
+        block.setBlockData(door);
+        if (value) block.getWorld().playEffect(block.getLocation(), Effect.IRON_DOOR_TOGGLE, 0);
+        else block.getWorld().playEffect(block.getLocation(), Effect.IRON_DOOR_CLOSE, 0);
+        return true;
+    }
+
 
     @Override
     public Map<String, Object> serialize() {

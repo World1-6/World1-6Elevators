@@ -18,10 +18,9 @@ import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.hover.content.Text;
-import org.bukkit.*;
-import org.bukkit.block.Block;
-import org.bukkit.block.BlockFace;
-import org.bukkit.block.data.type.Door;
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.Sound;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.configuration.serialization.SerializableAs;
 import org.bukkit.entity.Entity;
@@ -61,8 +60,8 @@ public class ElevatorObject implements ConfigurationSerializable {
     private boolean isIdling;
     private boolean isEmergencyStop;
 
-    private int topFloor = 0;
-    private int topBottomFloor = 0;
+    private int topFloor = 1;
+    private int topBottomFloor = 1;
 
     //Helpers
     private ElevatorMessageHelper elevatorMessageHelper;
@@ -110,6 +109,17 @@ public class ElevatorObject implements ConfigurationSerializable {
 
         //Helpers
         this.elevatorMessageHelper = new ElevatorMessageHelper(plugin, this);
+
+        //@TODO Some where in the future I will fix this correctly but for now this works.
+        //This is a temp fix because I would have to change serialization for ElevatorObject which will break all elevators...
+        for (FloorObject value : this.floorsMap.values()) {
+            if (value.getFloor() >= 2) {
+                this.topFloor++;
+            } else if (value.getFloor() < 0) {
+                if (topBottomFloor == 1) this.topBottomFloor--;
+                this.topBottomFloor--;
+            }
+        }
     }
 
     public Collection<Entity> getEntities() {
@@ -244,23 +254,7 @@ public class ElevatorObject implements ConfigurationSerializable {
     }
 
     private void floorDone(FloorObject floorObject, ElevatorStatus elevatorStatus) {
-        Map<Location, Material> oldBlocks = new HashMap<>();
-
-        //For door list.
-        for (Location location : floorObject.getDoorList()) {
-            Block block = location.getBlock().getRelative(BlockFace.UP);
-            oldBlocks.put(location, location.getBlock().getType());
-            if (!ifDoorThenDoIfNotThenFalse(block, true)) {
-                location.getBlock().setType(Material.REDSTONE_BLOCK);
-            }
-        }
-
-        //For main door.
-        oldBlocks.put(floorObject.getMainDoor(), floorObject.getMainDoor().getBlock().getType());
-        Block block = floorObject.getMainDoor().getBlock().getRelative(BlockFace.UP);
-        if (!ifDoorThenDoIfNotThenFalse(block, true)) {
-            floorObject.getMainDoor().getBlock().setType(Material.REDSTONE_BLOCK);
-        }
+        floorObject.doDoor(true, true);
 
         //Signs
         if (elevatorStatus == ElevatorStatus.UP) {
@@ -273,16 +267,9 @@ public class ElevatorObject implements ConfigurationSerializable {
             @Override
             public void run() {
                 for (SignObject signObject : floorObject.getSignList()) signObject.clearSign();
-
-                oldBlocks.forEach((k, v) -> {
-                    Block block = floorObject.getMainDoor().getBlock().getRelative(BlockFace.UP);
-                    if (!ifDoorThenDoIfNotThenFalse(block, false)) {
-                        k.getBlock().setType(v);
-                    }
-                });
+                floorObject.doDoor(false, true);
                 isPlayersInItAfter = !getPlayers().isEmpty();
                 if (!isPlayersInItAfter) elevatorMessageHelper.stop();
-                oldBlocks.clear();
             }
         }.runTaskLater(plugin, elevatorSettings.getDoorHolderTicksPerSecond());
     }
@@ -356,21 +343,24 @@ public class ElevatorObject implements ConfigurationSerializable {
         if (this.floorsMap.get(floorObject.getFloor()) != null) return; //Don't add the floor if we already have it.
         if (floorObject.getFloor() == 0) return; //0 won't be used as a floor anymore.
 
-        if (floorObject.getFloor() >= 1) {
+        if (floorObject.getFloor() >= 2) {
             this.topFloor++;
         } else if (floorObject.getFloor() < 0) {
+            if (topBottomFloor == 1) this.topBottomFloor--;
             this.topBottomFloor--;
         }
         this.floorsMap.put(floorObject.getFloor(), floorObject);
     }
 
     public void deleteFloor(int floor) {
+        //Don't delete a non exist floor.
+        if (!this.floorsMap.containsKey(floor)) return;
+
         if (floor >= 1) this.topFloor--;
         else if (floor < 0) {
             this.topBottomFloor++;
             if (topBottomFloor == 0) this.topBottomFloor++; //0 won't be used as a floor anymore.
         }
-
         this.floorsMap.remove(floor);
     }
 
@@ -416,23 +406,6 @@ public class ElevatorObject implements ConfigurationSerializable {
         getBukkitWorld().playSound(location, Sound.BLOCK_NOTE_BLOCK_PLING, 10F, 1.3F);
     }
 
-    public static Door isDoor(Location location) {
-        Door door = null;
-        if (location.getBlock().getType() == Material.IRON_DOOR) {
-            door = (Door) location.getBlock().getBlockData();
-        }
-        return door;
-    }
-
-    public boolean ifDoorThenDoIfNotThenFalse(Block block, boolean value) {
-        Door door = isDoor(block.getLocation());
-        if (door == null) return false;
-        door.setOpen(value);
-        block.setBlockData(door);
-        if (value) block.getWorld().playEffect(block.getLocation(), Effect.IRON_DOOR_TOGGLE, 0);
-        else block.getWorld().playEffect(block.getLocation(), Effect.IRON_DOOR_CLOSE, 0);
-        return true;
-    }
 
     public org.bukkit.World getBukkitWorld() {
         return Bukkit.getServer().getWorld(this.world);

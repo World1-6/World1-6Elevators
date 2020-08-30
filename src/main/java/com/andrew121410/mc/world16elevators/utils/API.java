@@ -84,7 +84,7 @@ public class API {
         }
     }
 
-    public String getIndexFromStringArrayList(List<String> stringList, int index) {
+    public static String getIndexFromStringArrayList(List<String> stringList, int index) {
         if (index >= 0 && index < stringList.size()) {
             return stringList.get(index);
         }
