@@ -50,6 +50,7 @@ public class ElevatorRunnable extends BukkitRunnable {
                 if (elevatorObject.getElevatorSettings().getPassingByFloorSound() != null) {
                     elevatorObject.getElevatorMovement().getAtDoor().getWorld().playSound(elevatorObject.getElevatorMovement().getAtDoor(), elevatorObject.getElevatorSettings().getPassingByFloorSound().getSound(), elevatorObject.getElevatorSettings().getPassingByFloorSound().getVolume(), elevatorObject.getElevatorSettings().getPassingByFloorSound().getPitch());
                 }
+                floorThatWeAreGoingToPass = null;
             }
         }
 
