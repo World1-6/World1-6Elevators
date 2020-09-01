@@ -340,6 +340,7 @@ public class ElevatorObject implements ConfigurationSerializable {
                             if (block3.getType() != Material.AIR) {
                                 //Found a floor.
                                 a++;
+                                if (a == 0) a++; //0 won't be used as a floor anymore.
                                 FloorObject floorObject = new FloorObject(a, location.clone());
                                 addFloor(floorObject);
                             }
@@ -361,6 +362,7 @@ public class ElevatorObject implements ConfigurationSerializable {
                             if (block3.getType() != Material.AIR) {
                                 //Found a floor.
                                 a--;
+                                if (a == 0) a--; //0 won't be used as a floor anymore.
                                 FloorObject floorObject = new FloorObject(a, block3.getLocation().clone());
                                 addFloor(floorObject);
                             }
