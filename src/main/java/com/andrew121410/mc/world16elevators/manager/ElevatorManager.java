@@ -2,7 +2,6 @@ package com.andrew121410.mc.world16elevators.manager;
 
 import com.andrew121410.mc.world16elevators.World16Elevators;
 import com.andrew121410.mc.world16elevators.objects.ElevatorController;
-import com.andrew121410.mc.world16elevators.objects.ElevatorObject;
 import com.andrew121410.mc.world16utils.chat.Translate;
 import com.andrew121410.mc.world16utils.config.CustomYmlManager;
 import org.bukkit.Location;
@@ -101,17 +100,6 @@ public class ElevatorManager {
         ConfigurationSection elevatorsSection = this.elevatorsYml.getConfig().getConfigurationSection("ElevatorControllers." + elevatorControllerName.toLowerCase() + ".ElevatorMap");
         if (elevatorsSection == null) return;
         elevatorsSection.set(elevatorName, null);
-        this.elevatorsYml.saveConfig();
-    }
-
-    public void deleteFloorOfElevator(String elevatorControllerName, String elevatorName, int floorNum) {
-        ElevatorController elevatorController = this.elevatorObjectMap.get(elevatorControllerName);
-        if (elevatorController == null) return;
-        ElevatorObject elevatorObject = elevatorController.getElevatorsMap().get(elevatorName);
-        elevatorObject.deleteFloor(floorNum);
-        ConfigurationSection elevatorFloors = this.elevatorsYml.getConfig().getConfigurationSection("ElevatorControllers." + elevatorControllerName.toLowerCase() + ".ElevatorMap." + elevatorName + ".FloorMap");
-        if (elevatorFloors == null) return;
-        elevatorFloors.set(String.valueOf(floorNum), null);
         this.elevatorsYml.saveConfig();
     }
 }

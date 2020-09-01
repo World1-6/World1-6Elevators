@@ -106,6 +106,10 @@ public class FloorObject implements ConfigurationSerializable {
     }
 
 
+    public String getName() {
+        return name != null ? name : String.valueOf(floor);
+    }
+
     @Override
     public Map<String, Object> serialize() {
         Map<String, Object> map = new HashMap<>();

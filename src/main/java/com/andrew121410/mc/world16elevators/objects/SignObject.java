@@ -29,34 +29,37 @@ public class SignObject implements ConfigurationSerializable {
         this.signUtils = World16Elevators.getInstance().getOtherPlugins().getWorld16Utils().getClassWrappers().getSignUtils();
     }
 
-    public void doUpArrow() {
+    public boolean doUpArrow() {
         Sign sign = signUtils.isSign(location.getBlock());
-        if (sign == null) return;
+        if (sign == null) return false;
         String text = signUtils.centerText("/\\", 16);
         String text1 = signUtils.centerText("//\\\\", 16);
         sign.setLine(0, Translate.chat("&a&l" + text));
         sign.setLine(1, Translate.chat("&a&l" + text1));
         sign.update();
+        return true;
     }
 
-    public void doDownArrow() {
+    public boolean doDownArrow() {
         Sign sign = signUtils.isSign(location.getBlock());
-        if (sign == null) return;
+        if (sign == null) return false;
         String text = signUtils.centerText("\\\\//", 16);
         String text1 = signUtils.centerText("\\/", 16);
         sign.setLine(2, Translate.chat("&c&l" + text));
         sign.setLine(3, Translate.chat("&c&l" + text1));
         sign.update();
+        return true;
     }
 
-    public void clearSign() {
+    public boolean clearSign() {
         Sign sign = signUtils.isSign(location.getBlock());
-        if (sign == null) return;
+        if (sign == null) return false;
         sign.setLine(0, "");
         sign.setLine(1, "");
         sign.setLine(2, "");
         sign.setLine(3, "");
         sign.update();
+        return true;
     }
 
     @Override

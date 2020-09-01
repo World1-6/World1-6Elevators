@@ -20,7 +20,9 @@ import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.hover.content.Text;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.Sound;
+import org.bukkit.block.Block;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.configuration.serialization.SerializableAs;
 import org.bukkit.entity.Entity;
@@ -28,8 +30,12 @@ import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.BoundingBox;
 
+import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static org.bukkit.block.BlockFace.DOWN;
+import static org.bukkit.block.BlockFace.UP;
 
 @EqualsAndHashCode
 @ToString
@@ -136,16 +142,6 @@ public class ElevatorObject implements ConfigurationSerializable {
     }
 
     public void goToFloor(String name, ElevatorStatus elevatorStatus, ElevatorWho elevatorWho) {
-        Integer isIntInt = null;
-        try {
-            Integer.parseInt(name);
-            isIntInt = Integer.valueOf(name);
-        } catch (Exception ignored) {
-        }
-        if (isIntInt != null) {
-            goToFloor(isIntInt, elevatorStatus, elevatorWho);
-            return;
-        }
         FloorObject floorObject = getFloor(name);
         if (floorObject == null) return;
         goToFloor(floorObject.getFloor(), elevatorStatus, elevatorWho);
@@ -258,15 +254,15 @@ public class ElevatorObject implements ConfigurationSerializable {
 
         //Signs
         if (elevatorStatus == ElevatorStatus.UP) {
-            for (SignObject signObject : floorObject.getSignList()) signObject.doUpArrow();
+            floorObject.getSignList().removeIf(signObject -> !signObject.doUpArrow());
         } else if (elevatorStatus == ElevatorStatus.DOWN) {
-            for (SignObject signObject : floorObject.getSignList()) signObject.doDownArrow();
+            floorObject.getSignList().removeIf(signObject -> !signObject.doDownArrow());
         }
 
         new BukkitRunnable() {
             @Override
             public void run() {
-                for (SignObject signObject : floorObject.getSignList()) signObject.clearSign();
+                floorObject.getSignList().removeIf(signObject -> !signObject.clearSign());
                 floorObject.doDoor(false, true);
                 isPlayersInItAfter = !getPlayers().isEmpty();
                 if (!isPlayersInItAfter) elevatorMessageHelper.stop();
@@ -326,6 +322,60 @@ public class ElevatorObject implements ConfigurationSerializable {
         }.runTaskTimer(plugin, 40L, 40L);
     }
 
+    public void smartCreateFloors(FloorObject beginningFloor, boolean goUP) {
+        long startTime = Instant.now().toEpochMilli();
+        boolean whileLoop = true;
+        Location location = beginningFloor.getMainDoor().clone();
+        int a = beginningFloor.getFloor();
+
+        if (goUP) {
+            location.add(0, 1, 0);
+            while (whileLoop) {
+                if (location.getBlock().getType() != Material.AIR) {
+                    Block block1 = location.getBlock().getRelative(UP);
+                    if (block1.getType() == Material.AIR || block1.getType() == Material.IRON_DOOR) {
+                        Block block2 = block1.getRelative(UP);
+                        if (block2.getType() == Material.AIR || block2.getType() == Material.IRON_DOOR) {
+                            Block block3 = block2.getRelative(UP);
+                            if (block3.getType() != Material.AIR) {
+                                //Found a floor.
+                                a++;
+                                FloorObject floorObject = new FloorObject(a, location.clone());
+                                addFloor(floorObject);
+                            }
+                        }
+                    }
+                }
+                location.add(0, 1, 0);
+                if (location.getBlockY() >= 256) whileLoop = false;
+            }
+        } else {
+            location.subtract(0, 1, 0);
+            while (whileLoop) {
+                if (location.getBlock().getType() != Material.AIR) {
+                    Block block1 = location.getBlock().getRelative(DOWN);
+                    if (block1.getType() == Material.AIR || block1.getType() == Material.IRON_DOOR) {
+                        Block block2 = block1.getRelative(DOWN);
+                        if (block2.getType() == Material.AIR || block2.getType() == Material.IRON_DOOR) {
+                            Block block3 = block2.getRelative(DOWN);
+                            if (block3.getType() != Material.AIR) {
+                                //Found a floor.
+                                a--;
+                                FloorObject floorObject = new FloorObject(a, block3.getLocation().clone());
+                                addFloor(floorObject);
+                            }
+                        }
+                    }
+                }
+                location.subtract(0, 1, 0);
+                if (location.getBlockY() <= 1) whileLoop = false;
+            }
+        }
+        long endTime = Instant.now().toEpochMilli();
+        long totalTime = endTime - startTime;
+        Bukkit.getServer().broadcastMessage("smartCreateFloors has completed took: " + totalTime + " milliseconds");
+    }
+
     public void addFloor(FloorObject floorObject) {
         //We have to find out the elevator floor by ourself.
         if (floorObject.getFloor() == Integer.MIN_VALUE) {
@@ -340,7 +390,7 @@ public class ElevatorObject implements ConfigurationSerializable {
             Bukkit.getServer().broadcastMessage("New floor has been set to " + a);
         }
 
-        if (this.floorsMap.get(floorObject.getFloor()) != null) return; //Don't add the floor if we already have it.
+        if (this.floorsMap.containsKey(floorObject.getFloor())) return; //Don't add the floor if we already have it.
         if (floorObject.getFloor() == 0) return; //0 won't be used as a floor anymore.
 
         if (floorObject.getFloor() >= 2) {
@@ -364,6 +414,12 @@ public class ElevatorObject implements ConfigurationSerializable {
         this.floorsMap.remove(floor);
     }
 
+    public void deleteFloor(String name) {
+        FloorObject floorObject = getFloor(name);
+        if (floorObject == null) return;
+        deleteFloor(floorObject.getFloor());
+    }
+
     public FloorObject getFloor(int floor) {
         if (this.floorsMap.containsKey(floor)) {
             return this.floorsMap.get(floor);
@@ -372,7 +428,20 @@ public class ElevatorObject implements ConfigurationSerializable {
     }
 
     public FloorObject getFloor(String name) {
-        return this.floorsMap.values().stream().filter(floorObject -> floorObject.getName().equalsIgnoreCase(name)).findFirst().orElse(null);
+        FloorObject floorObject = this.floorsMap.values().stream().filter(floorObject1 -> floorObject1.getName().equalsIgnoreCase(name)).findFirst().orElse(null);
+        if (floorObject == null) {
+            Integer integer = null;
+            try {
+                integer = Integer.parseInt(name);
+            } catch (NumberFormatException ignore) {
+            }
+            if (integer != null) {
+                if (this.floorsMap.containsKey(integer)) {
+                    floorObject = this.floorsMap.get(integer);
+                }
+            }
+        }
+        return floorObject;
     }
 
     public Integer[] listAllFloorsInt() {
@@ -386,13 +455,12 @@ public class ElevatorObject implements ConfigurationSerializable {
         ComponentBuilder componentBuilder = new ComponentBuilder().append("[").color(ChatColor.WHITE).append("BexarSystems").color(ChatColor.GOLD).append(" - ").color(ChatColor.RED).append("Please click a floor in the chat to take the elevator to.").color(ChatColor.BLUE).append("]").color(ChatColor.WHITE).append("\n");
         for (Integer integer : listAllFloorsInt()) {
             FloorObject floorObject = getFloor(integer);
-            componentBuilder.append(new ComponentBuilder((floorObject.getName() != null ? floorObject.getName() : String.valueOf(integer)) + ",")
+            componentBuilder.reset().append(new ComponentBuilder(floorObject.getName() + ",")
                     .color(ChatColor.GOLD)
                     .bold(true)
-                    .event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/elevator call " + elevatorControllerName + " " + elevatorName + " " + (floorObject.getName() != null ? floorObject.getName() : integer)))
-                    .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text("Click me to go to: " + (floorObject.getName() != null ? floorObject.getName() : integer))))
+                    .event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/elevator call " + elevatorControllerName + " " + elevatorName + " " + floorObject.getName()))
+                    .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text("Click me to go to: " + floorObject.getName())))
                     .append(" ")
-                    .reset()
                     .create());
         }
         player.spigot().sendMessage(componentBuilder.create());

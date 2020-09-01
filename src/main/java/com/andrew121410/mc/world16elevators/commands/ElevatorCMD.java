@@ -196,11 +196,13 @@ public class ElevatorCMD implements CommandExecutor {
             }
         } else if (args[0].equalsIgnoreCase("floor")) {
             if (args.length == 1) {
-                p.sendMessage(Translate.chat("&a&l&o[Elevator Floor Help]"));
-                p.sendMessage(Translate.chat("&6/elevator floor create &e<Controller> &9<Elevator> &a<Floor>"));
-                p.sendMessage(Translate.chat("&6/elevator floor delete &e<Controller> &9<Elevator> &a<Floor>"));
-                p.sendMessage(Translate.chat("&6/elevator floor sign &e<Controller> &9<Elevator> &a<Floor>"));
-                p.sendMessage(Translate.chat("&6/elevator floor door &e<Controller> &9<Elevator> &a<Floor> &b<ADD OR DELETE>"));
+                p.sendMessage(Translate.color("&a&l&o[Elevator Floor Help]"));
+                p.sendMessage(Translate.color("&6/elevator floor create &e<Controller> &9<Elevator> &a<Floor>"));
+                p.sendMessage(Translate.color("&6/elevator floor delete &e<Controller> &9<Elevator> &a<Floor>"));
+                p.sendMessage(Translate.color("&6/elevator floor setName &e<Controller> &9<Elevator> &a<FloorInt> &a<ToName>"));
+                p.sendMessage(Translate.color("&6/elevator floor sign &e<Controller> &9<Elevator> &a<Floor>"));
+                p.sendMessage(Translate.color("&6/elevator floor door &e<Controller> &9<Elevator> &a<Floor> &b<ADD OR DELETE>"));
+                p.sendMessage(Translate.color("&6/elevator floor smartCreateFloors &e<Controller> &9<Elevator> &a<FromFloor> &c<GoUp>"));
                 return true;
             } else if (args.length == 5 && args[1].equalsIgnoreCase("create")) {
                 String controllerName = args[2].toLowerCase();
@@ -220,7 +222,7 @@ public class ElevatorCMD implements CommandExecutor {
                 }
 
                 elevatorObject.addFloor(new FloorObject(floorName, api.getBlockPlayerIsLookingAt(p).getLocation()));
-                p.sendMessage(Translate.chat("[Create] Floor: " + floorName + " has been added to the elevator: " + elevatorName));
+                p.sendMessage(Translate.color("&e[&9Elevator&e] &6Floor:" + floorName + " has been added to elevator: " + elevatorName));
                 return true;
             } else if (args.length == 5 && args[1].equalsIgnoreCase("delete")) {
                 String controllerName = args[2].toLowerCase();
@@ -239,14 +241,39 @@ public class ElevatorCMD implements CommandExecutor {
                     return true;
                 }
 
-                if (elevatorObject.getFloor(floorName) == null) {
+                FloorObject floorObject = elevatorObject.getFloor(floorName);
+                if (floorObject == null) {
                     p.sendMessage(Translate.chat("This floor doesn't exist."));
                     return true;
                 }
 
-                FloorObject floorObject = elevatorObject.getFloor(floorName);
-                this.elevatorManager.deleteFloorOfElevator(controllerName, elevatorName, floorObject.getFloor());
+                elevatorObject.deleteFloor(floorName);
                 p.sendMessage(Translate.chat("The floor: " + floorName + " has been removed from the elevator: " + elevatorName));
+                return true;
+            } else if (args.length == 6 && args[1].equalsIgnoreCase("setname")) {
+                ElevatorCommandCustomArguments eleArgs = getArgumentsElevators(args, 3);
+
+                ElevatorController elevatorController = eleArgs.getElevatorController();
+                if (elevatorController == null) {
+                    p.sendMessage(Translate.color("&cCouldn't find elevator controller"));
+                    return true;
+                }
+
+                ElevatorObject elevatorObject = eleArgs.getElevatorObject();
+                if (elevatorObject == null) {
+                    p.sendMessage(Translate.color("&cCouldn't find elevator"));
+                    return true;
+                }
+
+                FloorObject floorObject = elevatorObject.getFloor(eleArgs.getOtherArgumentsAt(0));
+                if (floorObject == null) {
+                    p.sendMessage(Translate.color("&cCouldn't find floor"));
+                    return true;
+                }
+
+                String toFloorName = eleArgs.getOtherArgumentsAt(1);
+                floorObject.setName(toFloorName);
+                p.sendMessage(Translate.color("&6Elevator floor name has been set to: " + toFloorName));
                 return true;
             } else if (args.length == 5 && args[1].equalsIgnoreCase("sign")) {
                 String controllerName = args[2].toLowerCase();
@@ -272,7 +299,7 @@ public class ElevatorCMD implements CommandExecutor {
                 }
 
                 floorObject.getSignList().add(new SignObject(this.api.getBlockPlayerIsLookingAt(p).getLocation()));
-                p.sendMessage(Translate.chat("Sign has been set"));
+                p.sendMessage(Translate.color("&e[&9Elevator&e] &6Floor: " + floorObject.getName() + " has been set."));
                 return true;
             } else if (args.length == 6 && args[1].equalsIgnoreCase("door")) {
                 Location location = api.getBlockPlayerIsLookingAt(p).getLocation();
@@ -305,6 +332,36 @@ public class ElevatorCMD implements CommandExecutor {
                     floorObject.getDoorList().remove(location);
                     p.sendMessage(Translate.chat("The door for the floor: " + floorObject.getFloor() + " has been deleted for the elevator: " + elevatorObject.getElevatorName()));
                 }
+                return true;
+            } else if (args.length == 6 && args[1].equalsIgnoreCase("smartCreateFloors")) {
+                ElevatorCommandCustomArguments eleArgs = getArgumentsElevators(args, 3);
+
+                ElevatorController elevatorController = eleArgs.getElevatorController();
+                if (elevatorController == null) {
+                    p.sendMessage(Translate.color("&cCouldn't find elevator controller"));
+                    return true;
+                }
+
+                ElevatorObject elevatorObject = eleArgs.getElevatorObject();
+                if (elevatorObject == null) {
+                    p.sendMessage(Translate.color("&cCouldn't find elevator"));
+                    return true;
+                }
+
+                FloorObject floorObject = elevatorObject.getFloor(eleArgs.getOtherArgumentsAt(0));
+                if (floorObject == null) {
+                    p.sendMessage(Translate.color("&cCouldn't find floor"));
+                    return true;
+                }
+
+                Boolean bool = api.asBooleanOrElseNull(eleArgs.getOtherArgumentsAt(1));
+                if (bool == null) {
+                    p.sendMessage(Translate.color("Not a true/false"));
+                    return true;
+                }
+
+                elevatorObject.smartCreateFloors(floorObject, bool);
+                p.sendMessage(Translate.color("&esmartCreateFloors has started."));
                 return true;
             }
             return true;

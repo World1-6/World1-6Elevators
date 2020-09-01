@@ -84,6 +84,14 @@ public class API {
         }
     }
 
+    public Boolean asBooleanOrElseNull(String boolean1) {
+        try {
+            return Boolean.parseBoolean(boolean1);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
     public static String getIndexFromStringArrayList(List<String> stringList, int index) {
         if (index >= 0 && index < stringList.size()) {
             return stringList.get(index);

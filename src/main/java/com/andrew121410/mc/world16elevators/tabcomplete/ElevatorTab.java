@@ -3,6 +3,7 @@ package com.andrew121410.mc.world16elevators.tabcomplete;
 import com.andrew121410.mc.world16elevators.World16Elevators;
 import com.andrew121410.mc.world16elevators.objects.ElevatorController;
 import com.andrew121410.mc.world16elevators.objects.ElevatorObject;
+import com.andrew121410.mc.world16elevators.objects.FloorObject;
 import org.bukkit.Sound;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -89,7 +90,7 @@ public class ElevatorTab implements TabCompleter {
             return null;
         } else if (args[0].equalsIgnoreCase("floor")) {
             if (args.length == 2) {
-                return getContainsString(args[1], Arrays.asList("create", "door", "sign", "delete"));
+                return getContainsString(args[1], Arrays.asList("create", "door", "sign", "delete", "setName", "smartCreateFloors"));
             } else if (args.length == 3) {
                 return getContainsString(args[2], controllerList);
             } else if (args.length == 4) {
@@ -99,7 +100,7 @@ public class ElevatorTab implements TabCompleter {
                 if (elevatorController == null) return null;
                 ElevatorObject elevatorObject = elevatorController.getElevatorsMap().get(args[3]);
                 if (elevatorObject == null) return null;
-                return elevatorObject.getFloorsMap().keySet().stream().map(String::valueOf).collect(Collectors.toList());
+                return elevatorObject.getFloorsMap().values().stream().map(FloorObject::getName).collect(Collectors.toList());
             }
             return null;
         } else if (args[0].equalsIgnoreCase("call")) {
