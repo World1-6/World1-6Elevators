@@ -23,6 +23,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.configuration.serialization.SerializableAs;
 import org.bukkit.entity.Entity;
@@ -33,9 +34,6 @@ import org.bukkit.util.BoundingBox;
 import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
-
-import static org.bukkit.block.BlockFace.DOWN;
-import static org.bukkit.block.BlockFace.UP;
 
 @EqualsAndHashCode
 @ToString
@@ -332,11 +330,11 @@ public class ElevatorObject implements ConfigurationSerializable {
             location.add(0, 1, 0);
             while (whileLoop) {
                 if (location.getBlock().getType() != Material.AIR) {
-                    Block block1 = location.getBlock().getRelative(UP);
+                    Block block1 = location.getBlock().getRelative(BlockFace.UP);
                     if (block1.getType() == Material.AIR || block1.getType() == Material.IRON_DOOR) {
-                        Block block2 = block1.getRelative(UP);
+                        Block block2 = block1.getRelative(BlockFace.UP);
                         if (block2.getType() == Material.AIR || block2.getType() == Material.IRON_DOOR) {
-                            Block block3 = block2.getRelative(UP);
+                            Block block3 = block2.getRelative(BlockFace.UP);
                             if (block3.getType() != Material.AIR) {
                                 //Found a floor.
                                 a++;
@@ -354,11 +352,11 @@ public class ElevatorObject implements ConfigurationSerializable {
             location.subtract(0, 1, 0);
             while (whileLoop) {
                 if (location.getBlock().getType() != Material.AIR) {
-                    Block block1 = location.getBlock().getRelative(DOWN);
+                    Block block1 = location.getBlock().getRelative(BlockFace.DOWN);
                     if (block1.getType() == Material.AIR || block1.getType() == Material.IRON_DOOR) {
-                        Block block2 = block1.getRelative(DOWN);
+                        Block block2 = block1.getRelative(BlockFace.DOWN);
                         if (block2.getType() == Material.AIR || block2.getType() == Material.IRON_DOOR) {
-                            Block block3 = block2.getRelative(DOWN);
+                            Block block3 = block2.getRelative(BlockFace.DOWN);
                             if (block3.getType() != Material.AIR) {
                                 //Found a floor.
                                 a--;
@@ -446,17 +444,12 @@ public class ElevatorObject implements ConfigurationSerializable {
         return floorObject;
     }
 
-    public Integer[] listAllFloorsInt() {
-        Set<Integer> homeSet = this.floorsMap.keySet();
-        Integer[] integers = homeSet.toArray(new Integer[0]);
-        Arrays.sort(integers);
-        return integers;
-    }
-
     public void clickMessageGoto(Player player) {
         ComponentBuilder componentBuilder = new ComponentBuilder().append("[").color(ChatColor.WHITE).append("BexarSystems").color(ChatColor.GOLD).append(" - ").color(ChatColor.RED).append("Please click a floor in the chat to take the elevator to.").color(ChatColor.BLUE).append("]").color(ChatColor.WHITE).append("\n");
-        for (Integer integer : listAllFloorsInt()) {
-            FloorObject floorObject = getFloor(integer);
+        for (Map.Entry<Integer, FloorObject> floorObjectEntry : this.floorsMap.entrySet()) {
+            Integer integer = floorObjectEntry.getKey();
+            FloorObject floorObject = floorObjectEntry.getValue();
+
             componentBuilder.reset().append(new ComponentBuilder(floorObject.getName() + ",")
                     .color(ChatColor.GOLD)
                     .bold(true)

@@ -102,7 +102,7 @@ public class ElevatorCMD implements CommandExecutor {
 
         Player p = (Player) sender;
         if (!p.hasPermission("world16elevators.elevator")) {
-            p.sendMessage(com.andrew121410.mc.world16utils.chat.Translate.chat("&bYou don't have permission to use this command."));
+            p.sendMessage(Translate.color("&bYou don't have permission to use this command."));
             return true;
         }
 
@@ -118,7 +118,6 @@ public class ElevatorCMD implements CommandExecutor {
             p.sendMessage("");
             p.sendMessage(Translate.color("&6/elevator controller &d<Shows help for creation of a controller.>"));
             p.sendMessage(Translate.color("&6/elevator floor &d<Shows help for the floor."));
-            p.sendMessage(Translate.color("&6/elevator shaft &d<Shows help for the shaft.>"));
             p.sendMessage(Translate.color("&6/elevator call &d<Shows help to call the elevator.>"));
             p.sendMessage(Translate.color("&6/elevator settings &d<Shows help to change the settings.>"));
             return true;
@@ -129,6 +128,10 @@ public class ElevatorCMD implements CommandExecutor {
                 p.sendMessage(Translate.chat("&6/elevator controller delete &e<Controller>"));
                 return true;
             } else if (args.length == 3 && args[1].equalsIgnoreCase("create")) {
+                if (!p.hasPermission("world16elevators.controller.create")) {
+                    p.sendMessage(Translate.color("&bYou don't have permission to use this command."));
+                    return true;
+                }
                 String controllerName = args[2].toLowerCase();
 
                 if (elevatorControllerMap.get(controllerName) != null) {
@@ -140,6 +143,11 @@ public class ElevatorCMD implements CommandExecutor {
                 p.sendMessage(Translate.chat("ElevatorController has been registered with the name of " + controllerName));
                 return true;
             } else if (args.length == 3 && args[1].equalsIgnoreCase("delete")) {
+                if (!p.hasPermission("world16elevators.controller.delete")) {
+                    p.sendMessage(Translate.color("&bYou don't have permission to use this command."));
+                    return true;
+                }
+
                 String controllerName = args[2].toLowerCase();
 
                 if (elevatorControllerMap.get(controllerName) == null) {
@@ -154,6 +162,10 @@ public class ElevatorCMD implements CommandExecutor {
             return true;
             //Create elevator
         } else if (args[0].equalsIgnoreCase("create")) {
+            if (!p.hasPermission("world16elevators.create")) {
+                p.sendMessage(Translate.color("&bYou don't have permission to use this command."));
+                return true;
+            }
             if (args.length == 1) {
                 p.sendMessage(Translate.chat("&6/elevator create &e<Controller> &9<ElevatorName> &a<FloorName>"));
                 return true;
@@ -205,6 +217,10 @@ public class ElevatorCMD implements CommandExecutor {
                 p.sendMessage(Translate.color("&6/elevator floor smartCreateFloors &e<Controller> &9<Elevator> &a<FromFloor> &c<GoUp>"));
                 return true;
             } else if (args.length == 5 && args[1].equalsIgnoreCase("create")) {
+                if (!p.hasPermission("world16elevators.floor.create")) {
+                    p.sendMessage(Translate.color("&bYou don't have permission to use this command."));
+                    return true;
+                }
                 String controllerName = args[2].toLowerCase();
                 String elevatorName = args[3].toLowerCase();
                 String floorName = args[4];
@@ -225,6 +241,10 @@ public class ElevatorCMD implements CommandExecutor {
                 p.sendMessage(Translate.color("&e[&9Elevator&e] &6Floor:" + floorName + " has been added to elevator: " + elevatorName));
                 return true;
             } else if (args.length == 5 && args[1].equalsIgnoreCase("delete")) {
+                if (!p.hasPermission("world16elevators.floor.delete")) {
+                    p.sendMessage(Translate.color("&bYou don't have permission to use this command."));
+                    return true;
+                }
                 String controllerName = args[2].toLowerCase();
                 String elevatorName = args[3].toLowerCase();
                 String floorName = args[4];
@@ -251,6 +271,10 @@ public class ElevatorCMD implements CommandExecutor {
                 p.sendMessage(Translate.chat("The floor: " + floorName + " has been removed from the elevator: " + elevatorName));
                 return true;
             } else if (args.length == 6 && args[1].equalsIgnoreCase("setname")) {
+                if (!p.hasPermission("world16elevators.floor.setname")) {
+                    p.sendMessage(Translate.color("&bYou don't have permission to use this command."));
+                    return true;
+                }
                 ElevatorCommandCustomArguments eleArgs = getArgumentsElevators(args, 3);
 
                 ElevatorController elevatorController = eleArgs.getElevatorController();
@@ -276,6 +300,10 @@ public class ElevatorCMD implements CommandExecutor {
                 p.sendMessage(Translate.color("&6Elevator floor name has been set to: " + toFloorName));
                 return true;
             } else if (args.length == 5 && args[1].equalsIgnoreCase("sign")) {
+                if (!p.hasPermission("world16elevators.floor.sign")) {
+                    p.sendMessage(Translate.color("&bYou don't have permission to use this command."));
+                    return true;
+                }
                 String controllerName = args[2].toLowerCase();
                 String elevatorName = args[3].toLowerCase();
                 String floorName = args[4];
@@ -302,6 +330,10 @@ public class ElevatorCMD implements CommandExecutor {
                 p.sendMessage(Translate.color("&e[&9Elevator&e] &6Floor: " + floorObject.getName() + " has been set."));
                 return true;
             } else if (args.length == 6 && args[1].equalsIgnoreCase("door")) {
+                if (!p.hasPermission("world16elevators.floor.door")) {
+                    p.sendMessage(Translate.color("&bYou don't have permission to use this command."));
+                    return true;
+                }
                 Location location = api.getBlockPlayerIsLookingAt(p).getLocation();
                 ElevatorCommandCustomArguments eleArgs = getArgumentsElevators(args, 3);
                 String floorName = eleArgs.getOtherArgumentsAt(0);
@@ -366,6 +398,11 @@ public class ElevatorCMD implements CommandExecutor {
             }
             return true;
         } else if (args.length == 3 && args[0].equalsIgnoreCase("delete")) {
+            if (!p.hasPermission("world16elevators.delete")) {
+                p.sendMessage(Translate.color("&bYou don't have permission to use this command."));
+                return true;
+            }
+
             String controllerName = args[1].toLowerCase();
             String elevatorName = args[2].toLowerCase();
 
@@ -413,6 +450,11 @@ public class ElevatorCMD implements CommandExecutor {
             this.plugin.getServer().getConsoleSender().sendMessage(elevatorController.getElevatorsMap().get(elevatorName).toString());
             return true;
         } else if (args.length == 3 && args[0].equalsIgnoreCase("stop")) {
+            if (!p.hasPermission("world16elevators.stop")) {
+                p.sendMessage(Translate.color("&bYou don't have permission to use this command."));
+                return true;
+            }
+
             String controllerName = args[1].toLowerCase();
             String elevatorName = args[2].toLowerCase();
 
@@ -432,6 +474,11 @@ public class ElevatorCMD implements CommandExecutor {
             p.sendMessage(Translate.chat("emergency stop has been activated."));
             return true;
         } else if (args[0].equalsIgnoreCase("call")) {
+            if (!p.hasPermission("world16elevators.call")) {
+                p.sendMessage(Translate.color("&bYou don't have permission to use this command."));
+                return true;
+            }
+
             if (args.length == 1) {
                 p.sendMessage(Translate.chat("&a&l&o[Elevator Call Help]"));
                 p.sendMessage(Translate.chat("&6/elevator call &e<Controller> &9<ElevatorName> &b<Floor>"));
@@ -464,6 +511,10 @@ public class ElevatorCMD implements CommandExecutor {
                 return true;
             }
         } else if (args.length == 4 && args[0].equalsIgnoreCase("rename")) {
+            if (!p.hasPermission("world16elevators.rename")) {
+                p.sendMessage(Translate.color("&bYou don't have permission to use this command."));
+                return true;
+            }
             String controllerName = args[1].toLowerCase();
             String elevatorName = args[2].toLowerCase();
             String toElevatorName = args[3].toLowerCase();
@@ -486,6 +537,10 @@ public class ElevatorCMD implements CommandExecutor {
             p.sendMessage(Translate.chat("Old Name: " + elevatorName + " new Name: " + toElevatorName));
             return true;
         } else if (args[0].equalsIgnoreCase("settings")) {
+            if (!p.hasPermission("world16elevators.settings")) {
+                p.sendMessage(Translate.color("&bYou don't have permission to use this command."));
+                return true;
+            }
             if (args.length == 1) {
                 p.sendMessage(Translate.chat("&a&l&o[Elevator Settings Help]"));
                 p.sendMessage(Translate.chat("&6/elevator settings &e<Controller> &9<Elevator> &bticksPerSecond &3<Value>"));
@@ -626,6 +681,10 @@ public class ElevatorCMD implements CommandExecutor {
                 return true;
             }
         } else if (args[0].equalsIgnoreCase("opendoor") && args.length == 4) {
+            if (!p.hasPermission("world16elevators.opendoor")) {
+                p.sendMessage(Translate.color("&bYou don't have permission to use this command."));
+                return true;
+            }
             ElevatorCommandCustomArguments eleArgs = getArgumentsElevators(args, 2);
 
             ElevatorController elevatorController = eleArgs.getElevatorController();

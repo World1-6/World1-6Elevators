@@ -2,7 +2,7 @@ name: World1-6Elevators
 version: ${project.version}
 main: com.andrew121410.mc.world16elevators.World16Elevators
 api-version: 1.16
-authors: [Andrew121410]
+authors: [ Andrew121410 ]
 description: A plugin that i made for my private mc server to add custom elevators.
 
 depend:
@@ -12,9 +12,78 @@ depend:
 commands:
   elevator:
     permission: world16elevators.elevator
-    aliases: [ele]
+    aliases: [ ele ]
 
 permissions:
-  world16elevators.elevator:
-    description: Allows you to do the elevator command
+  world16elevators.elevator: #Default
+    description: Allows you to call a elevator and use main command
+    default: false
+    children:
+      world16elevators.click: true
+      world16elevators.opendoor: true
+      world16elevators.call: true
+  world16elevators.admin:
+    description: Allows you to modify elevators
+    default: op
+    children:
+      world16elevators.create: true
+      world16elevators.delete: true
+      world16elevators.stop: true
+      world16elevators.rename: true
+      world16elevators.controller.create: true
+      world16elevators.controller.delete: true
+      world16elevators.floor.create: true
+      world16elevators.floor.delete: true
+      world16elevators.floor.setname: true
+      world16elevators.floor.sign: true
+      world16elevators.floor.door: true
+      world16elevators.settings: true
+  world16elevators.create:
+    description: Allows you to create elevators
+    default: op
+  world16elevators.delete:
+    description: Allows you to delete elevators
+    default: op
+  world16elevators.stop:
+    description: Allows you to forcefully stop the elevator
+    default: op
+  world16elevators.click: #Default
+    description: Allows you to do a sub command
+    default: false
+  world16elevators.rename:
+    description: Allows you to rename a elevator
+    default: op
+  world16elevators.opendoor: #Default
+    description: Allows you to forcebully open a elevator door
+    default: false
+  #Controllers
+  world16elevators.controller.create:
+    description: Allows you to create a elevator controller
+    default: op
+  world16elevators.controller.delete:
+    description: Allows you to delete a elevator controller
+    default: op
+  ###
+  #Floors
+  world16elevators.floor.create:
+    description: Allows you to create a floor
+    default: op
+  world16elevators.floor.delete:
+    description: Allows you to delete a floor
+    default: op
+  world16elevators.floor.setname:
+    description: Allows you to set a name of a floor
+    default: op
+  world16elevators.floor.sign:
+    description: Allows you to set a sign for a floor
+    default: op
+  world16elevators.floor.door:
+    description: Allows you to add and remove doors from floors
+    default: op
+  ###
+  world16elevators.call: #Default
+    description: Allows you to call a elevator
+    default: false
+  world16elevators.settings:
+    description: Allows you to change the settings of the elevator
     default: op
