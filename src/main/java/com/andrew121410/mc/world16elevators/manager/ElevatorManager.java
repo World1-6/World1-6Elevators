@@ -85,7 +85,9 @@ public class ElevatorManager {
 
     public void deleteElevatorController(String name) {
         ElevatorController elevatorController = this.elevatorObjectMap.get(name.toLowerCase());
-        this.chunksToControllerNameMap.remove(elevatorController.getMainChunk());
+        if (elevatorController.getMainChunk() != null) {
+            this.chunksToControllerNameMap.remove(elevatorController.getMainChunk());
+        }
         this.elevatorObjectMap.remove(name.toLowerCase());
         ConfigurationSection elevatorControllersSection = this.elevatorsYml.getConfig().getConfigurationSection("ElevatorControllers");
         if (elevatorControllersSection == null) return;
