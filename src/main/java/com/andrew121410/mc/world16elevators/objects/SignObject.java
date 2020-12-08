@@ -2,7 +2,7 @@ package com.andrew121410.mc.world16elevators.objects;
 
 
 import com.andrew121410.mc.world16elevators.World16Elevators;
-import com.andrew121410.mc.world16utils.blocks.sign.SignUtils;
+import com.andrew121410.mc.world16utils.sign.SignUtils;
 import com.andrew121410.mc.world16utils.chat.Translate;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
