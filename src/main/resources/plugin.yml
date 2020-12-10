@@ -17,7 +17,7 @@ commands:
 permissions:
   world16elevators.elevator: #Default
     description: Allows you to call a elevator and use main command
-    default: false
+    default: true
     children:
       world16elevators.click: true
       world16elevators.opendoor: true
@@ -49,13 +49,13 @@ permissions:
     default: op
   world16elevators.click: #Default
     description: Allows you to do a sub command
-    default: false
+    default: true
   world16elevators.rename:
     description: Allows you to rename a elevator
     default: op
   world16elevators.opendoor: #Default
     description: Allows you to forcebully open a elevator door
-    default: false
+    default: true
   #Controllers
   world16elevators.controller.create:
     description: Allows you to create a elevator controller
@@ -83,7 +83,7 @@ permissions:
   ###
   world16elevators.call: #Default
     description: Allows you to call a elevator
-    default: false
+    default: true
   world16elevators.settings:
     description: Allows you to change the settings of the elevator
     default: op

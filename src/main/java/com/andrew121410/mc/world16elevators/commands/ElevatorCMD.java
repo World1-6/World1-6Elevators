@@ -1,6 +1,7 @@
 package com.andrew121410.mc.world16elevators.commands;
 
 import com.andrew121410.mc.world16elevators.World16Elevators;
+import com.andrew121410.mc.world16elevators.gui.ElevatorGUI;
 import com.andrew121410.mc.world16elevators.manager.ElevatorManager;
 import com.andrew121410.mc.world16elevators.objects.*;
 import com.andrew121410.mc.world16elevators.tabcomplete.ElevatorTab;
@@ -723,7 +724,10 @@ public class ElevatorCMD implements CommandExecutor {
                 public void run() {
                     floorObject.doDoor(false, true);
                 }
-            }.runTaskLater(plugin, 20 * seconds);
+            }.runTaskLater(plugin, 20L * seconds);
+        } else if (args[0].equalsIgnoreCase("gui")) {
+            ElevatorGUI elevatorGUI = new ElevatorGUI(this.plugin);
+            elevatorGUI.open(p);
         }
         return true;
     }
