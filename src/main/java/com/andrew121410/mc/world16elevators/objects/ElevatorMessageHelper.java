@@ -1,6 +1,7 @@
 package com.andrew121410.mc.world16elevators.objects;
 
 import com.andrew121410.mc.world16elevators.World16Elevators;
+import com.andrew121410.mc.world16utils.chat.ChatResponseManager;
 import com.andrew121410.mc.world16utils.chat.Translate;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -66,7 +67,22 @@ public class ElevatorMessageHelper {
                         players.add(player.getUniqueId());
                         return;
                     }
-                    elevatorObject.clickMessageGoto(player);
+                    switch (elevatorObject.getElevatorSettings().getElevatorCallSystem()) {
+                        case CLICK_CHAT:
+                            elevatorObject.clickMessageGoto(player);
+                            break;
+                        case GUI:
+                            GUIElevatorFloors guiElevatorFloors = new GUIElevatorFloors(plugin, elevatorObject);
+                            guiElevatorFloors.open(player);
+                            break;
+                        case CHAT_RESPONSE:
+                            ChatResponseManager chatResponseManager = plugin.getOtherPlugins().getWorld16Utils().getChatResponseManager();
+                            player.sendMessage("Please type in the chat your response");
+                            elevatorObject.elevatorFloorsMessage(player);
+                            chatResponseManager.create(player, Translate.color("&bWhat floor?"), "", (thePlayer, response) -> {
+                                plugin.getServer().dispatchCommand(player, "elevator call " + elevatorObject.getElevatorControllerName() + " " + elevatorObject.getElevatorName() + " " + response);
+                            });
+                    }
                     players.add(player.getUniqueId());
                 }
             }

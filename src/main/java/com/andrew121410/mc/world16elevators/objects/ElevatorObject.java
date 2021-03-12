@@ -1,6 +1,7 @@
 package com.andrew121410.mc.world16elevators.objects;
 
 import com.andrew121410.mc.world16elevators.World16Elevators;
+import com.andrew121410.mc.world16utils.chat.Translate;
 import com.andrew121410.mc.world16utils.math.SimpleMath;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.MaxChangedBlocksException;
@@ -459,6 +460,17 @@ public class ElevatorObject implements ConfigurationSerializable {
                     .create());
         }
         player.spigot().sendMessage(componentBuilder.create());
+    }
+
+    public void elevatorFloorsMessage(Player player){
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("&2[Elevator Floors]&r");
+        for (Map.Entry<Integer, FloorObject> entry : this.floorsMap.entrySet()) {
+            Integer floor = entry.getKey();
+            FloorObject floorObject = entry.getValue();
+            stringBuilder.append("&e, &a" + floorObject.getName());
+        }
+        player.sendMessage(Translate.color(stringBuilder.toString()));
     }
 
     private void arrivalChime(Location location) {

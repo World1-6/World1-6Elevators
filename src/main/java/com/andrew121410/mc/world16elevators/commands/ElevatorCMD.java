@@ -1,7 +1,6 @@
 package com.andrew121410.mc.world16elevators.commands;
 
 import com.andrew121410.mc.world16elevators.World16Elevators;
-import com.andrew121410.mc.world16elevators.gui.ElevatorGUI;
 import com.andrew121410.mc.world16elevators.manager.ElevatorManager;
 import com.andrew121410.mc.world16elevators.objects.*;
 import com.andrew121410.mc.world16elevators.tabcomplete.ElevatorTab;
@@ -550,6 +549,7 @@ public class ElevatorCMD implements CommandExecutor {
                 p.sendMessage(Translate.chat("&6/elevator settings &e<Controller> &9<Elevator> &bdoElevatorLeveling &3<Value>"));
                 p.sendMessage(Translate.chat("&6/elevator settings &e<Controller> &9<Elevator> &barrivalSound &3<Sound> <Volume> <Pitch>"));
                 p.sendMessage(Translate.chat("&6/elevator settings &e<Controller> &9<Elevator> &bpassingByFloorSound &3<Sound> <Volume> <Pitch"));
+                p.sendMessage(Translate.chat("&6/elevator settings &e<Controller> &9<Elevator> &belevatorCallSystem &3<System>"));
             } else if (args.length > 2) {
                 ElevatorCommandCustomArguments eleArgs = getArgumentsElevators(args, 2);
                 ElevatorController elevatorController = eleArgs.getElevatorController();
@@ -627,6 +627,17 @@ public class ElevatorCMD implements CommandExecutor {
                         elevatorObject.getElevatorSettings().setPassingByFloorSound(elevatorSound);
                     }
 
+                    return true;
+                }else if (setting.equalsIgnoreCase("elevatorCallSystem")){
+                    ElevatorCallSystem elevatorCallSystem = null;
+                    try {
+                        elevatorCallSystem = ElevatorCallSystem.valueOf(eleArgs.getOtherArgumentsAt(1));
+                    }catch (Exception ignored){
+                     p.sendMessage(Translate.color("&cThat's not a valid call system."));
+                     return true;
+                    }
+                    elevatorObject.getElevatorSettings().setElevatorCallSystem(elevatorCallSystem);
+                    p.sendMessage(Translate.color("New call system has been set to " + elevatorCallSystem.name()));
                     return true;
                 }
                 return true;
@@ -725,9 +736,6 @@ public class ElevatorCMD implements CommandExecutor {
                     floorObject.doDoor(false, true);
                 }
             }.runTaskLater(plugin, 20L * seconds);
-        } else if (args[0].equalsIgnoreCase("gui")) {
-            ElevatorGUI elevatorGUI = new ElevatorGUI(this.plugin);
-            elevatorGUI.open(p);
         }
         return true;
     }
