@@ -117,7 +117,11 @@ public class ElevatorTab implements TabCompleter {
             } else if (args.length == 4) {
                 return getContainsString(args[3], Arrays.asList("ticksPerSecond", "doorHolderTicksPerSecond", "elevatorWaiterTicksPerSecond", "doElevatorLeveling", "onlyTwoFloors", "arrivalSound", "passingByFloorSound", "elevatorCallSystem"));
             } else if (args.length == 5) {
-                if (args[3].equals("arrivalSound") || args[3].equals("passingByFloorSound")) {
+                if (args[3].equalsIgnoreCase("doElevatorLeveling")) {
+                    return StringUtil.copyPartialMatches(args[4], Arrays.asList("true", "false"), new ArrayList<>());
+                } else if (args[3].equalsIgnoreCase("onlyTwoFloors")) {
+                    return StringUtil.copyPartialMatches(args[4], Arrays.asList("true", "false"), new ArrayList<>());
+                } else if (args[3].equals("arrivalSound") || args[3].equals("passingByFloorSound")) {
                     return StringUtil.copyPartialMatches(args[4], this.soundList, new ArrayList<>());
                 } else if (args[3].equalsIgnoreCase("elevatorCallSystem")) {
                     return StringUtil.copyPartialMatches(args[4], Arrays.stream(ElevatorCallSystem.values()).map(Enum::name).collect(Collectors.toList()), new ArrayList<>());

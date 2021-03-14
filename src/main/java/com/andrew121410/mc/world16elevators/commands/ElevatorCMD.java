@@ -4,9 +4,10 @@ import com.andrew121410.mc.world16elevators.World16Elevators;
 import com.andrew121410.mc.world16elevators.manager.ElevatorManager;
 import com.andrew121410.mc.world16elevators.objects.*;
 import com.andrew121410.mc.world16elevators.tabcomplete.ElevatorTab;
-import com.andrew121410.mc.world16elevators.utils.API;
 import com.andrew121410.mc.world16utils.chat.Translate;
 import com.andrew121410.mc.world16utils.math.SimpleMath;
+import com.andrew121410.mc.world16utils.player.PlayerUtils;
+import com.andrew121410.mc.world16utils.utils.Utils;
 import com.sk89q.worldedit.bukkit.BukkitAdapter;
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import com.sk89q.worldedit.regions.Region;
@@ -35,7 +36,6 @@ import java.util.Map;
 public class ElevatorCMD implements CommandExecutor {
 
     private World16Elevators plugin;
-    private API api;
 
     private WorldEditPlugin worldEditPlugin;
     private ElevatorManager elevatorManager;
@@ -47,7 +47,6 @@ public class ElevatorCMD implements CommandExecutor {
     public ElevatorCMD(World16Elevators plugin) {
         this.plugin = plugin;
 
-        this.api = new API(this.plugin);
         this.simpleMath = new SimpleMath(this.plugin);
 
         this.worldEditPlugin = this.plugin.getOtherPlugins().getWorldEditPlugin();
@@ -170,7 +169,7 @@ public class ElevatorCMD implements CommandExecutor {
                 p.sendMessage(Translate.chat("&6/elevator create &e<Controller> &9<ElevatorName> &a<FloorName>"));
                 return true;
             } else if (args.length == 4) {
-                Block block = api.getBlockPlayerIsLookingAt(p);
+                Block block = PlayerUtils.getBlockPlayerIsLookingAt(p);
                 ElevatorCommandCustomArguments eleArgs = getArgumentsElevators(args, 2);
                 String floorName = eleArgs.getOtherArgumentsAt(1);
                 Region region = getSelection(p);
@@ -237,7 +236,7 @@ public class ElevatorCMD implements CommandExecutor {
                     return true;
                 }
 
-                elevatorObject.addFloor(new FloorObject(floorName, api.getBlockPlayerIsLookingAt(p).getLocation()));
+                elevatorObject.addFloor(new FloorObject(floorName, PlayerUtils.getBlockPlayerIsLookingAt(p).getLocation()));
                 p.sendMessage(Translate.color("&e[&9Elevator&e] &6Floor:" + floorName + " has been added to elevator: " + elevatorName));
                 return true;
             } else if (args.length == 5 && args[1].equalsIgnoreCase("delete")) {
@@ -326,7 +325,7 @@ public class ElevatorCMD implements CommandExecutor {
                     return true;
                 }
 
-                floorObject.getSignList().add(new SignObject(this.api.getBlockPlayerIsLookingAt(p).getLocation()));
+                floorObject.getSignList().add(new SignObject(PlayerUtils.getBlockPlayerIsLookingAt(p).getLocation()));
                 p.sendMessage(Translate.color("&e[&9Elevator&e] &6Floor: " + floorObject.getName() + " has been set."));
                 return true;
             } else if (args.length == 6 && args[1].equalsIgnoreCase("door")) {
@@ -334,7 +333,7 @@ public class ElevatorCMD implements CommandExecutor {
                     p.sendMessage(Translate.color("&bYou don't have permission to use this command."));
                     return true;
                 }
-                Location location = api.getBlockPlayerIsLookingAt(p).getLocation();
+                Location location = PlayerUtils.getBlockPlayerIsLookingAt(p).getLocation();
                 ElevatorCommandCustomArguments eleArgs = getArgumentsElevators(args, 3);
                 String floorName = eleArgs.getOtherArgumentsAt(0);
                 String addOrRemove = eleArgs.getOtherArgumentsAt(1);
@@ -386,7 +385,7 @@ public class ElevatorCMD implements CommandExecutor {
                     return true;
                 }
 
-                Boolean bool = api.asBooleanOrElseNull(eleArgs.getOtherArgumentsAt(1));
+                Boolean bool = Utils.asBooleanOrElse(eleArgs.getOtherArgumentsAt(1), null);
                 if (bool == null) {
                     p.sendMessage(Translate.color("Not a true/false"));
                     return true;
@@ -546,7 +545,8 @@ public class ElevatorCMD implements CommandExecutor {
                 p.sendMessage(Translate.chat("&6/elevator settings &e<Controller> &9<Elevator> &bticksPerSecond &3<Value>"));
                 p.sendMessage(Translate.chat("&6/elevator settings &e<Controller> &9<Elevator> &bdoorHolderTicksPerSecond &3<Value>"));
                 p.sendMessage(Translate.chat("&6/elevator settings &e<Controller> &9<Elevator> &belevatorWaiterTicksPerSecond &3<Value>"));
-                p.sendMessage(Translate.chat("&6/elevator settings &e<Controller> &9<Elevator> &bdoElevatorLeveling &3<Value>"));
+                p.sendMessage(Translate.chat("&6/elevator settings &e<Controller> &9<Elevator> &bdoElevatorLeveling &3<Bool>"));
+                p.sendMessage(Translate.chat("&6/elevator settings &e<Controller> &9<Elevator> &bonlyTwoFloors &3<Bool>"));
                 p.sendMessage(Translate.chat("&6/elevator settings &e<Controller> &9<Elevator> &barrivalSound &3<Sound> <Volume> <Pitch>"));
                 p.sendMessage(Translate.chat("&6/elevator settings &e<Controller> &9<Elevator> &bpassingByFloorSound &3<Sound> <Volume> <Pitch"));
                 p.sendMessage(Translate.chat("&6/elevator settings &e<Controller> &9<Elevator> &belevatorCallSystem &3<System>"));
@@ -569,27 +569,27 @@ public class ElevatorCMD implements CommandExecutor {
                 }
 
                 if (setting.equalsIgnoreCase("ticksPerSecond")) {
-                    long valueLong = api.asLongOrDefault(eleArgs.getOtherArgumentsAt(1), ElevatorSettings.DEFAULT_TICKS_PER_SECOND);
+                    long valueLong = Utils.asLongOrElse(eleArgs.getOtherArgumentsAt(1), ElevatorSettings.DEFAULT_TICKS_PER_SECOND);
                     elevatorObject.getElevatorSettings().setTicksPerSecond(valueLong);
                     p.sendMessage(Translate.chat("The ticks per second has been updated to: " + valueLong));
                     return true;
                 } else if (setting.equalsIgnoreCase("doorHolderTicksPerSecond")) {
-                    long valueLong = api.asLongOrDefault(eleArgs.getOtherArgumentsAt(1), ElevatorSettings.DEFAULT_DOOR_HOLDER_TICKS_PER_SECOND);
+                    long valueLong = Utils.asLongOrElse(eleArgs.getOtherArgumentsAt(1), ElevatorSettings.DEFAULT_DOOR_HOLDER_TICKS_PER_SECOND);
                     elevatorObject.getElevatorSettings().setDoorHolderTicksPerSecond(valueLong);
                     p.sendMessage(Translate.chat("The door holder ticks per second has been updated to: " + valueLong));
                     return true;
                 } else if (setting.equalsIgnoreCase("elevatorWaiterTicksPerSecond")) {
-                    long valueLong = api.asLongOrDefault(eleArgs.getOtherArgumentsAt(1), ElevatorSettings.DEFAULT_ELEVATOR_WAITER_TICKS_PER_SECOND);
+                    long valueLong = Utils.asLongOrElse(eleArgs.getOtherArgumentsAt(1), ElevatorSettings.DEFAULT_ELEVATOR_WAITER_TICKS_PER_SECOND);
                     elevatorObject.getElevatorSettings().setElevatorWaiterTicksPerSecond(valueLong);
                     p.sendMessage(Translate.chat("The elevator waiter ticks per second has been updated to: " + valueLong));
                     return true;
                 } else if (setting.equalsIgnoreCase("doElevatorLeveling")) {
-                    boolean bool = api.asBooleanOrDefault(eleArgs.getOtherArgumentsAt(1), true);
+                    boolean bool = Utils.asBooleanOrElse(eleArgs.getOtherArgumentsAt(1), true);
                     elevatorObject.getElevatorSettings().setDoElevatorLeveling(bool);
                     p.sendMessage(Translate.chat("The doLevelingSystem has been set to: " + bool));
                     return true;
                 } else if (setting.equalsIgnoreCase("onlyTwoFloors")) {
-                    boolean bool = api.asBooleanOrDefault(eleArgs.getOtherArgumentsAt(1), false);
+                    boolean bool = Utils.asBooleanOrElse(eleArgs.getOtherArgumentsAt(1), false);
                     elevatorObject.getElevatorSettings().setOnlyTwoFloors(bool);
                     p.sendMessage(Translate.chat("onlyTwoFloors has been set to: " + bool));
                     return true;
@@ -613,8 +613,8 @@ public class ElevatorCMD implements CommandExecutor {
                     }
 
                     Sound sound = Sound.valueOf(fakeSound);
-                    float volume = api.asFloatOrDefault(fakeVolume, 99.1F);
-                    float pitch = api.asFloatOrDefault(fakePitch, 99.1F);
+                    float volume = Utils.asFloatOrElse(fakeVolume, 99.1F);
+                    float pitch = Utils.asFloatOrElse(fakePitch, 99.1F);
 
                     if (volume == 91.1F || pitch == 91.1F) {
                         p.sendMessage(Translate.chat("Volume or pitch is messed up."));
@@ -628,13 +628,13 @@ public class ElevatorCMD implements CommandExecutor {
                     }
 
                     return true;
-                }else if (setting.equalsIgnoreCase("elevatorCallSystem")){
+                } else if (setting.equalsIgnoreCase("elevatorCallSystem")) {
                     ElevatorCallSystem elevatorCallSystem = null;
                     try {
                         elevatorCallSystem = ElevatorCallSystem.valueOf(eleArgs.getOtherArgumentsAt(1));
-                    }catch (Exception ignored){
-                     p.sendMessage(Translate.color("&cThat's not a valid call system."));
-                     return true;
+                    } catch (Exception ignored) {
+                        p.sendMessage(Translate.color("&cThat's not a valid call system."));
+                        return true;
                     }
                     elevatorObject.getElevatorSettings().setElevatorCallSystem(elevatorCallSystem);
                     p.sendMessage(Translate.color("New call system has been set to " + elevatorCallSystem.name()));
@@ -716,8 +716,8 @@ public class ElevatorCMD implements CommandExecutor {
                 p.sendMessage("SecondsString cannot be null");
                 return true;
             }
-            int seconds = api.asIntOrDefault(secondsString, Integer.MIN_VALUE);
-            if (seconds == Integer.MIN_VALUE) {
+            Integer seconds = Utils.asIntegerOrElse(secondsString, null);
+            if (seconds == null) {
                 p.sendMessage(Translate.color("Not a int."));
                 return true;
             }
@@ -793,6 +793,6 @@ class ElevatorCommandCustomArguments {
     private ArrayList<String> otherArgs = null;
 
     public String getOtherArgumentsAt(int index) {
-        return API.getIndexFromStringArrayList(otherArgs, index) != null ? otherArgs.get(index) : null;
+        return Utils.getIndexFromStringList(otherArgs, index) != null ? otherArgs.get(index) : null;
     }
 }
