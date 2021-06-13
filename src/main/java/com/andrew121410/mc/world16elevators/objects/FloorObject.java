@@ -9,6 +9,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.block.data.Bisected;
 import org.bukkit.block.data.type.Door;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.configuration.serialization.SerializableAs;
@@ -37,7 +38,7 @@ public class FloorObject implements ConfigurationSerializable {
     public FloorObject(int floor, String name, Location mainDoor, List<Location> doorList, List<SignObject> signList) {
         this.floor = floor;
         this.name = name;
-        this.mainDoor = mainDoor;
+        this.mainDoor = IfIronDoorThenGetBlockUnderTheDoorIfNotThanReturn(mainDoor).getLocation();
         this.doorList = doorList;
         this.signList = signList;
     }
@@ -68,7 +69,7 @@ public class FloorObject implements ConfigurationSerializable {
         }
 
         //Main door
-        if (!ifDoorThenDoIfNotThenFalse(this.getMainDoor().getBlock().getRelative(BlockFace.UP), open)) {
+        if (!IfIronDoorThenSetOpenIfNotThenFalse(this.getMainDoor().getBlock().getRelative(BlockFace.UP), open)) {
             if (open) this.mainDoor.getBlock().setType(Material.REDSTONE_BLOCK);
             else this.mainDoor.getBlock().setType(this.oldBlocks.get(this.mainDoor));
         }
@@ -77,7 +78,7 @@ public class FloorObject implements ConfigurationSerializable {
         if (forAllDoors) {
             for (Location location : this.doorList) {
                 Block block = location.getBlock().getRelative(BlockFace.UP);
-                if (!ifDoorThenDoIfNotThenFalse(block, open)) {
+                if (!IfIronDoorThenSetOpenIfNotThenFalse(block, open)) {
                     if (open) location.getBlock().setType(Material.REDSTONE_BLOCK);
                     else location.getBlock().setType(this.oldBlocks.get(this.mainDoor));
                 }
@@ -95,7 +96,7 @@ public class FloorObject implements ConfigurationSerializable {
         return door;
     }
 
-    public static boolean ifDoorThenDoIfNotThenFalse(Block block, boolean value) {
+    public static boolean IfIronDoorThenSetOpenIfNotThenFalse(Block block, boolean value) {
         Door door = isDoor(block.getLocation());
         if (door == null) return false;
         door.setOpen(value);
@@ -105,6 +106,17 @@ public class FloorObject implements ConfigurationSerializable {
         return true;
     }
 
+    public static Block IfIronDoorThenGetBlockUnderTheDoorIfNotThanReturn(Location location) {
+        Door door = isDoor(location);
+        if (door != null) {
+            if (door.getHalf() == Bisected.Half.TOP) {
+                return location.getBlock().getRelative(0, -2, 0);
+            } else {
+                return location.getBlock().getRelative(0, -1, 0);
+            }
+        }
+        return location.getBlock();
+    }
 
     public String getName() {
         return name != null ? name : String.valueOf(floor);

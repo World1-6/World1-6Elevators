@@ -160,7 +160,7 @@ public class ElevatorCMD implements CommandExecutor {
                 p.sendMessage(Translate.chat("&6/elevator create &e<Controller> &9<ElevatorName> &a<FloorName>"));
                 return true;
             } else if (args.length == 4) {
-                Block block = PlayerUtils.getBlockPlayerIsLookingAt(p);
+                Block blockPlayerIsLookingAt = PlayerUtils.getBlockPlayerIsLookingAt(p);
                 ElevatorCommandCustomArguments eleArgs = getArgumentsElevators(args, 2);
                 String floorName = eleArgs.getOtherArgumentsAt(1);
                 BoundingBox region = this.plugin.getOtherPlugins().getWorld16Utils().getClassWrappers().getWorldEdit().getRegion(p);
@@ -182,9 +182,9 @@ public class ElevatorCMD implements CommandExecutor {
                 }
                 String elevatorName = eleArgs.getOtherArgumentsAt(0);
 
-                ElevatorMovement elevatorMovement = new ElevatorMovement(1, block.getLocation().clone(), region);
+                ElevatorMovement elevatorMovement = new ElevatorMovement(1, blockPlayerIsLookingAt.getLocation().clone(), region);
                 ElevatorObject elevatorObject = new ElevatorObject(this.plugin, elevatorName, p.getWorld().getName(), elevatorMovement);
-                FloorObject floorObject = new FloorObject(1, floorName, block.getLocation().clone());
+                FloorObject floorObject = new FloorObject(1, floorName, blockPlayerIsLookingAt.getLocation().clone());
                 elevatorObject.addFloor(floorObject);
 
                 elevatorController.registerElevator(elevatorName, elevatorObject);

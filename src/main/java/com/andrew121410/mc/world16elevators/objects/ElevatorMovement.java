@@ -1,6 +1,9 @@
 package com.andrew121410.mc.world16elevators.objects;
 
-import lombok.*;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 import org.bukkit.Location;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.configuration.serialization.SerializableAs;
@@ -13,7 +16,6 @@ import java.util.Map;
 @ToString
 @Getter
 @Setter
-@AllArgsConstructor
 @SerializableAs("ElevatorMovement")
 public class ElevatorMovement implements ConfigurationSerializable {
 
@@ -21,6 +23,12 @@ public class ElevatorMovement implements ConfigurationSerializable {
 
     private Location atDoor;
     private BoundingBox boundingBox;
+
+    public ElevatorMovement(Integer floor, Location atDoor, BoundingBox boundingBox) {
+        this.floor = floor;
+        this.atDoor = FloorObject.IfIronDoorThenGetBlockUnderTheDoorIfNotThanReturn(atDoor).getLocation();
+        this.boundingBox = boundingBox;
+    }
 
     public void moveUP() {
         this.atDoor.add(0, 1, 0);
