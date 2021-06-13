@@ -3,7 +3,7 @@ version: ${project.version}
 main: com.andrew121410.mc.world16elevators.World16Elevators
 api-version: 1.16
 authors: [ Andrew121410 ]
-description: A plugin that i made for my private mc server to add custom elevators.
+description: An Elevator Plugin That I Made For A Private City Minecraft Server!
 
 depend:
   - World1-6Utils

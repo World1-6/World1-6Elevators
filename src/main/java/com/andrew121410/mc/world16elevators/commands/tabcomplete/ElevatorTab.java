@@ -1,4 +1,4 @@
-package com.andrew121410.mc.world16elevators.tabcomplete;
+package com.andrew121410.mc.world16elevators.commands.tabcomplete;
 
 import com.andrew121410.mc.world16elevators.World16Elevators;
 import com.andrew121410.mc.world16elevators.objects.ElevatorCallSystem;

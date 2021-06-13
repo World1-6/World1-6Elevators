@@ -1,16 +1,12 @@
 package com.andrew121410.mc.world16elevators.commands;
 
 import com.andrew121410.mc.world16elevators.World16Elevators;
+import com.andrew121410.mc.world16elevators.commands.tabcomplete.ElevatorTab;
 import com.andrew121410.mc.world16elevators.manager.ElevatorManager;
 import com.andrew121410.mc.world16elevators.objects.*;
-import com.andrew121410.mc.world16elevators.tabcomplete.ElevatorTab;
 import com.andrew121410.mc.world16utils.chat.Translate;
-import com.andrew121410.mc.world16utils.math.SimpleMath;
 import com.andrew121410.mc.world16utils.player.PlayerUtils;
 import com.andrew121410.mc.world16utils.utils.Utils;
-import com.sk89q.worldedit.bukkit.BukkitAdapter;
-import com.sk89q.worldedit.bukkit.WorldEditPlugin;
-import com.sk89q.worldedit.regions.Region;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -37,19 +33,14 @@ public class ElevatorCMD implements CommandExecutor {
 
     private World16Elevators plugin;
 
-    private WorldEditPlugin worldEditPlugin;
     private ElevatorManager elevatorManager;
 
     private Map<String, ElevatorController> elevatorControllerMap;
 
-    private SimpleMath simpleMath;
 
     public ElevatorCMD(World16Elevators plugin) {
         this.plugin = plugin;
 
-        this.simpleMath = new SimpleMath(this.plugin);
-
-        this.worldEditPlugin = this.plugin.getOtherPlugins().getWorldEditPlugin();
         this.elevatorControllerMap = this.plugin.getSetListMap().getElevatorControllerMap();
         this.elevatorManager = this.plugin.getElevatorManager();
 
@@ -172,7 +163,7 @@ public class ElevatorCMD implements CommandExecutor {
                 Block block = PlayerUtils.getBlockPlayerIsLookingAt(p);
                 ElevatorCommandCustomArguments eleArgs = getArgumentsElevators(args, 2);
                 String floorName = eleArgs.getOtherArgumentsAt(1);
-                Region region = getSelection(p);
+                BoundingBox region = this.plugin.getOtherPlugins().getWorld16Utils().getClassWrappers().getWorldEdit().getRegion(p);
 
                 if (region == null) {
                     p.sendMessage(Translate.chat("&cYou didn't make a WorldEdit selection... [FAILED]"));
@@ -191,13 +182,8 @@ public class ElevatorCMD implements CommandExecutor {
                 }
                 String elevatorName = eleArgs.getOtherArgumentsAt(0);
 
-                Location one = new Location(p.getWorld(), region.getMinimumPoint().getX(), region.getMinimumPoint().getY(), region.getMinimumPoint().getZ());
-                Location two = new Location(p.getWorld(), region.getMaximumPoint().getX(), region.getMaximumPoint().getY(), region.getMaximumPoint().getZ());
-
-                ElevatorMovement elevatorMovement = new ElevatorMovement(1, block.getLocation().clone(), one, two);
-                BoundingBox boundingBox = BoundingBox.of(one, two);
-                boundingBox.expand(1);
-                ElevatorObject elevatorObject = new ElevatorObject(this.plugin, elevatorName, p.getWorld().getName(), elevatorMovement, boundingBox);
+                ElevatorMovement elevatorMovement = new ElevatorMovement(1, block.getLocation().clone(), region);
+                ElevatorObject elevatorObject = new ElevatorObject(this.plugin, elevatorName, p.getWorld().getName(), elevatorMovement);
                 FloorObject floorObject = new FloorObject(1, floorName, block.getLocation().clone());
                 elevatorObject.addFloor(floorObject);
 
@@ -768,16 +754,6 @@ public class ElevatorCMD implements CommandExecutor {
             floorQueueObjectStringBuilder.append(removeFloorFromFloorQueueBuffer.create());
         }
         return floorQueueObjectStringBuilder;
-    }
-
-    private Region getSelection(Player player) {
-        Region region;
-        try {
-            region = worldEditPlugin.getSession(player).getSelection(BukkitAdapter.adapt(player.getWorld()));
-        } catch (Exception ex) {
-            return null;
-        }
-        return region;
     }
 }
 
