@@ -3,6 +3,7 @@ package com.andrew121410.mc.world16elevators.objects;
 
 import com.andrew121410.mc.world16elevators.World16Elevators;
 import com.andrew121410.mc.world16utils.chat.Translate;
+import com.andrew121410.mc.world16utils.sign.SignCache;
 import com.andrew121410.mc.world16utils.sign.SignUtils;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -22,16 +23,19 @@ import java.util.Map;
 public class SignObject implements ConfigurationSerializable {
 
     private Location location;
+    private SignCache signCache;
     private SignUtils signUtils;
 
     public SignObject(Location location) {
         this.location = location;
+        this.signCache = new SignCache();
         this.signUtils = World16Elevators.getInstance().getOtherPlugins().getWorld16Utils().getClassWrappers().getSignUtils();
     }
 
     public boolean doUpArrow() {
         Sign sign = signUtils.isSign(location.getBlock());
         if (sign == null) return false;
+        this.signCache.fromSign(sign);
         String text = signUtils.centerText("/\\", 16);
         String text1 = signUtils.centerText("//\\\\", 16);
         sign.setLine(0, Translate.chat("&a&l" + text));
@@ -43,6 +47,7 @@ public class SignObject implements ConfigurationSerializable {
     public boolean doDownArrow() {
         Sign sign = signUtils.isSign(location.getBlock());
         if (sign == null) return false;
+        this.signCache.fromSign(sign);
         String text = signUtils.centerText("\\\\//", 16);
         String text1 = signUtils.centerText("\\/", 16);
         sign.setLine(2, Translate.chat("&c&l" + text));
@@ -51,14 +56,10 @@ public class SignObject implements ConfigurationSerializable {
         return true;
     }
 
-    public boolean clearSign() {
+    public boolean revert() {
         Sign sign = signUtils.isSign(location.getBlock());
         if (sign == null) return false;
-        sign.setLine(0, "");
-        sign.setLine(1, "");
-        sign.setLine(2, "");
-        sign.setLine(3, "");
-        sign.update();
+        this.signCache.updateFancy(sign);
         return true;
     }
 

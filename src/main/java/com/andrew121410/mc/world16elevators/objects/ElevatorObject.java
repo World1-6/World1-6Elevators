@@ -220,18 +220,12 @@ public class ElevatorObject implements ConfigurationSerializable {
 
     private void floorDone(FloorObject floorObject, ElevatorStatus elevatorStatus) {
         floorObject.doDoor(true, true);
-
-        //Signs
-        if (elevatorStatus == ElevatorStatus.UP) {
-            floorObject.getSignList().removeIf(signObject -> !signObject.doUpArrow());
-        } else if (elevatorStatus == ElevatorStatus.DOWN) {
-            floorObject.getSignList().removeIf(signObject -> !signObject.doDownArrow());
-        }
+        floorObject.doSigns(elevatorStatus, false);
 
         new BukkitRunnable() {
             @Override
             public void run() {
-                floorObject.getSignList().removeIf(signObject -> !signObject.clearSign());
+                floorObject.doSigns(elevatorStatus, true);
                 floorObject.doDoor(false, true);
                 isPlayersInItAfter = !getPlayers().isEmpty();
                 if (!isPlayersInItAfter) elevatorMessageHelper.stop();

@@ -88,6 +88,22 @@ public class FloorObject implements ConfigurationSerializable {
         if (!open) this.oldBlocks.clear();
     }
 
+    public void doSigns(ElevatorStatus elevatorStatus, boolean revert) {
+        if (revert) {
+            this.signList.removeIf(signObject -> !signObject.revert());
+            return;
+        }
+
+        switch (elevatorStatus) {
+            case UP:
+                this.signList.removeIf(signObject -> !signObject.doUpArrow());
+                break;
+            case DOWN:
+                this.signList.removeIf(signObject -> !signObject.doDownArrow());
+                break;
+        }
+    }
+
     public static Door isIronDoor(Location location) {
         Door door = null;
         if (location.getBlock().getType() == Material.IRON_DOOR) {
