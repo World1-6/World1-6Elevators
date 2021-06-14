@@ -3,6 +3,9 @@ package com.andrew121410.mc.world16elevators.listeners;
 import com.andrew121410.mc.world16elevators.World16Elevators;
 import com.andrew121410.mc.world16elevators.objects.*;
 import com.andrew121410.mc.world16utils.chat.Translate;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
 import org.bukkit.Location;
 import org.bukkit.Tag;
 import org.bukkit.block.data.Bisected;
@@ -28,35 +31,61 @@ public class OnPlayerInteractEvent implements Listener {
         if (event.getAction() == Action.RIGHT_CLICK_BLOCK && Tag.BUTTONS.isTagged(event.getClickedBlock().getType())) {
             if (event.getItem() != null && Tag.BUTTONS.isTagged(event.getItem().getType())) return;
 
-            //@TODO - clean this shit up to make it look nicer
-
-            for (int x = -1; x < 2; x++) {
-                for (int z = -1; z < 2; z++) {
-                    Location doorLocation = event.getClickedBlock().getRelative(x, 0, z).getLocation();
-                    Door door = FloorObject.isIronDoor(doorLocation);
+            for (int x = -2; x < 3; x++) {
+                for (int z = -2; z < 3; z++) {
+                    Location blockLocation = event.getClickedBlock().getRelative(x, 0, z).getLocation();
+                    Door door = FloorObject.isIronDoor(blockLocation);
                     if (door != null) {
-                        Location blockUnderTheDoor = FloorObject.ifIronDoorThenGetBlockUnderTheDoorIfNotThanReturn(doorLocation).getLocation();
-                        for (ElevatorController elevatorController : this.plugin.getSetListMap().getElevatorControllerMap().values()) {
-                            for (ElevatorObject elevatorObject : elevatorController.getElevatorsMap().values()) {
-                                if (!elevatorObject.getElevatorSettings().isCallButtonSystem()) continue;
-                                for (FloorObject floorObject : elevatorObject.getFloorsMap().values()) {
-                                    if (floorObject.getBlockUnderMainDoor().equals(blockUnderTheDoor)) {
-                                        event.setCancelled(true);
-                                        if (door.getHalf() == Bisected.Half.TOP) {
-                                            elevatorController.callElevatorClosest(floorObject.getFloor(), ElevatorStatus.UP, ElevatorWho.BUTTON);
-                                            event.getPlayer().sendMessage(Translate.color("&2[ElevatorController] &6Called the nearest elevator to go to floor " + floorObject.getFloor() + " to go up"));
-                                        } else {
-                                            elevatorController.callElevatorClosest(floorObject.getFloor(), ElevatorStatus.DOWN, ElevatorWho.BUTTON);
-                                            event.getPlayer().sendMessage(Translate.color("&2[ElevatorController] &6Called the nearest elevator to go floor " + floorObject.getFloor() + " to go down"));
-                                        }
-                                        return;
-                                    }
-                                }
+                        Location blockUnderTheDoor = FloorObject.ifIronDoorThenGetBlockUnderTheDoorIfNotThanReturn(blockLocation).getLocation();
+                        ElevatorKey elevatorKey = findElevatorKey(blockUnderTheDoor);
+                        if (elevatorKey == null) return;
+
+                        event.setCancelled(true);
+
+                        if ((x == -2 || x == 2) || (z == -2 || z == 2)) {
+                            if (door.getHalf() == Bisected.Half.TOP) {
+                                elevatorKey.getElevatorController().callElevatorClosest(elevatorKey.getFloorObject().getName(), ElevatorStatus.UP, ElevatorWho.BUTTON);
+                                event.getPlayer().sendMessage(Translate.color("&2[ElevatorController] &6Called the nearest elevator to go to floor " + elevatorKey.getFloorObject().getName() + " to go up"));
+                            } else {
+                                elevatorKey.getElevatorController().callElevatorClosest(elevatorKey.getFloorObject().getName(), ElevatorStatus.DOWN, ElevatorWho.BUTTON);
+                                event.getPlayer().sendMessage(Translate.color("&2[ElevatorController] &6Called the nearest elevator to go to floor " + elevatorKey.getFloorObject().getName() + " to go down"));
+                            }
+                        } else {
+                            if (door.getHalf() == Bisected.Half.TOP) {
+                                elevatorKey.getElevatorObject().goToFloor(elevatorKey.getFloorObject().getName(), ElevatorStatus.UP, ElevatorWho.BUTTON);
+                                event.getPlayer().sendMessage(Translate.color("&2[ElevatorController] &6Called the elevator to go to floor " + elevatorKey.getFloorObject().getName() + " to go up"));
+                            } else {
+                                elevatorKey.getElevatorObject().goToFloor(elevatorKey.getFloorObject().getName(), ElevatorStatus.DOWN, ElevatorWho.BUTTON);
+                                event.getPlayer().sendMessage(Translate.color("&2[ElevatorController] &6Called the elevator to go to floor " + elevatorKey.getFloorObject().getName() + " to go down"));
                             }
                         }
+                        return;
                     }
                 }
             }
         }
     }
+
+    private ElevatorKey findElevatorKey(Location blockUnderTheDoor) {
+        for (ElevatorController elevatorController : this.plugin.getSetListMap().getElevatorControllerMap().values()) {
+            for (ElevatorObject elevatorObject : elevatorController.getElevatorsMap().values()) {
+                if (!elevatorObject.getElevatorSettings().isCallButtonSystem()) continue;
+                for (FloorObject floorObject : elevatorObject.getFloorsMap().values()) {
+                    if (floorObject.getBlockUnderMainDoor().equals(blockUnderTheDoor)) {
+                        return new ElevatorKey(elevatorController, elevatorObject, floorObject);
+                    }
+                }
+            }
+        }
+        return null;
+    }
+}
+
+@Getter
+@Setter
+@AllArgsConstructor
+class ElevatorKey {
+    private ElevatorController elevatorController;
+    private ElevatorObject elevatorObject;
+    private FloorObject floorObject;
 }
