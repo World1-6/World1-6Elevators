@@ -28,31 +28,31 @@ public class FloorObject implements ConfigurationSerializable {
 
     private int floor;
     private String name;
-    private Location mainDoor;
+    private Location blockUnderMainDoor;
     private List<Location> doorList;
     private List<SignObject> signList;
 
     //Do not save
     private Map<Location, Material> oldBlocks = new HashMap<>();
 
-    public FloorObject(int floor, String name, Location mainDoor, List<Location> doorList, List<SignObject> signList) {
+    public FloorObject(int floor, String name, Location blockUnderMainDoor, List<Location> doorList, List<SignObject> signList) {
         this.floor = floor;
         this.name = name;
-        this.mainDoor = ifIronDoorThenGetBlockUnderTheDoorIfNotThanReturn(mainDoor).getLocation();
+        this.blockUnderMainDoor = ifIronDoorThenGetBlockUnderTheDoorIfNotThanReturn(blockUnderMainDoor).getLocation();
         this.doorList = doorList;
         this.signList = signList;
     }
 
-    public FloorObject(int floor, String name, Location mainDoor) {
-        this(floor, name, mainDoor, new ArrayList<>(), new ArrayList<>());
+    public FloorObject(int floor, String name, Location blockUnderMainDoor) {
+        this(floor, name, blockUnderMainDoor, new ArrayList<>(), new ArrayList<>());
     }
 
-    public FloorObject(int floor, Location mainDoor) {
-        this(floor, null, mainDoor, new ArrayList<>(), new ArrayList<>());
+    public FloorObject(int floor, Location blockUnderMainDoor) {
+        this(floor, null, blockUnderMainDoor, new ArrayList<>(), new ArrayList<>());
     }
 
-    public FloorObject(String name, Location mainDoor) {
-        this(Integer.MIN_VALUE, name, mainDoor, new ArrayList<>(), new ArrayList<>());
+    public FloorObject(String name, Location blockUnderMainDoor) {
+        this(Integer.MIN_VALUE, name, blockUnderMainDoor, new ArrayList<>(), new ArrayList<>());
     }
 
     //Do not remove unnecessary bounding and .clone().
@@ -63,15 +63,15 @@ public class FloorObject implements ConfigurationSerializable {
     public void doDoor(boolean open, boolean forAllDoors) {
         if (open) {
             //Before
-            this.oldBlocks.put(this.mainDoor, this.mainDoor.getBlock().getType());
+            this.oldBlocks.put(this.blockUnderMainDoor, this.blockUnderMainDoor.getBlock().getType());
             if (forAllDoors)
                 for (Location location : this.doorList) this.oldBlocks.put(location, location.getBlock().getType());
         }
 
         //Main door
-        if (!ifIronDoorThenSetOpenIfNotThenFalse(this.getMainDoor().getBlock().getRelative(BlockFace.UP), open)) {
-            if (open) this.mainDoor.getBlock().setType(Material.REDSTONE_BLOCK);
-            else this.mainDoor.getBlock().setType(this.oldBlocks.get(this.mainDoor));
+        if (!ifIronDoorThenSetOpenIfNotThenFalse(this.getBlockUnderMainDoor().getBlock().getRelative(BlockFace.UP), open)) {
+            if (open) this.blockUnderMainDoor.getBlock().setType(Material.REDSTONE_BLOCK);
+            else this.blockUnderMainDoor.getBlock().setType(this.oldBlocks.get(this.blockUnderMainDoor));
         }
 
         //For all the other doors
@@ -80,7 +80,7 @@ public class FloorObject implements ConfigurationSerializable {
                 Block block = location.getBlock().getRelative(BlockFace.UP);
                 if (!ifIronDoorThenSetOpenIfNotThenFalse(block, open)) {
                     if (open) location.getBlock().setType(Material.REDSTONE_BLOCK);
-                    else location.getBlock().setType(this.oldBlocks.get(this.mainDoor));
+                    else location.getBlock().setType(this.oldBlocks.get(this.blockUnderMainDoor));
                 }
             }
         }
@@ -127,7 +127,7 @@ public class FloorObject implements ConfigurationSerializable {
         Map<String, Object> map = new HashMap<>();
         map.put("Floor", this.floor);
         map.put("Name", this.name);
-        map.put("MainDoor", this.mainDoor);
+        map.put("MainDoor", this.blockUnderMainDoor);
         map.put("DoorList", this.doorList);
         map.put("SignList", this.signList);
         return map;

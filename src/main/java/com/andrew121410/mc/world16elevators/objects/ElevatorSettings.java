@@ -30,10 +30,10 @@ public class ElevatorSettings implements ConfigurationSerializable {
     private ElevatorSound arrivalSound;
     private ElevatorSound passingByFloorSound;
     private ElevatorCallSystem elevatorCallSystem;
-    private Boolean callButtonSystem;
+    private boolean callButtonSystem;
     //...
 
-    public ElevatorSettings(long ticksPerSecond, long doorHolderTicksPerSecond, long elevatorWaiterTicksPerSecond, boolean doElevatorLeveling, boolean onlyTwoFloors, ElevatorSound arrivalSound, ElevatorSound passingByFloorSound, ElevatorCallSystem elevatorCallSystem, Boolean callButtonSystem) {
+    public ElevatorSettings(long ticksPerSecond, long doorHolderTicksPerSecond, long elevatorWaiterTicksPerSecond, boolean doElevatorLeveling, boolean onlyTwoFloors, ElevatorSound arrivalSound, ElevatorSound passingByFloorSound, ElevatorCallSystem elevatorCallSystem, boolean callButtonSystem) {
         this.ticksPerSecond = ticksPerSecond;
         this.doorHolderTicksPerSecond = doorHolderTicksPerSecond;
         this.elevatorWaiterTicksPerSecond = elevatorWaiterTicksPerSecond;

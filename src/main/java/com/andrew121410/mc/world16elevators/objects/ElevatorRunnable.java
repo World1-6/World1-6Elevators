@@ -46,7 +46,7 @@ public class ElevatorRunnable extends BukkitRunnable {
             floorThatWeAreGoingToPass = intFloorThatWeAreGoingToPass != null ? elevatorObject.getFloor(intFloorThatWeAreGoingToPass) : null;
         } else {
             //We are passing a floor.
-            if (elevatorObject.getElevatorMovement().getAtDoor().getBlockY() == floorThatWeAreGoingToPass.getMainDoor().getBlockY()) {
+            if (elevatorObject.getElevatorMovement().getAtDoor().getBlockY() == floorThatWeAreGoingToPass.getBlockUnderMainDoor().getBlockY()) {
                 if (elevatorObject.getElevatorSettings().getPassingByFloorSound() != null) {
                     elevatorObject.getElevatorMovement().getAtDoor().getWorld().playSound(elevatorObject.getElevatorMovement().getAtDoor(), elevatorObject.getElevatorSettings().getPassingByFloorSound().getSound(), elevatorObject.getElevatorSettings().getPassingByFloorSound().getVolume(), elevatorObject.getElevatorSettings().getPassingByFloorSound().getPitch());
                 }
@@ -55,11 +55,11 @@ public class ElevatorRunnable extends BukkitRunnable {
         }
 
 //        Check's if at the floor if so then stop the elevator.
-        if (elevatorObject.getElevatorMovement().getAtDoor().getBlockY() == floorObject.getMainDoor().getBlockY()) {
+        if (elevatorObject.getElevatorMovement().getAtDoor().getBlockY() == floorObject.getBlockUnderMainDoor().getBlockY()) {
             this.cancel();
             elevatorObject.floorStop(floorObject, elevatorStatus);
             return;
-        } else if (stopByFloor != null && elevatorObject.getElevatorMovement().getAtDoor().getY() == stopByFloor.getMainDoor().getY()) {
+        } else if (stopByFloor != null && elevatorObject.getElevatorMovement().getAtDoor().getY() == stopByFloor.getBlockUnderMainDoor().getY()) {
             elevatorObject.floorStop(floorObject, elevatorStatus, elevatorObject.getStopBy(), stopByFloor);
             return;
         }
@@ -83,7 +83,7 @@ public class ElevatorRunnable extends BukkitRunnable {
 
             if (elevatorObject.getElevatorSettings().isDoElevatorLeveling()) {
                 int x = elevatorObject.getElevatorMovement().getAtDoor().getBlockY();
-                int z = floorObject.getMainDoor().getBlockY();
+                int z = floorObject.getBlockUnderMainDoor().getBlockY();
                 x += 5;
                 if (x >= z) {
                     counter += 1;
@@ -99,7 +99,7 @@ public class ElevatorRunnable extends BukkitRunnable {
 
             if (elevatorObject.getElevatorSettings().isDoElevatorLeveling()) {
                 int x = elevatorObject.getElevatorMovement().getAtDoor().getBlockY();
-                int z = floorObject.getMainDoor().getBlockY();
+                int z = floorObject.getBlockUnderMainDoor().getBlockY();
                 x -= 5;
                 if (x <= z) {
                     counter += 1;
