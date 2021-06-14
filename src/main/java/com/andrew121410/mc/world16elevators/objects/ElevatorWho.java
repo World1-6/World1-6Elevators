@@ -4,5 +4,6 @@ public enum ElevatorWho {
     PLAYER_COMMAND,
     COMMAND_BLOCK,
     FLOOR_QUEUE,
-    MESSAGE_HELPER
+    MESSAGE_HELPER,
+    BUTTON
 }
