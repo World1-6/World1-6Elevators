@@ -42,11 +42,13 @@ public class ElevatorController implements ConfigurationSerializable {
 
     public void callElevatorClosest(int floorNum, ElevatorStatus elevatorStatus, ElevatorWho elevatorWho) {
         ElevatorObject elevatorObject = getClosestElevator(floorNum, true, elevatorStatus);
+        if (elevatorObject == null) return;
         elevatorObject.goToFloor(floorNum, elevatorStatus, elevatorWho);
     }
 
     public void callElevatorClosest(String floorName, ElevatorStatus elevatorStatus, ElevatorWho elevatorWho) {
         ElevatorObject elevatorObject = getClosestElevator(floorName, true, elevatorStatus);
+        if (elevatorObject == null) return;
         elevatorObject.goToFloor(floorName, elevatorStatus, elevatorWho);
     }
 

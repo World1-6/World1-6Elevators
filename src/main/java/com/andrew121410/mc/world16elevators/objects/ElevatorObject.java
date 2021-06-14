@@ -141,7 +141,7 @@ public class ElevatorObject implements ConfigurationSerializable {
         //Gets the floor before the elevator starts ticking.
         FloorObject floorObject = getFloor(floorNum);
 
-        //Check if the floor is a thing or not.
+        //Check's if the floor exists; if not then cancel.
         if (floorObject == null) return;
 
         //Add to the queue if elevator is running or idling.
@@ -149,6 +149,7 @@ public class ElevatorObject implements ConfigurationSerializable {
             if (this.floorBuffer.contains(floorNum) && elevatorStatus != ElevatorStatus.DONT_KNOW && this.stopBy.toElevatorStatus() == elevatorStatus) {
                 this.stopBy.getStopByQueue().add(floorNum);
             } else {
+                if (isIdling && floorNum == this.elevatorMovement.getFloor()) return;
                 floorQueueBuffer.add(new FloorQueueObject(floorNum, elevatorStatus));
                 setupFloorQueue();
             }
