@@ -31,11 +31,11 @@ import java.util.Map;
 
 public class ElevatorCMD implements CommandExecutor {
 
-    private World16Elevators plugin;
+    private final World16Elevators plugin;
 
-    private ElevatorManager elevatorManager;
+    private final ElevatorManager elevatorManager;
 
-    private Map<String, ElevatorController> elevatorControllerMap;
+    private final Map<String, ElevatorController> elevatorControllerMap;
 
 
     public ElevatorCMD(World16Elevators plugin) {
@@ -536,6 +536,7 @@ public class ElevatorCMD implements CommandExecutor {
                 p.sendMessage(Translate.chat("&6/elevator settings &e<Controller> &9<Elevator> &barrivalSound &3<Sound> <Volume> <Pitch>"));
                 p.sendMessage(Translate.chat("&6/elevator settings &e<Controller> &9<Elevator> &bpassingByFloorSound &3<Sound> <Volume> <Pitch"));
                 p.sendMessage(Translate.chat("&6/elevator settings &e<Controller> &9<Elevator> &belevatorCallSystem &3<System>"));
+                p.sendMessage(Translate.chat("&6/elevator settings &e<Controller> &9<Elevator> &bcallButtonSystem &3<Bool>"));
             } else if (args.length > 2) {
                 ElevatorCommandCustomArguments eleArgs = getArgumentsElevators(args, 2);
                 ElevatorController elevatorController = eleArgs.getElevatorController();
@@ -624,6 +625,11 @@ public class ElevatorCMD implements CommandExecutor {
                     }
                     elevatorObject.getElevatorSettings().setElevatorCallSystem(elevatorCallSystem);
                     p.sendMessage(Translate.color("New call system has been set to " + elevatorCallSystem.name()));
+                    return true;
+                } else if (setting.equalsIgnoreCase("callButtonSystem")) {
+                    boolean bool = Utils.asBooleanOrElse(eleArgs.getOtherArgumentsAt(1), true);
+                    elevatorObject.getElevatorSettings().setCallButtonSystem(bool);
+                    p.sendMessage(Translate.chat("The callButtonSystem has been set to: " + bool));
                     return true;
                 }
                 return true;

@@ -26,7 +26,7 @@ public class ElevatorMovement implements ConfigurationSerializable {
 
     public ElevatorMovement(Integer floor, Location atDoor, BoundingBox boundingBox) {
         this.floor = floor;
-        this.atDoor = FloorObject.IfIronDoorThenGetBlockUnderTheDoorIfNotThanReturn(atDoor).getLocation();
+        this.atDoor = FloorObject.ifIronDoorThenGetBlockUnderTheDoorIfNotThanReturn(atDoor).getLocation();
         this.boundingBox = boundingBox;
     }
 

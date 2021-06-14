@@ -1,6 +1,7 @@
 package com.andrew121410.mc.world16elevators;
 
 import com.andrew121410.mc.world16elevators.commands.ElevatorCMD;
+import com.andrew121410.mc.world16elevators.listeners.OnPlayerInteractEvent;
 import com.andrew121410.mc.world16elevators.manager.ElevatorChunkSmartManager;
 import com.andrew121410.mc.world16elevators.manager.ElevatorManager;
 import com.andrew121410.mc.world16elevators.objects.*;
@@ -49,7 +50,8 @@ public final class World16Elevators extends JavaPlugin {
             this.getServer().getScheduler().scheduleSyncRepeatingTask(this, new ElevatorChunkSmartManager(this), 200L, 200L);
         }
 
-        regCommands();
+        registerEvents();
+        registerCommands();
     }
 
     @Override
@@ -57,7 +59,11 @@ public final class World16Elevators extends JavaPlugin {
         this.elevatorManager.saveAllElevators();
     }
 
-    public void regCommands() {
+    public void registerEvents() {
+        new OnPlayerInteractEvent(this);
+    }
+
+    public void registerCommands() {
         new ElevatorCMD(this);
     }
 

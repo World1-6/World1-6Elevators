@@ -20,12 +20,12 @@ import java.util.stream.Collectors;
 
 public class ElevatorTab implements TabCompleter {
 
-    private List<String> tabCompleteList;
-    private Map<String, ElevatorController> elevatorControllerMap;
+    private final List<String> tabCompleteList;
+    private final Map<String, ElevatorController> elevatorControllerMap;
 
-    private List<String> soundList;
+    private final List<String> soundList;
 
-    private World16Elevators plugin;
+    private final World16Elevators plugin;
 
     public ElevatorTab(World16Elevators plugin) {
         this.plugin = plugin;
@@ -115,7 +115,7 @@ public class ElevatorTab implements TabCompleter {
             } else if (args.length == 3) {
                 return this.elevatorControllerMap.containsKey(args[1]) ? new ArrayList<>(this.elevatorControllerMap.get(args[1]).getElevatorsMap().keySet()) : null;
             } else if (args.length == 4) {
-                return getContainsString(args[3], Arrays.asList("ticksPerSecond", "doorHolderTicksPerSecond", "elevatorWaiterTicksPerSecond", "doElevatorLeveling", "onlyTwoFloors", "arrivalSound", "passingByFloorSound", "elevatorCallSystem"));
+                return getContainsString(args[3], Arrays.asList("ticksPerSecond", "doorHolderTicksPerSecond", "elevatorWaiterTicksPerSecond", "doElevatorLeveling", "onlyTwoFloors", "arrivalSound", "passingByFloorSound", "elevatorCallSystem", "callButtonSystem"));
             } else if (args.length == 5) {
                 if (args[3].equalsIgnoreCase("doElevatorLeveling")) {
                     return StringUtil.copyPartialMatches(args[4], Arrays.asList("true", "false"), new ArrayList<>());

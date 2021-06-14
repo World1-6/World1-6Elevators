@@ -159,7 +159,7 @@ public class ElevatorObject implements ConfigurationSerializable {
         floorBuffer.clear(); //Clears the floorBuffer
 
         //Checks if the elevator should go up or down.
-        goUp = floorObject.getMainDoor().getY() > this.elevatorMovement.getAtDoor().getY();
+        goUp = floorObject.getBlockUnderMainDoor().getY() > this.elevatorMovement.getAtDoor().getY();
 
         //This calculates what floors it's going to pass going up or down this has to be run before it sets this.elevatorFloor to not a floor.
         calculateFloorBuffer(floorNum, goUp);
@@ -181,7 +181,7 @@ public class ElevatorObject implements ConfigurationSerializable {
         if (!this.elevatorMessageHelper.isRunning()) elevatorMessageHelper.start();
         //Sound
         if (elevatorSettings.getArrivalSound() != null) {
-            floorObject.getMainDoor().getWorld().playSound(floorObject.getMainDoor(), elevatorSettings.getArrivalSound().getSound(), elevatorSettings.getArrivalSound().getVolume(), elevatorSettings.getArrivalSound().getPitch());
+            floorObject.getBlockUnderMainDoor().getWorld().playSound(floorObject.getBlockUnderMainDoor(), elevatorSettings.getArrivalSound().getSound(), elevatorSettings.getArrivalSound().getVolume(), elevatorSettings.getArrivalSound().getPitch());
         }
         floorDone(floorObject, elevatorStatus);
         doFloorIdle();
@@ -259,10 +259,10 @@ public class ElevatorObject implements ConfigurationSerializable {
         if (peek == null) return;
         FloorObject floorObject = getFloor(peek);
         if (goUp) {
-            if (this.elevatorMovement.getAtDoor().getBlockY() >= floorObject.getMainDoor().getBlockY())
+            if (this.elevatorMovement.getAtDoor().getBlockY() >= floorObject.getBlockUnderMainDoor().getBlockY())
                 this.floorBuffer.remove();
         } else {
-            if (this.elevatorMovement.getAtDoor().getBlockY() <= floorObject.getMainDoor().getBlockY())
+            if (this.elevatorMovement.getAtDoor().getBlockY() <= floorObject.getBlockUnderMainDoor().getBlockY())
                 this.floorBuffer.remove();
         }
     }
@@ -293,7 +293,7 @@ public class ElevatorObject implements ConfigurationSerializable {
     public void smartCreateFloors(FloorObject beginningFloor, boolean goUP) {
         long startTime = Instant.now().toEpochMilli();
         boolean whileLoop = true;
-        Location location = beginningFloor.getMainDoor().clone();
+        Location location = beginningFloor.getBlockUnderMainDoor().clone();
         int a = beginningFloor.getFloor();
 
         if (goUP) {
@@ -350,7 +350,7 @@ public class ElevatorObject implements ConfigurationSerializable {
         //We have to find out the elevator floor by ourself.
         if (floorObject.getFloor() == Integer.MIN_VALUE) {
             //Checks if the elevator should go up or down.
-            boolean goUp = floorObject.getMainDoor().getY() > this.elevatorMovement.getAtDoor().getY();
+            boolean goUp = floorObject.getBlockUnderMainDoor().getY() > this.elevatorMovement.getAtDoor().getY();
             int a = goUp ? 1 : -1;
             while (this.getFloorsMap().containsKey(a) && a != 0) {
                 if (goUp) a++;
