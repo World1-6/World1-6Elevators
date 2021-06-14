@@ -37,6 +37,7 @@ permissions:
       world16elevators.floor.setname: true
       world16elevators.floor.sign: true
       world16elevators.floor.door: true
+      world16elevators.floor.smartcreatefloors: true
       world16elevators.settings: true
   world16elevators.create:
     description: Allows you to create elevators
