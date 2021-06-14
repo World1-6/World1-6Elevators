@@ -36,6 +36,7 @@ public class SignObject implements ConfigurationSerializable {
         Sign sign = signUtils.isSign(location.getBlock());
         if (sign == null) return false;
         this.signCache.fromSign(sign);
+        clearSign();
         String text = signUtils.centerText("/\\", 16);
         String text1 = signUtils.centerText("//\\\\", 16);
         sign.setLine(0, Translate.chat("&a&l" + text));
@@ -48,10 +49,22 @@ public class SignObject implements ConfigurationSerializable {
         Sign sign = signUtils.isSign(location.getBlock());
         if (sign == null) return false;
         this.signCache.fromSign(sign);
+        clearSign();
         String text = signUtils.centerText("\\\\//", 16);
         String text1 = signUtils.centerText("\\/", 16);
         sign.setLine(2, Translate.chat("&c&l" + text));
         sign.setLine(3, Translate.chat("&c&l" + text1));
+        sign.update();
+        return true;
+    }
+
+    public boolean clearSign() {
+        Sign sign = signUtils.isSign(location.getBlock());
+        if (sign == null) return false;
+        sign.setLine(0, "");
+        sign.setLine(1, "");
+        sign.setLine(2, "");
+        sign.setLine(3, "");
         sign.update();
         return true;
     }
