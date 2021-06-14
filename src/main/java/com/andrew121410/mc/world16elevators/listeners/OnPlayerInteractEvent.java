@@ -2,6 +2,7 @@ package com.andrew121410.mc.world16elevators.listeners;
 
 import com.andrew121410.mc.world16elevators.World16Elevators;
 import com.andrew121410.mc.world16elevators.objects.*;
+import com.andrew121410.mc.world16utils.chat.Translate;
 import org.bukkit.Location;
 import org.bukkit.Tag;
 import org.bukkit.block.data.Bisected;
@@ -43,8 +44,10 @@ public class OnPlayerInteractEvent implements Listener {
                                         event.setCancelled(true);
                                         if (door.getHalf() == Bisected.Half.TOP) {
                                             elevatorController.callElevatorClosest(floorObject.getFloor(), ElevatorStatus.UP, ElevatorWho.BUTTON);
+                                            event.getPlayer().sendMessage(Translate.color("&2[ElevatorController] &6Called the nearest elevator to go to floor" + floorObject.getFloor() + " to go up"));
                                         } else {
                                             elevatorController.callElevatorClosest(floorObject.getFloor(), ElevatorStatus.DOWN, ElevatorWho.BUTTON);
+                                            event.getPlayer().sendMessage(Translate.color("&2[ElevatorController] &6Called the nearest elevator to go floor" + floorObject.getFloor() + " to go down"));
                                         }
                                         return;
                                     }
