@@ -115,7 +115,7 @@ public class ElevatorTab implements TabCompleter {
             } else if (args.length == 3) {
                 return this.elevatorControllerMap.containsKey(args[1]) ? new ArrayList<>(this.elevatorControllerMap.get(args[1]).getElevatorsMap().keySet()) : null;
             } else if (args.length == 4) {
-                return getContainsString(args[3], Arrays.asList("ticksPerSecond", "doorHolderTicksPerSecond", "elevatorWaiterTicksPerSecond", "doElevatorLeveling", "onlyTwoFloors", "arrivalSound", "passingByFloorSound", "elevatorCallSystem", "callButtonSystem"));
+                return getContainsString(args[3], Arrays.asList("ticksPerSecond", "doorHolderTicksPerSecond", "elevatorWaiterTicksPerSecond", "doElevatorLeveling", "onlyTwoFloors", "arrivalSound", "passingByFloorSound", "elevatorCallSystem", "callButtonSystem", "signFinderSystem"));
             } else if (args.length == 5) {
                 if (args[3].equalsIgnoreCase("doElevatorLeveling")) {
                     return StringUtil.copyPartialMatches(args[4], Arrays.asList("true", "false"), new ArrayList<>());

@@ -537,6 +537,7 @@ public class ElevatorCMD implements CommandExecutor {
                 p.sendMessage(Translate.chat("&6/elevator settings &e<Controller> &9<Elevator> &bpassingByFloorSound &3<Sound> <Volume> <Pitch"));
                 p.sendMessage(Translate.chat("&6/elevator settings &e<Controller> &9<Elevator> &belevatorCallSystem &3<System>"));
                 p.sendMessage(Translate.chat("&6/elevator settings &e<Controller> &9<Elevator> &bcallButtonSystem &3<Bool>"));
+                p.sendMessage(Translate.chat("&6/elevator settings &e<Controller> &9<Elevator> &bsignFinderSystem &3<Bool>"));
             } else if (args.length > 2) {
                 ElevatorCommandCustomArguments eleArgs = getArgumentsElevators(args, 2);
                 ElevatorController elevatorController = eleArgs.getElevatorController();
@@ -630,6 +631,11 @@ public class ElevatorCMD implements CommandExecutor {
                     boolean bool = Utils.asBooleanOrElse(eleArgs.getOtherArgumentsAt(1), true);
                     elevatorObject.getElevatorSettings().setCallButtonSystem(bool);
                     p.sendMessage(Translate.chat("The callButtonSystem has been set to: " + bool));
+                    return true;
+                } else if (setting.equalsIgnoreCase("signFinderSystem")) {
+                    boolean bool = Utils.asBooleanOrElse(eleArgs.getOtherArgumentsAt(1), true);
+                    elevatorObject.getElevatorSettings().setSignFinderSystem(bool);
+                    p.sendMessage(Translate.chat("The signFinderSystem has been set to: " + bool));
                     return true;
                 }
                 return true;

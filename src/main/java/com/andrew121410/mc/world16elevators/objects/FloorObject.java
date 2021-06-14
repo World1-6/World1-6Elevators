@@ -1,5 +1,7 @@
 package com.andrew121410.mc.world16elevators.objects;
 
+import com.andrew121410.mc.world16elevators.World16Elevators;
+import com.andrew121410.mc.world16utils.sign.SignUtils;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
@@ -9,6 +11,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.block.Sign;
 import org.bukkit.block.data.Bisected;
 import org.bukkit.block.data.type.Door;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
@@ -88,7 +91,27 @@ public class FloorObject implements ConfigurationSerializable {
         if (!open) this.oldBlocks.clear();
     }
 
-    public void doSigns(ElevatorStatus elevatorStatus, boolean revert) {
+    public void doSigns(ElevatorObject elevatorObject, ElevatorStatus elevatorStatus, boolean revert) {
+        if ((this.signList.isEmpty() && !revert) && elevatorObject.getElevatorSettings().isSignFinderSystem()) {
+            SignUtils signUtils = World16Elevators.getInstance().getOtherPlugins().getWorld16Utils().getClassWrappers().getSignUtils();
+
+            List<Sign> signs = new ArrayList<>();
+
+            //Find signs
+            for (int x = -1; x < 2; x++) {
+                for (int z = -1; z < 2; z++) {
+                    Location signLocation = this.getBlockUnderMainDoor().getBlock().getRelative(0, 3, 0).getRelative(x, 0, z).getLocation();
+                    Sign sign = signUtils.isSign(signLocation.getBlock());
+                    if (sign != null) signs.add(sign);
+                }
+            }
+
+            //Couldn't find any signs
+            if (signs.isEmpty()) return;
+
+            this.signList.add(new SignObject(signs.stream().findAny().get().getLocation()));
+        }
+
         if (revert) {
             this.signList.removeIf(signObject -> !signObject.revert());
             return;

@@ -31,9 +31,10 @@ public class ElevatorSettings implements ConfigurationSerializable {
     private ElevatorSound passingByFloorSound;
     private ElevatorCallSystem elevatorCallSystem;
     private boolean callButtonSystem;
+    private boolean signFinderSystem;
     //...
 
-    public ElevatorSettings(long ticksPerSecond, long doorHolderTicksPerSecond, long elevatorWaiterTicksPerSecond, boolean doElevatorLeveling, boolean onlyTwoFloors, ElevatorSound arrivalSound, ElevatorSound passingByFloorSound, ElevatorCallSystem elevatorCallSystem, boolean callButtonSystem) {
+    public ElevatorSettings(long ticksPerSecond, long doorHolderTicksPerSecond, long elevatorWaiterTicksPerSecond, boolean doElevatorLeveling, boolean onlyTwoFloors, ElevatorSound arrivalSound, ElevatorSound passingByFloorSound, ElevatorCallSystem elevatorCallSystem, boolean callButtonSystem, boolean signFinderSystem) {
         this.ticksPerSecond = ticksPerSecond;
         this.doorHolderTicksPerSecond = doorHolderTicksPerSecond;
         this.elevatorWaiterTicksPerSecond = elevatorWaiterTicksPerSecond;
@@ -43,10 +44,11 @@ public class ElevatorSettings implements ConfigurationSerializable {
         this.passingByFloorSound = passingByFloorSound;
         this.elevatorCallSystem = elevatorCallSystem;
         this.callButtonSystem = callButtonSystem;
+        this.signFinderSystem = signFinderSystem;
     }
 
     public ElevatorSettings() {
-        this(DEFAULT_TICKS_PER_SECOND, DEFAULT_DOOR_HOLDER_TICKS_PER_SECOND, DEFAULT_ELEVATOR_WAITER_TICKS_PER_SECOND, true, false, null, null, ElevatorCallSystem.CLICK_CHAT, true);
+        this(DEFAULT_TICKS_PER_SECOND, DEFAULT_DOOR_HOLDER_TICKS_PER_SECOND, DEFAULT_ELEVATOR_WAITER_TICKS_PER_SECOND, true, false, null, null, ElevatorCallSystem.CLICK_CHAT, true, true);
     }
 
     @Override
@@ -61,6 +63,7 @@ public class ElevatorSettings implements ConfigurationSerializable {
         map.put("PassingByFloorSound", this.passingByFloorSound);
         map.put("ElevatorCallSystem", this.elevatorCallSystem.name());
         map.put("CallButtonSystem", this.callButtonSystem);
+        map.put("SignFinderSystem", this.signFinderSystem);
         return map;
     }
 
@@ -73,6 +76,7 @@ public class ElevatorSettings implements ConfigurationSerializable {
                 (ElevatorSound) map.get("ArrivalSound"),
                 (ElevatorSound) map.get("PassingByFloorSound"),
                 ElevatorCallSystem.valueOf((String) map.get("ElevatorCallSystem")),
-                (Boolean) map.get("CallButtonSystem"));
+                (Boolean) map.get("CallButtonSystem"),
+                (Boolean) map.get("SignFinderSystem"));
     }
 }
