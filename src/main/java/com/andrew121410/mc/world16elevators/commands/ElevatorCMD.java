@@ -543,7 +543,7 @@ public class ElevatorCMD implements CommandExecutor {
                 p.sendMessage(Translate.chat("&6/elevator settings &e<Controller> &9<Elevator> &bonlyTwoFloors &3<Bool>"));
                 p.sendMessage(Translate.chat("&6/elevator settings &e<Controller> &9<Elevator> &barrivalSound &3<Sound> <Volume> <Pitch>"));
                 p.sendMessage(Translate.chat("&6/elevator settings &e<Controller> &9<Elevator> &bpassingByFloorSound &3<Sound> <Volume> <Pitch"));
-                p.sendMessage(Translate.chat("&6/elevator settings &e<Controller> &9<Elevator> &belevatorCallSystem &3<System>"));
+                p.sendMessage(Translate.chat("&6/elevator settings &e<Controller> &9<Elevator> &bcallSystemType &3<Type>"));
                 p.sendMessage(Translate.chat("&6/elevator settings &e<Controller> &9<Elevator> &bcallButtonSystem &3<Bool>"));
                 p.sendMessage(Translate.chat("&6/elevator settings &e<Controller> &9<Elevator> &bsignFinderSystem &3<Bool>"));
             } else if (args.length > 2) {
@@ -624,16 +624,16 @@ public class ElevatorCMD implements CommandExecutor {
                     }
 
                     return true;
-                } else if (setting.equalsIgnoreCase("elevatorCallSystem")) {
-                    ElevatorCallSystem elevatorCallSystem = null;
+                } else if (setting.equalsIgnoreCase("callSystemType")) {
+                    ElevatorCallSystem elevatorCallSystem;
                     try {
                         elevatorCallSystem = ElevatorCallSystem.valueOf(eleArgs.getOtherArgumentsAt(1));
                     } catch (Exception ignored) {
-                        p.sendMessage(Translate.color("&cThat's not a valid call system."));
+                        p.sendMessage(Translate.color("&cThat's not a valid call system type."));
                         return true;
                     }
-                    elevatorObject.getElevatorSettings().setElevatorCallSystem(elevatorCallSystem);
-                    p.sendMessage(Translate.color("New call system has been set to " + elevatorCallSystem.name()));
+                    elevatorObject.getElevatorSettings().setCallSystemType(elevatorCallSystem);
+                    p.sendMessage(Translate.color("New call system type has been set to " + elevatorCallSystem.name()));
                     return true;
                 } else if (setting.equalsIgnoreCase("callButtonSystem")) {
                     boolean bool = Utils.asBooleanOrElse(eleArgs.getOtherArgumentsAt(1), true);

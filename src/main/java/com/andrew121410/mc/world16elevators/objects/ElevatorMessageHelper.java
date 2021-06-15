@@ -67,7 +67,7 @@ public class ElevatorMessageHelper {
                         players.add(player.getUniqueId());
                         return;
                     }
-                    switch (elevatorObject.getElevatorSettings().getElevatorCallSystem()) {
+                    switch (elevatorObject.getElevatorSettings().getCallSystemType()) {
                         case CLICK_CHAT:
                             elevatorObject.clickMessageGoto(player);
                             break;
