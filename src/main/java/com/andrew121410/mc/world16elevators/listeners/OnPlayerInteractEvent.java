@@ -2,7 +2,6 @@ package com.andrew121410.mc.world16elevators.listeners;
 
 import com.andrew121410.mc.world16elevators.World16Elevators;
 import com.andrew121410.mc.world16elevators.objects.*;
-import com.andrew121410.mc.world16utils.chat.Translate;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -44,19 +43,15 @@ public class OnPlayerInteractEvent implements Listener {
 
                         if ((x == -2 || x == 2) || (z == -2 || z == 2)) {
                             if (door.getHalf() == Bisected.Half.TOP) {
-                                elevatorKey.getElevatorController().callElevatorClosest(elevatorKey.getFloorObject().getName(), ElevatorStatus.UP, ElevatorWho.BUTTON);
-                                event.getPlayer().sendMessage(Translate.color("&2[ElevatorController] &6Called the nearest elevator to go to floor " + elevatorKey.getFloorObject().getName() + " to go up"));
+                                elevatorKey.getElevatorController().callElevatorClosest(event.getPlayer(), elevatorKey.getFloorObject().getName(), ElevatorStatus.UP, ElevatorWho.BUTTON);
                             } else {
-                                elevatorKey.getElevatorController().callElevatorClosest(elevatorKey.getFloorObject().getName(), ElevatorStatus.DOWN, ElevatorWho.BUTTON);
-                                event.getPlayer().sendMessage(Translate.color("&2[ElevatorController] &6Called the nearest elevator to go to floor " + elevatorKey.getFloorObject().getName() + " to go down"));
+                                elevatorKey.getElevatorController().callElevatorClosest(event.getPlayer(), elevatorKey.getFloorObject().getName(), ElevatorStatus.DOWN, ElevatorWho.BUTTON);
                             }
                         } else {
                             if (door.getHalf() == Bisected.Half.TOP) {
-                                elevatorKey.getElevatorObject().goToFloor(elevatorKey.getFloorObject().getName(), ElevatorStatus.UP, ElevatorWho.BUTTON);
-                                event.getPlayer().sendMessage(Translate.color("&2[ElevatorController] &6Called the elevator to go to floor " + elevatorKey.getFloorObject().getName() + " to go up"));
+                                elevatorKey.getElevatorObject().goToFloor(event.getPlayer(), elevatorKey.getFloorObject().getName(), ElevatorStatus.UP, ElevatorWho.BUTTON);
                             } else {
-                                elevatorKey.getElevatorObject().goToFloor(elevatorKey.getFloorObject().getName(), ElevatorStatus.DOWN, ElevatorWho.BUTTON);
-                                event.getPlayer().sendMessage(Translate.color("&2[ElevatorController] &6Called the elevator to go to floor " + elevatorKey.getFloorObject().getName() + " to go down"));
+                                elevatorKey.getElevatorObject().goToFloor(event.getPlayer(), elevatorKey.getFloorObject().getName(), ElevatorStatus.DOWN, ElevatorWho.BUTTON);
                             }
                         }
                         return;

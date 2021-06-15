@@ -104,8 +104,6 @@ public class ElevatorObject implements ConfigurationSerializable {
         //Helpers
         this.elevatorMessageHelper = new ElevatorMessageHelper(plugin, this);
 
-        //@TODO Some where in the future I will fix this correctly but for now this works.
-        //This is a temp fix because I would have to change serialization for ElevatorObject which will break all elevators...
         for (FloorObject value : this.floorsMap.values()) {
             if (value.getFloor() >= 2) {
                 this.topFloor++;
@@ -129,29 +127,62 @@ public class ElevatorObject implements ConfigurationSerializable {
         goToFloor(toWhatFloor, ElevatorStatus.DONT_KNOW, elevatorWho);
     }
 
-    public void goToFloor(String name, ElevatorStatus elevatorStatus, ElevatorWho elevatorWho) {
-        FloorObject floorObject = getFloor(name);
+    public void goToFloor(Player player, String floorName, ElevatorStatus elevatorStatus, ElevatorWho elevatorWho) {
+        FloorObject floorObject = getFloor(floorName);
+        if (floorObject == null) return;
+        goToFloor(player, floorObject, elevatorStatus, elevatorWho);
+    }
+
+    public void goToFloor(Player player, int floorNumber, ElevatorStatus elevatorStatus, ElevatorWho elevatorWho) {
+        FloorObject floorObject = getFloor(floorNumber);
+        if (floorObject == null) return;
+        goToFloor(player, floorObject, elevatorStatus, elevatorWho);
+    }
+
+    private void goToFloor(Player player, FloorObject floorObject, ElevatorStatus elevatorStatus, ElevatorWho elevatorWho) {
+        if (elevatorStatus == ElevatorStatus.UP && floorObject.getFloor() == this.topFloor)
+            elevatorStatus = ElevatorStatus.DOWN;
+        if (elevatorStatus == ElevatorStatus.DOWN && floorObject.getFloor() == this.topBottomFloor)
+            elevatorStatus = ElevatorStatus.UP;
+
+        switch (elevatorStatus) {
+            case UP:
+                player.sendMessage(Translate.color("&2[Elevator] &6Called the elevator to go to floor " + floorObject.getName() + " to go up"));
+                break;
+            case DOWN:
+                player.sendMessage(Translate.color("&2[Elevator] &6Called the elevator to go to floor " + floorObject.getName() + " to go down"));
+                break;
+            case DONT_KNOW:
+                player.sendMessage(Translate.color("&2[Elevator] &6Called the elevator to go to floor " + floorObject.getName()));
+                break;
+        }
+
+        goToFloor(floorObject.getFloor(), elevatorStatus, elevatorWho);
+    }
+
+    public void goToFloor(String floorName, ElevatorStatus elevatorStatus, ElevatorWho elevatorWho) {
+        FloorObject floorObject = getFloor(floorName);
         if (floorObject == null) return;
         goToFloor(floorObject.getFloor(), elevatorStatus, elevatorWho);
     }
 
-    public void goToFloor(int floorNum, ElevatorStatus elevatorStatus, ElevatorWho elevatorWho) {
+    public void goToFloor(int floorNumber, ElevatorStatus elevatorStatus, ElevatorWho elevatorWho) {
         boolean goUp;
 
         //Gets the floor before the elevator starts ticking.
-        FloorObject floorObject = getFloor(floorNum);
+        FloorObject floorObject = getFloor(floorNumber);
 
         //Check's if the floor exists; if not then cancel.
         if (floorObject == null) return;
 
         //Add to the queue if elevator is running or idling.
         if (isGoing || isIdling) {
-            if (this.floorBuffer.contains(floorNum) && elevatorStatus != ElevatorStatus.DONT_KNOW && this.stopBy.toElevatorStatus() == elevatorStatus) {
-                this.stopBy.getStopByQueue().add(floorNum);
+            if (this.floorBuffer.contains(floorNumber) && elevatorStatus != ElevatorStatus.DONT_KNOW && this.stopBy.toElevatorStatus() == elevatorStatus) {
+                this.stopBy.getStopByQueue().add(floorNumber);
             } else {
-                if (isGoing && floorNum == this.whereItsCurrentlyGoing.getFloorNumber()) return;
-                if (isIdling && floorNum == this.elevatorMovement.getFloor()) return;
-                floorQueueBuffer.add(new FloorQueueObject(floorNum, elevatorStatus));
+                if (isGoing && floorNumber == this.whereItsCurrentlyGoing.getFloorNumber()) return;
+                if (isIdling && floorNumber == this.elevatorMovement.getFloor()) return;
+                floorQueueBuffer.add(new FloorQueueObject(floorNumber, elevatorStatus));
                 setupFloorQueue();
             }
             return;
@@ -164,13 +195,13 @@ public class ElevatorObject implements ConfigurationSerializable {
         goUp = floorObject.getBlockUnderMainDoor().getY() > this.elevatorMovement.getAtDoor().getY();
 
         //This calculates what floors it's going to pass going up or down this has to be run before it sets this.elevatorFloor to not a floor.
-        calculateFloorBuffer(floorNum, goUp);
+        calculateFloorBuffer(floorNumber, goUp);
 
         this.stopBy.setGoUp(goUp);
 
         this.elevatorMovement.setFloor(null); //Not on a floor.
 
-        this.whereItsCurrentlyGoing = new FloorQueueObject(floorNum, elevatorStatus);
+        this.whereItsCurrentlyGoing = new FloorQueueObject(floorNumber, elevatorStatus);
 
         //Start ticking the elevator.
         new ElevatorRunnable(plugin, this, goUp, floorObject, elevatorStatus).runTask(plugin);

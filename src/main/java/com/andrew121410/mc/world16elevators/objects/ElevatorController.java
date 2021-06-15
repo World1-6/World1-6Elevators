@@ -1,6 +1,7 @@
 package com.andrew121410.mc.world16elevators.objects;
 
 import com.andrew121410.mc.world16elevators.World16Elevators;
+import com.andrew121410.mc.world16utils.chat.Translate;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
@@ -9,6 +10,7 @@ import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.configuration.serialization.SerializableAs;
+import org.bukkit.entity.Player;
 
 import java.util.Comparator;
 import java.util.HashMap;
@@ -40,10 +42,24 @@ public class ElevatorController implements ConfigurationSerializable {
         this(plugin, controllerName, null, new HashMap<>());
     }
 
-    public void callElevatorClosest(int floorNum, ElevatorStatus elevatorStatus, ElevatorWho elevatorWho) {
-        ElevatorObject elevatorObject = getClosestElevator(floorNum, true, elevatorStatus);
+    public void callElevatorClosest(Player player, int floorNumber, ElevatorStatus elevatorStatus, ElevatorWho elevatorWho) {
+        ElevatorObject elevatorObject = getClosestElevator(floorNumber, true, elevatorStatus);
         if (elevatorObject == null) return;
-        elevatorObject.goToFloor(floorNum, elevatorStatus, elevatorWho);
+        player.sendMessage(Translate.color("&e&oCalled the nearest elevator on the controller"));
+        elevatorObject.goToFloor(player, floorNumber, elevatorStatus, elevatorWho);
+    }
+
+    public void callElevatorClosest(Player player, String floorName, ElevatorStatus elevatorStatus, ElevatorWho elevatorWho) {
+        ElevatorObject elevatorObject = getClosestElevator(floorName, true, elevatorStatus);
+        if (elevatorObject == null) return;
+        player.sendMessage(Translate.color("&e&oCalled the nearest elevator on the controller"));
+        elevatorObject.goToFloor(player, floorName, elevatorStatus, elevatorWho);
+    }
+
+    public void callElevatorClosest(int floorNumber, ElevatorStatus elevatorStatus, ElevatorWho elevatorWho) {
+        ElevatorObject elevatorObject = getClosestElevator(floorNumber, true, elevatorStatus);
+        if (elevatorObject == null) return;
+        elevatorObject.goToFloor(floorNumber, elevatorStatus, elevatorWho);
     }
 
     public void callElevatorClosest(String floorName, ElevatorStatus elevatorStatus, ElevatorWho elevatorWho) {
