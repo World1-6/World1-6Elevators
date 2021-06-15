@@ -149,6 +149,7 @@ public class ElevatorObject implements ConfigurationSerializable {
             if (this.floorBuffer.contains(floorNum) && elevatorStatus != ElevatorStatus.DONT_KNOW && this.stopBy.toElevatorStatus() == elevatorStatus) {
                 this.stopBy.getStopByQueue().add(floorNum);
             } else {
+                if (isGoing && floorNum == this.whereItsCurrentlyGoing.getFloorNumber()) return;
                 if (isIdling && floorNum == this.elevatorMovement.getFloor()) return;
                 floorQueueBuffer.add(new FloorQueueObject(floorNum, elevatorStatus));
                 setupFloorQueue();
