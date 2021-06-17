@@ -68,6 +68,8 @@ public class ElevatorSettings implements ConfigurationSerializable {
     }
 
     public static ElevatorSettings deserialize(Map<String, Object> map) {
+        ElevatorCallSystem elevatorCallSystem = ElevatorCallSystem.valueOf((String) (map.containsKey("CallSystemType") ? map.get("CallSystemType") : map.get("ElevatorCallSystem")));
+
         return new ElevatorSettings(((Integer) map.get("TicksPerSecond")).longValue(),
                 ((Integer) map.get("DoorHolderTicksPerSecond")).longValue(),
                 ((Integer) map.get("ElevatorWaiterTicksPerSecond")).longValue(),
@@ -75,7 +77,7 @@ public class ElevatorSettings implements ConfigurationSerializable {
                 (Boolean) map.get("OnlyTwoFloors"),
                 (ElevatorSound) map.get("ArrivalSound"),
                 (ElevatorSound) map.get("PassingByFloorSound"),
-                ElevatorCallSystem.valueOf((String) map.get("CallSystemType")),
+                elevatorCallSystem,
                 (Boolean) map.get("CallButtonSystem"),
                 (Boolean) map.get("SignFinderSystem"));
     }
