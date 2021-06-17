@@ -123,7 +123,7 @@ public class ElevatorTab implements TabCompleter {
                     return StringUtil.copyPartialMatches(args[4], Arrays.asList("true", "false"), new ArrayList<>());
                 } else if (args[3].equals("arrivalSound") || args[3].equals("passingByFloorSound")) {
                     return StringUtil.copyPartialMatches(args[4], this.soundList, new ArrayList<>());
-                } else if (args[3].equalsIgnoreCase("elevatorCallSystem")) {
+                } else if (args[3].equalsIgnoreCase("callSystemType")) {
                     return StringUtil.copyPartialMatches(args[4], Arrays.stream(ElevatorCallSystem.values()).map(Enum::name).collect(Collectors.toList()), new ArrayList<>());
                 }
             }
