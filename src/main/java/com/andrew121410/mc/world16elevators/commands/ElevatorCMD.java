@@ -6,6 +6,7 @@ import com.andrew121410.mc.world16elevators.manager.ElevatorManager;
 import com.andrew121410.mc.world16elevators.objects.*;
 import com.andrew121410.mc.world16utils.chat.Translate;
 import com.andrew121410.mc.world16utils.player.PlayerUtils;
+import com.andrew121410.mc.world16utils.utils.SimpleBoundingBox;
 import com.andrew121410.mc.world16utils.utils.Utils;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -23,7 +24,6 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.util.BoundingBox;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -163,7 +163,7 @@ public class ElevatorCMD implements CommandExecutor {
                 Block blockPlayerIsLookingAt = PlayerUtils.getBlockPlayerIsLookingAt(p);
                 ElevatorCommandCustomArguments eleArgs = getArgumentsElevators(args, 2);
                 String floorName = eleArgs.getOtherArgumentsAt(1);
-                BoundingBox region = this.plugin.getOtherPlugins().getWorld16Utils().getClassWrappers().getWorldEdit().getRegion(p);
+                SimpleBoundingBox region = this.plugin.getOtherPlugins().getWorld16Utils().getClassWrappers().getWorldEdit().getRegion(p);
 
                 if (region == null) {
                     p.sendMessage(Translate.chat("&cYou didn't make a WorldEdit selection... [FAILED]"));
@@ -182,7 +182,7 @@ public class ElevatorCMD implements CommandExecutor {
                 }
                 String elevatorName = eleArgs.getOtherArgumentsAt(0);
 
-                ElevatorMovement elevatorMovement = new ElevatorMovement(1, blockPlayerIsLookingAt.getLocation().clone(), region);
+                ElevatorMovement elevatorMovement = new ElevatorMovement(1, blockPlayerIsLookingAt.getLocation().clone(), region.to());
                 ElevatorObject elevatorObject = new ElevatorObject(this.plugin, elevatorName, p.getWorld().getName(), elevatorMovement);
                 FloorObject floorObject = new FloorObject(1, floorName, blockPlayerIsLookingAt.getLocation().clone());
                 elevatorObject.addFloor(floorObject);

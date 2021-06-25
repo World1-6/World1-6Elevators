@@ -2,9 +2,9 @@ package com.andrew121410.mc.world16elevators.objects;
 
 
 import com.andrew121410.mc.world16elevators.World16Elevators;
+import com.andrew121410.mc.world16utils.blocks.BlockUtils;
 import com.andrew121410.mc.world16utils.chat.Translate;
 import com.andrew121410.mc.world16utils.sign.SignCache;
-import com.andrew121410.mc.world16utils.sign.SignUtils;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
@@ -24,20 +24,20 @@ public class SignObject implements ConfigurationSerializable {
 
     private Location location;
     private SignCache signCache;
-    private SignUtils signUtils;
+    private BlockUtils blockUtils;
 
     public SignObject(Location location) {
         this.location = location;
         this.signCache = new SignCache();
-        this.signUtils = World16Elevators.getInstance().getOtherPlugins().getWorld16Utils().getClassWrappers().getSignUtils();
+        this.blockUtils = World16Elevators.getInstance().getOtherPlugins().getWorld16Utils().getClassWrappers().getBlockUtils();
     }
 
     public boolean doUpArrow() {
-        Sign sign = signUtils.isSign(location.getBlock());
+        Sign sign = blockUtils.isSign(location.getBlock());
         if (sign == null) return false;
         this.signCache.fromSign(sign);
-        String text = signUtils.centerText("/\\", 16);
-        String text1 = signUtils.centerText("//\\\\", 16);
+        String text = BlockUtils.signCenterText("/\\");
+        String text1 = BlockUtils.signCenterText("//\\\\");
         sign.setLine(0, Translate.chat("&a&l" + text));
         sign.setLine(1, Translate.chat("&a&l" + text1));
         sign.setLine(2, "");
@@ -47,11 +47,11 @@ public class SignObject implements ConfigurationSerializable {
     }
 
     public boolean doDownArrow() {
-        Sign sign = signUtils.isSign(location.getBlock());
+        Sign sign = blockUtils.isSign(location.getBlock());
         if (sign == null) return false;
         this.signCache.fromSign(sign);
-        String text = signUtils.centerText("\\\\//", 16);
-        String text1 = signUtils.centerText("\\/", 16);
+        String text = BlockUtils.signCenterText("\\\\//");
+        String text1 = BlockUtils.signCenterText("\\/");
         sign.setLine(0, "");
         sign.setLine(1, "");
         sign.setLine(2, Translate.chat("&c&l" + text));
@@ -61,7 +61,7 @@ public class SignObject implements ConfigurationSerializable {
     }
 
     public boolean revert() {
-        Sign sign = signUtils.isSign(location.getBlock());
+        Sign sign = blockUtils.isSign(location.getBlock());
         if (sign == null) return false;
         this.signCache.updateFancy(sign);
         return true;

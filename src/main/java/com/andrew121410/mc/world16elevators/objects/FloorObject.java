@@ -1,7 +1,7 @@
 package com.andrew121410.mc.world16elevators.objects;
 
 import com.andrew121410.mc.world16elevators.World16Elevators;
-import com.andrew121410.mc.world16utils.sign.SignUtils;
+import com.andrew121410.mc.world16utils.blocks.BlockUtils;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
@@ -93,7 +93,7 @@ public class FloorObject implements ConfigurationSerializable {
 
     public void doSigns(ElevatorObject elevatorObject, ElevatorStatus elevatorStatus, boolean revert) {
         if ((this.signList.isEmpty() && !revert) && elevatorObject.getElevatorSettings().isSignFinderSystem()) {
-            SignUtils signUtils = World16Elevators.getInstance().getOtherPlugins().getWorld16Utils().getClassWrappers().getSignUtils();
+            BlockUtils blockUtils = World16Elevators.getInstance().getOtherPlugins().getWorld16Utils().getClassWrappers().getBlockUtils();
 
             List<Sign> signs = new ArrayList<>();
 
@@ -101,7 +101,7 @@ public class FloorObject implements ConfigurationSerializable {
             for (int x = -1; x < 2; x++) {
                 for (int z = -1; z < 2; z++) {
                     Location signLocation = this.getBlockUnderMainDoor().getBlock().getRelative(0, 3, 0).getRelative(x, 0, z).getLocation();
-                    Sign sign = signUtils.isSign(signLocation.getBlock());
+                    Sign sign = blockUtils.isSign(signLocation.getBlock());
                     if (sign != null) signs.add(sign);
                 }
             }
