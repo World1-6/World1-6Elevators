@@ -2,7 +2,6 @@ package com.andrew121410.mc.world16elevators.objects;
 
 import com.andrew121410.mc.world16elevators.World16Elevators;
 import com.andrew121410.mc.world16utils.chat.Translate;
-import com.andrew121410.mc.world16utils.utils.SimpleBoundingBox;
 import com.andrew121410.mc.world16utils.worldedit.WorldEdit;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -233,7 +232,7 @@ public class ElevatorObject implements ConfigurationSerializable {
 
     protected void goUP() {
         WorldEdit worldEdit = this.plugin.getOtherPlugins().getWorld16Utils().getClassWrappers().getWorldEdit();
-        worldEdit.moveCuboidRegion(getBukkitWorld(), SimpleBoundingBox.from(elevatorMovement.getBoundingBox()), new Location(getBukkitWorld(), 0, 1, 0), 1);
+        worldEdit.moveCuboidRegion(getBukkitWorld(), elevatorMovement.getBoundingBox(), new Location(getBukkitWorld(), 0, 1, 0), 1);
 
         elevatorMovement.moveUP();
         this.boundingBoxExpanded.shift(0, 1, 0);
@@ -241,7 +240,7 @@ public class ElevatorObject implements ConfigurationSerializable {
 
     protected void goDOWN() {
         WorldEdit worldEdit = this.plugin.getOtherPlugins().getWorld16Utils().getClassWrappers().getWorldEdit();
-        worldEdit.moveCuboidRegion(getBukkitWorld(), SimpleBoundingBox.from(elevatorMovement.getBoundingBox()), new Location(getBukkitWorld(), 0, -1, 0), 1);
+        worldEdit.moveCuboidRegion(getBukkitWorld(), elevatorMovement.getBoundingBox(), new Location(getBukkitWorld(), 0, -1, 0), 1);
 
         elevatorMovement.moveDOWN();
         this.boundingBoxExpanded.shift(0, -1, 0);
