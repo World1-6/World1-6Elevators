@@ -3,6 +3,7 @@ package com.andrew121410.mc.world16elevators.objects;
 
 import com.andrew121410.mc.world16elevators.World16Elevators;
 import com.andrew121410.mc.world16utils.blocks.BlockUtils;
+import com.andrew121410.mc.world16utils.blocks.UniversalBlockUtils;
 import com.andrew121410.mc.world16utils.chat.Translate;
 import com.andrew121410.mc.world16utils.sign.SignCache;
 import lombok.EqualsAndHashCode;
@@ -33,11 +34,11 @@ public class SignObject implements ConfigurationSerializable {
     }
 
     public boolean doUpArrow() {
-        Sign sign = blockUtils.isSign(location.getBlock());
+        Sign sign = UniversalBlockUtils.isSign(location.getBlock());
         if (sign == null) return false;
         this.signCache.fromSign(sign);
-        String text = BlockUtils.signCenterText("/\\");
-        String text1 = BlockUtils.signCenterText("//\\\\");
+        String text = UniversalBlockUtils.signCenterText("/\\");
+        String text1 = UniversalBlockUtils.signCenterText("//\\\\");
         sign.setLine(0, Translate.chat("&a&l" + text));
         sign.setLine(1, Translate.chat("&a&l" + text1));
         sign.setLine(2, "");
@@ -47,11 +48,11 @@ public class SignObject implements ConfigurationSerializable {
     }
 
     public boolean doDownArrow() {
-        Sign sign = blockUtils.isSign(location.getBlock());
+        Sign sign = UniversalBlockUtils.isSign(location.getBlock());
         if (sign == null) return false;
         this.signCache.fromSign(sign);
-        String text = BlockUtils.signCenterText("\\\\//");
-        String text1 = BlockUtils.signCenterText("\\/");
+        String text = UniversalBlockUtils.signCenterText("\\\\//");
+        String text1 = UniversalBlockUtils.signCenterText("\\/");
         sign.setLine(0, "");
         sign.setLine(1, "");
         sign.setLine(2, Translate.chat("&c&l" + text));
@@ -61,7 +62,7 @@ public class SignObject implements ConfigurationSerializable {
     }
 
     public boolean revert() {
-        Sign sign = blockUtils.isSign(location.getBlock());
+        Sign sign = UniversalBlockUtils.isSign(location.getBlock());
         if (sign == null) return false;
         this.signCache.updateFancy(sign);
         return true;

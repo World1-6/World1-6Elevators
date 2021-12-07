@@ -2,6 +2,7 @@ package com.andrew121410.mc.world16elevators.objects;
 
 import com.andrew121410.mc.world16elevators.World16Elevators;
 import com.andrew121410.mc.world16utils.blocks.BlockUtils;
+import com.andrew121410.mc.world16utils.blocks.UniversalBlockUtils;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
@@ -60,7 +61,7 @@ public class FloorObject implements ConfigurationSerializable {
 
     //Do not remove unnecessary bounding and .clone().
     public static FloorObject from(ElevatorMovement elevatorMovement) {
-        return new FloorObject(new Integer(elevatorMovement.getFloor()), elevatorMovement.getAtDoor().clone());
+        return new FloorObject(elevatorMovement.getFloor().intValue(), elevatorMovement.getAtDoor().clone());
     }
 
     public void doDoor(boolean open, boolean forAllDoors) {
@@ -101,7 +102,7 @@ public class FloorObject implements ConfigurationSerializable {
             for (int x = -1; x < 2; x++) {
                 for (int z = -1; z < 2; z++) {
                     Location signLocation = this.getBlockUnderMainDoor().getBlock().getRelative(0, 3, 0).getRelative(x, 0, z).getLocation();
-                    Sign sign = blockUtils.isSign(signLocation.getBlock());
+                    Sign sign = UniversalBlockUtils.isSign(signLocation.getBlock());
                     if (sign != null) signs.add(sign);
                 }
             }
@@ -118,12 +119,8 @@ public class FloorObject implements ConfigurationSerializable {
         }
 
         switch (elevatorStatus) {
-            case UP:
-                this.signList.removeIf(signObject -> !signObject.doUpArrow());
-                break;
-            case DOWN:
-                this.signList.removeIf(signObject -> !signObject.doDownArrow());
-                break;
+            case UP -> this.signList.removeIf(signObject -> !signObject.doUpArrow());
+            case DOWN -> this.signList.removeIf(signObject -> !signObject.doDownArrow());
         }
     }
 
