@@ -12,7 +12,7 @@ import java.util.Map;
 public class ElevatorManager {
 
     private Map<Location, String> chunksToControllerNameMap;
-    private Map<String, ElevatorController> elevatorObjectMap;
+    private Map<String, ElevatorController> elevatorControllerMap;
 
     private World16Elevators plugin;
     private CustomYmlManager elevatorsYml;
@@ -20,7 +20,7 @@ public class ElevatorManager {
     public ElevatorManager(World16Elevators plugin) {
         this.plugin = plugin;
         this.chunksToControllerNameMap = this.plugin.getSetListMap().getChunksToControllerNameMap();
-        this.elevatorObjectMap = this.plugin.getSetListMap().getElevatorControllerMap();
+        this.elevatorControllerMap = this.plugin.getSetListMap().getElevatorControllerMap();
         //elevators.yml
         this.elevatorsYml = new CustomYmlManager(this.plugin, false);
         this.elevatorsYml.setup("elevators.yml");
@@ -42,7 +42,7 @@ public class ElevatorManager {
             ElevatorController elevatorController = (ElevatorController) elevatorControllersSection.get(elevatorControllerName);
             if (this.plugin.isChunkSmartManagement())
                 this.chunksToControllerNameMap.put(elevatorController.getMainChunk(), elevatorControllerName);
-            else this.elevatorObjectMap.put(elevatorControllerName.toLowerCase(), elevatorController);
+            else this.elevatorControllerMap.put(elevatorControllerName.toLowerCase(), elevatorController);
         }
     }
 
@@ -53,7 +53,7 @@ public class ElevatorManager {
             this.elevatorsYml.saveConfig();
         }
         //For each elevator controller.
-        for (Map.Entry<String, ElevatorController> mapEntry : this.elevatorObjectMap.entrySet()) {
+        for (Map.Entry<String, ElevatorController> mapEntry : this.elevatorControllerMap.entrySet()) {
             String controllerName = mapEntry.getKey();
             ElevatorController elevatorController = mapEntry.getValue();
             elevatorControllersSection.set(controllerName, elevatorController);
@@ -68,7 +68,7 @@ public class ElevatorManager {
             this.elevatorsYml.saveConfig();
         }
         ElevatorController elevatorController = (ElevatorController) elevatorControllersSection.get(key);
-        this.elevatorObjectMap.putIfAbsent(key, elevatorController);
+        this.elevatorControllerMap.putIfAbsent(key, elevatorController);
         return elevatorController;
     }
 
@@ -79,16 +79,16 @@ public class ElevatorManager {
             this.elevatorsYml.saveConfig();
         }
         elevatorControllersSection.set(elevatorController.getControllerName(), elevatorController);
-        this.elevatorObjectMap.remove(elevatorController.getControllerName());
+        this.elevatorControllerMap.remove(elevatorController.getControllerName());
         this.elevatorsYml.saveConfig();
     }
 
     public void deleteElevatorController(String name) {
-        ElevatorController elevatorController = this.elevatorObjectMap.get(name.toLowerCase());
+        ElevatorController elevatorController = this.elevatorControllerMap.get(name.toLowerCase());
         if (elevatorController.getMainChunk() != null) {
             this.chunksToControllerNameMap.remove(elevatorController.getMainChunk());
         }
-        this.elevatorObjectMap.remove(name.toLowerCase());
+        this.elevatorControllerMap.remove(name.toLowerCase());
         ConfigurationSection elevatorControllersSection = this.elevatorsYml.getConfig().getConfigurationSection("ElevatorControllers");
         if (elevatorControllersSection == null) return;
         elevatorControllersSection.set(name.toLowerCase(), null);
@@ -96,7 +96,7 @@ public class ElevatorManager {
     }
 
     public void deleteElevator(String elevatorControllerName, String elevatorName) {
-        ElevatorController elevatorController = this.elevatorObjectMap.get(elevatorControllerName);
+        ElevatorController elevatorController = this.elevatorControllerMap.get(elevatorControllerName);
         if (elevatorController == null) return;
         elevatorController.getElevatorsMap().remove(elevatorName);
         ConfigurationSection elevatorsSection = this.elevatorsYml.getConfig().getConfigurationSection("ElevatorControllers." + elevatorControllerName.toLowerCase() + ".ElevatorMap");

@@ -5,7 +5,9 @@ import com.andrew121410.mc.world16elevators.objects.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.Tag;
 import org.bukkit.block.data.Bisected;
 import org.bukkit.block.data.type.Door;
@@ -14,6 +16,8 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
+
+import java.util.Optional;
 
 public class OnPlayerInteractEvent implements Listener {
 
@@ -38,6 +42,11 @@ public class OnPlayerInteractEvent implements Listener {
                         Location blockUnderTheDoor = FloorObject.ifIronDoorThenGetBlockUnderTheDoorIfNotThanReturn(blockLocation).getLocation();
                         ElevatorKey elevatorKey = findElevatorKey(blockUnderTheDoor);
                         if (elevatorKey == null) return;
+
+                        // This isn't the main door
+                        if (!(blockUnderTheDoor.equals(elevatorKey.getBlockUnderMainDoor()))){
+                            continue;
+                        }
 
                         event.setCancelled(true);
 
@@ -67,7 +76,11 @@ public class OnPlayerInteractEvent implements Listener {
                 if (!elevatorObject.getElevatorSettings().isCallButtonSystem()) continue;
                 for (FloorObject floorObject : elevatorObject.getFloorsMap().values()) {
                     if (floorObject.getBlockUnderMainDoor().equals(blockUnderTheDoor)) {
-                        return new ElevatorKey(elevatorController, elevatorObject, floorObject);
+                        return new ElevatorKey(elevatorController, elevatorObject, floorObject, floorObject.getBlockUnderMainDoor());
+                    }
+                    Optional<Location> foundWithOtherDoor = floorObject.getDoorList().stream().filter(location -> location.equals(blockUnderTheDoor)).findFirst();
+                    if (foundWithOtherDoor.isPresent()) {
+                        return new ElevatorKey(elevatorController, elevatorObject, floorObject, floorObject.getBlockUnderMainDoor());
                     }
                 }
             }
@@ -83,4 +96,5 @@ class ElevatorKey {
     private ElevatorController elevatorController;
     private ElevatorObject elevatorObject;
     private FloorObject floorObject;
+    private Location blockUnderMainDoor;
 }

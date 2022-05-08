@@ -85,7 +85,7 @@ public class ElevatorController implements ConfigurationSerializable {
     }
 
     public ElevatorObject getElevator(String name) {
-        return elevatorsMap.get(name.toLowerCase());
+        return elevatorsMap.getOrDefault(name, null);
     }
 
     public void registerElevator(String name, ElevatorObject elevatorObject) {
@@ -94,7 +94,7 @@ public class ElevatorController implements ConfigurationSerializable {
             this.mainChunk = new Location(chunk.getWorld(), chunk.getX(), 0, chunk.getZ());
         }
         elevatorObject.setElevatorControllerName(this.controllerName);
-        this.elevatorsMap.putIfAbsent(name.toLowerCase(), elevatorObject);
+        this.elevatorsMap.putIfAbsent(name, elevatorObject);
     }
 
     public boolean isSingle() {

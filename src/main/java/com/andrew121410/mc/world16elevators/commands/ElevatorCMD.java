@@ -319,7 +319,7 @@ public class ElevatorCMD implements CommandExecutor {
                     p.sendMessage(Translate.color("&bYou don't have permission to use this command."));
                     return true;
                 }
-                Location location = PlayerUtils.getBlockPlayerIsLookingAt(p).getLocation();
+                Location location = FloorObject.ifIronDoorThenGetBlockUnderTheDoorIfNotThanReturn(PlayerUtils.getBlockPlayerIsLookingAt(p).getLocation()).getLocation();
                 ElevatorCommandCustomArguments eleArgs = getArgumentsElevators(args, 3);
                 String floorName = eleArgs.getOtherArgumentsAt(0);
                 String addOrRemove = eleArgs.getOtherArgumentsAt(1);
@@ -509,8 +509,8 @@ public class ElevatorCMD implements CommandExecutor {
                 return true;
             }
             String controllerName = args[1].toLowerCase();
-            String elevatorName = args[2].toLowerCase();
-            String toElevatorName = args[3].toLowerCase();
+            String elevatorName = args[2];
+            String toElevatorName = args[3];
 
             ElevatorController elevatorController = this.elevatorControllerMap.get(controllerName);
             if (elevatorController == null) {
