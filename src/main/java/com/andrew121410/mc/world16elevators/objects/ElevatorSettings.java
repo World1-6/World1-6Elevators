@@ -51,6 +51,21 @@ public class ElevatorSettings implements ConfigurationSerializable {
         this(DEFAULT_TICKS_PER_SECOND, DEFAULT_DOOR_HOLDER_TICKS_PER_SECOND, DEFAULT_ELEVATOR_WAITER_TICKS_PER_SECOND, true, false, null, null, ElevatorCallSystem.CLICK_CHAT, true, true);
     }
 
+    public ElevatorSettings clone() {
+        return new ElevatorSettings(
+                this.ticksPerSecond,
+                this.doorHolderTicksPerSecond,
+                this.elevatorWaiterTicksPerSecond,
+                this.doElevatorLeveling,
+                this.onlyTwoFloors,
+                this.arrivalSound,
+                this.passingByFloorSound,
+                this.callSystemType,
+                this.callButtonSystem,
+                this.signFinderSystem
+        );
+    }
+
     @Override
     public Map<String, Object> serialize() {
         Map<String, Object> map = new HashMap<>();

@@ -9,15 +9,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Getter
-@Setter
 @EqualsAndHashCode
 @ToString
 @AllArgsConstructor
 @SerializableAs("ElevatorSound")
 public class ElevatorSound implements ConfigurationSerializable {
-    private Sound sound;
-    private float volume;
-    private float pitch;
+    private final Sound sound;
+    private final float volume;
+    private final float pitch;
 
     @Override
     public Map<String, Object> serialize() {

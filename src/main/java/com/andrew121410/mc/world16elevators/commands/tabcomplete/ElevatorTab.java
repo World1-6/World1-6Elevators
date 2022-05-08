@@ -40,6 +40,7 @@ public class ElevatorTab implements TabCompleter {
         tabCompleteList.add("settings");
         tabCompleteList.add("queue");
         tabCompleteList.add("opendoor");
+        tabCompleteList.add("copysettingsfrom");
         tabCompleteList.add("tostring");
         this.elevatorControllerMap = this.plugin.getSetListMap().getElevatorControllerMap();
         this.soundList = new ArrayList<>();
@@ -148,6 +149,13 @@ public class ElevatorTab implements TabCompleter {
             if (args.length == 2) {
                 return getContainsString(args[1], controllerList);
             } else if (args.length == 3) {
+                return this.elevatorControllerMap.containsKey(args[1]) ? new ArrayList<>(this.elevatorControllerMap.get(args[1]).getElevatorsMap().keySet()) : null;
+            }
+            return null;
+        }else if (args[0].equalsIgnoreCase("copysettingsfrom")){
+            if (args.length == 2 || args.length == 4) {
+                return getContainsString(args[1], controllerList);
+            } else if (args.length == 3 || args.length == 5) {
                 return this.elevatorControllerMap.containsKey(args[1]) ? new ArrayList<>(this.elevatorControllerMap.get(args[1]).getElevatorsMap().keySet()) : null;
             }
             return null;

@@ -669,6 +669,42 @@ public class ElevatorCMD implements CommandExecutor {
                     floorObject.doDoor(false, true);
                 }
             }.runTaskLater(plugin, 20L * seconds);
+        } else if (args[0].equalsIgnoreCase("copysettingsfrom")) {
+            if (!p.hasPermission("world16elevators.copysettingsfrom")) {
+                p.sendMessage(Translate.color("&bYou don't have permission to use this command."));
+                return true;
+            }
+            if (args.length == 5) {
+                ElevatorArguments elevatorArguments = getElevatorArguments(args, 2);
+
+                ElevatorController elevatorControllerFrom = elevatorArguments.getElevatorController();
+                if (elevatorControllerFrom == null) {
+                    p.sendMessage("from: That's not a valid elevator controller");
+                    return true;
+                }
+                ElevatorObject elevatorObjectFrom = elevatorArguments.getElevatorObject();
+                if (elevatorObjectFrom == null) {
+                    p.sendMessage("from: That's not a valid elevator");
+                    return true;
+                }
+                ElevatorController elevatorControllerTo = this.elevatorControllerMap.getOrDefault(elevatorArguments.getOtherArgumentsAt(0), null);
+                if (elevatorControllerTo == null) {
+                    p.sendMessage("to: That's not a valid elevator controller");
+                    return true;
+                }
+                ElevatorObject elevatorObjectTo = elevatorControllerTo.getElevator(elevatorArguments.getOtherArgumentsAt(1));
+                if (elevatorObjectTo == null) {
+                    p.sendMessage("to: That's not a valid elevator");
+                    return true;
+                }
+
+                ElevatorSettings clone = elevatorObjectFrom.getElevatorSettings().clone();
+                elevatorObjectTo.setElevatorSettings(clone);
+                p.sendMessage("Successfully cloned to " + elevatorObjectTo.getElevatorName());
+                return true;
+            } else {
+                p.sendMessage(Translate.chat("&6/elevator copysettingsfrom &e<Controller> &9<Elevator> &e<Controller> &9<Elevator>"));
+            }
         }
         return true;
     }
