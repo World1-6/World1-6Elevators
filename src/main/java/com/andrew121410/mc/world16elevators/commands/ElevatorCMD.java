@@ -207,7 +207,7 @@ public class ElevatorCMD implements CommandExecutor {
                     return true;
                 }
                 String controllerName = args[2].toLowerCase();
-                String elevatorName = args[3].toLowerCase();
+                String elevatorName = args[3];
                 String floorName = args[4];
 
                 ElevatorController elevatorController = this.elevatorControllerMap.get(controllerName);
@@ -231,7 +231,7 @@ public class ElevatorCMD implements CommandExecutor {
                     return true;
                 }
                 String controllerName = args[2].toLowerCase();
-                String elevatorName = args[3].toLowerCase();
+                String elevatorName = args[3];
                 String floorName = args[4];
 
                 ElevatorController elevatorController = this.elevatorControllerMap.get(controllerName);
@@ -290,7 +290,7 @@ public class ElevatorCMD implements CommandExecutor {
                     return true;
                 }
                 String controllerName = args[2].toLowerCase();
-                String elevatorName = args[3].toLowerCase();
+                String elevatorName = args[3];
                 String floorName = args[4];
 
                 ElevatorController elevatorController = this.elevatorControllerMap.get(controllerName);
@@ -393,7 +393,7 @@ public class ElevatorCMD implements CommandExecutor {
             }
 
             String controllerName = args[1].toLowerCase();
-            String elevatorName = args[2].toLowerCase();
+            String elevatorName = args[2];
 
             ElevatorController elevatorController = this.elevatorControllerMap.get(controllerName);
             if (elevatorController == null) {
@@ -427,7 +427,7 @@ public class ElevatorCMD implements CommandExecutor {
         } else if (args.length == 3 && args[0].equalsIgnoreCase("toString")) {
             if (!p.hasPermission("world16elevators.admin")) return true;
             String controllerName = args[1].toLowerCase();
-            String elevatorName = args[2].toLowerCase();
+            String elevatorName = args[2];
 
             ElevatorController elevatorController = this.elevatorControllerMap.get(controllerName);
             if (elevatorController == null) {
@@ -449,7 +449,7 @@ public class ElevatorCMD implements CommandExecutor {
             }
 
             String controllerName = args[1].toLowerCase();
-            String elevatorName = args[2].toLowerCase();
+            String elevatorName = args[2];
 
             ElevatorController elevatorController = this.elevatorControllerMap.get(controllerName);
             if (elevatorController == null) {
