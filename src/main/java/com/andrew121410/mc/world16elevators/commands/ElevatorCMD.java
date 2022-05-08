@@ -37,7 +37,6 @@ public class ElevatorCMD implements CommandExecutor {
 
     private final Map<String, ElevatorController> elevatorControllerMap;
 
-
     public ElevatorCMD(World16Elevators plugin) {
         this.plugin = plugin;
 
@@ -59,7 +58,7 @@ public class ElevatorCMD implements CommandExecutor {
             CommandBlock realCommandBlock = (CommandBlock) commandBlock.getState();
             if (args[0].equalsIgnoreCase("call")) {
                 if (args.length >= 3) {
-                    ElevatorCommandCustomArguments eleArgs = getArgumentsElevators(args, 2);
+                    ElevatorArguments eleArgs = getElevatorArguments(args, 2);
                     String stringFloor = eleArgs.getOtherArgumentsAt(0);
                     Boolean isGoingUp = eleArgs.getOtherArgumentsAt(1) != null ? Boolean.parseBoolean(eleArgs.getOtherArgumentsAt(1)) : null;
 
@@ -161,7 +160,7 @@ public class ElevatorCMD implements CommandExecutor {
                 return true;
             } else if (args.length == 4) {
                 Block blockPlayerIsLookingAt = PlayerUtils.getBlockPlayerIsLookingAt(p);
-                ElevatorCommandCustomArguments eleArgs = getArgumentsElevators(args, 2);
+                ElevatorArguments eleArgs = getElevatorArguments(args, 2);
                 String floorName = eleArgs.getOtherArgumentsAt(1);
                 BoundingBox region = this.plugin.getOtherPlugins().getWorld16Utils().getClassWrappers().getWorldEdit().getRegion(p);
 
@@ -192,7 +191,121 @@ public class ElevatorCMD implements CommandExecutor {
                 return true;
             }
         } else if (args[0].equalsIgnoreCase("floor")) {
-            if (args.length == 1) {
+            if (args.length >= 5) {
+                ElevatorArguments elevatorArguments = getElevatorArguments(args, 3);
+                ElevatorController elevatorController = elevatorArguments.getElevatorController();
+                ElevatorObject elevatorObject = elevatorArguments.getElevatorObject();
+                String floorName = elevatorArguments.getOtherArgumentsAt(0);
+
+                if (elevatorController == null) {
+                    p.sendMessage("Elevator controller was not found.");
+                    return true;
+                }
+                if (elevatorObject == null) {
+                    p.sendMessage(Translate.chat("That elevator doesn't exist in the controller."));
+                    return true;
+                }
+
+                if (args[1].equalsIgnoreCase("create")) {
+                    if (!p.hasPermission("world16elevators.floor.create")) {
+                        p.sendMessage(Translate.color("&bYou don't have permission to use this command."));
+                        return true;
+                    }
+
+                    elevatorObject.addFloor(new FloorObject(floorName, PlayerUtils.getBlockPlayerIsLookingAt(p).getLocation()));
+                    p.sendMessage(Translate.color("&e[&9Elevator&e] &6Floor:" + floorName + " has been added to elevator: " + elevatorObject.getElevatorName()));
+                    return true;
+                } else if (args[1].equalsIgnoreCase("delete")) {
+                    if (!p.hasPermission("world16elevators.floor.delete")) {
+                        p.sendMessage(Translate.color("&bYou don't have permission to use this command."));
+                        return true;
+                    }
+
+                    FloorObject floorObject = elevatorObject.getFloor(floorName);
+                    if (floorObject == null) {
+                        p.sendMessage(Translate.chat("This floor doesn't exist."));
+                        return true;
+                    }
+
+                    elevatorObject.deleteFloor(floorName);
+                    p.sendMessage(Translate.chat("The floor: " + floorName + " has been removed from the elevator: " + elevatorObject.getElevatorName()));
+                    return true;
+                } else if (args[1].equalsIgnoreCase("setname") && args.length == 6) {
+                    if (!p.hasPermission("world16elevators.floor.setname")) {
+                        p.sendMessage(Translate.color("&bYou don't have permission to use this command."));
+                        return true;
+                    }
+
+                    FloorObject floorObject = elevatorObject.getFloor(floorName);
+                    if (floorObject == null) {
+                        p.sendMessage(Translate.chat("This floor doesn't exist."));
+                        return true;
+                    }
+
+                    String toFloorName = elevatorArguments.getOtherArgumentsAt(1);
+                    floorObject.setName(toFloorName);
+                    p.sendMessage(Translate.color("&6Elevator floor name has been set to: " + toFloorName));
+                    return true;
+                } else if (args[1].equalsIgnoreCase("sign")) {
+                    if (!p.hasPermission("world16elevators.floor.sign")) {
+                        p.sendMessage(Translate.color("&bYou don't have permission to use this command."));
+                        return true;
+                    }
+
+                    FloorObject floorObject = elevatorObject.getFloor(floorName);
+                    if (floorObject == null) {
+                        p.sendMessage(Translate.chat("This floor doesn't exist."));
+                        return true;
+                    }
+
+                    floorObject.getSignList().add(new SignObject(PlayerUtils.getBlockPlayerIsLookingAt(p).getLocation()));
+                    p.sendMessage(Translate.color("&e[&9Elevator&e] &6Floor: " + floorObject.getName() + " has been set."));
+                    return true;
+                } else if (args[1].equalsIgnoreCase("door") && args.length == 6) {
+                    if (!p.hasPermission("world16elevators.floor.door")) {
+                        p.sendMessage(Translate.color("&bYou don't have permission to use this command."));
+                        return true;
+                    }
+                    Location location = FloorObject.ifIronDoorThenGetBlockUnderTheDoorIfNotThanReturn(PlayerUtils.getBlockPlayerIsLookingAt(p).getLocation()).getLocation();
+                    String addOrRemove = elevatorArguments.getOtherArgumentsAt(1);
+
+                    FloorObject floorObject = elevatorObject.getFloor(floorName);
+                    if (floorObject == null) {
+                        p.sendMessage(Translate.chat("This floor doesn't exist."));
+                        return true;
+                    }
+
+                    if (addOrRemove.equalsIgnoreCase("add")) {
+                        floorObject.getDoorList().add(location);
+                        p.sendMessage(Translate.chat("The door for the floor: " + floorObject.getFloor() + " has been added to the elevator: " + elevatorObject.getElevatorName()));
+                    } else if (addOrRemove.equalsIgnoreCase("remove") || addOrRemove.equalsIgnoreCase("delete")) {
+                        floorObject.getDoorList().remove(location);
+                        p.sendMessage(Translate.chat("The door for the floor: " + floorObject.getFloor() + " has been deleted for the elevator: " + elevatorObject.getElevatorName()));
+                    }
+                    return true;
+                } else if (args[1].equalsIgnoreCase("smartCreateFloors") && args.length == 6) {
+                    if (!p.hasPermission("world16elevators.floor.smartcreatefloors")) {
+                        p.sendMessage(Translate.color("&bYou don't have permission to use this command."));
+                        return true;
+                    }
+
+                    FloorObject floorObject = elevatorObject.getFloor(elevatorArguments.getOtherArgumentsAt(0));
+                    if (floorObject == null) {
+                        p.sendMessage(Translate.color("&cCouldn't find floor"));
+                        return true;
+                    }
+
+                    Boolean bool = Utils.asBooleanOrElse(elevatorArguments.getOtherArgumentsAt(1), null);
+                    if (bool == null) {
+                        p.sendMessage(Translate.color("Not a true/false"));
+                        return true;
+                    }
+
+                    elevatorObject.smartCreateFloors(floorObject, bool);
+                    p.sendMessage(Translate.color("&esmartCreateFloors has started."));
+                    return true;
+                }
+            } else {
                 p.sendMessage(Translate.color("&a&l&o[Elevator Floor Help]"));
                 p.sendMessage(Translate.color("&6/elevator floor create &e<Controller> &9<Elevator> &a<Floor>"));
                 p.sendMessage(Translate.color("&6/elevator floor delete &e<Controller> &9<Elevator> &a<Floor>"));
@@ -200,190 +313,6 @@ public class ElevatorCMD implements CommandExecutor {
                 p.sendMessage(Translate.color("&6/elevator floor sign &e<Controller> &9<Elevator> &a<Floor>"));
                 p.sendMessage(Translate.color("&6/elevator floor door &e<Controller> &9<Elevator> &a<Floor> &b<ADD OR DELETE>"));
                 p.sendMessage(Translate.color("&6/elevator floor smartCreateFloors &e<Controller> &9<Elevator> &a<FromFloor> &c<GoUp>"));
-                return true;
-            } else if (args.length == 5 && args[1].equalsIgnoreCase("create")) {
-                if (!p.hasPermission("world16elevators.floor.create")) {
-                    p.sendMessage(Translate.color("&bYou don't have permission to use this command."));
-                    return true;
-                }
-                String controllerName = args[2].toLowerCase();
-                String elevatorName = args[3];
-                String floorName = args[4];
-
-                ElevatorController elevatorController = this.elevatorControllerMap.get(controllerName);
-                if (elevatorController == null) {
-                    p.sendMessage("Elevator controller was not found.");
-                    return true;
-                }
-
-                ElevatorObject elevatorObject = elevatorController.getElevator(elevatorName);
-                if (elevatorObject == null) {
-                    p.sendMessage(Translate.chat("That elevator doesn't exist in the controller."));
-                    return true;
-                }
-
-                elevatorObject.addFloor(new FloorObject(floorName, PlayerUtils.getBlockPlayerIsLookingAt(p).getLocation()));
-                p.sendMessage(Translate.color("&e[&9Elevator&e] &6Floor:" + floorName + " has been added to elevator: " + elevatorName));
-                return true;
-            } else if (args.length == 5 && args[1].equalsIgnoreCase("delete")) {
-                if (!p.hasPermission("world16elevators.floor.delete")) {
-                    p.sendMessage(Translate.color("&bYou don't have permission to use this command."));
-                    return true;
-                }
-                String controllerName = args[2].toLowerCase();
-                String elevatorName = args[3];
-                String floorName = args[4];
-
-                ElevatorController elevatorController = this.elevatorControllerMap.get(controllerName);
-                if (elevatorController == null) {
-                    p.sendMessage("Elevator controller was not found.");
-                    return true;
-                }
-
-                ElevatorObject elevatorObject = elevatorController.getElevator(elevatorName);
-                if (elevatorObject == null) {
-                    p.sendMessage(Translate.chat("That elevator doesn't exist in the controller."));
-                    return true;
-                }
-
-                FloorObject floorObject = elevatorObject.getFloor(floorName);
-                if (floorObject == null) {
-                    p.sendMessage(Translate.chat("This floor doesn't exist."));
-                    return true;
-                }
-
-                elevatorObject.deleteFloor(floorName);
-                p.sendMessage(Translate.chat("The floor: " + floorName + " has been removed from the elevator: " + elevatorName));
-                return true;
-            } else if (args.length == 6 && args[1].equalsIgnoreCase("setname")) {
-                if (!p.hasPermission("world16elevators.floor.setname")) {
-                    p.sendMessage(Translate.color("&bYou don't have permission to use this command."));
-                    return true;
-                }
-                ElevatorCommandCustomArguments eleArgs = getArgumentsElevators(args, 3);
-
-                ElevatorController elevatorController = eleArgs.getElevatorController();
-                if (elevatorController == null) {
-                    p.sendMessage(Translate.color("&cCouldn't find elevator controller"));
-                    return true;
-                }
-
-                ElevatorObject elevatorObject = eleArgs.getElevatorObject();
-                if (elevatorObject == null) {
-                    p.sendMessage(Translate.color("&cCouldn't find elevator"));
-                    return true;
-                }
-
-                FloorObject floorObject = elevatorObject.getFloor(eleArgs.getOtherArgumentsAt(0));
-                if (floorObject == null) {
-                    p.sendMessage(Translate.color("&cCouldn't find floor"));
-                    return true;
-                }
-
-                String toFloorName = eleArgs.getOtherArgumentsAt(1);
-                floorObject.setName(toFloorName);
-                p.sendMessage(Translate.color("&6Elevator floor name has been set to: " + toFloorName));
-                return true;
-            } else if (args.length == 5 && args[1].equalsIgnoreCase("sign")) {
-                if (!p.hasPermission("world16elevators.floor.sign")) {
-                    p.sendMessage(Translate.color("&bYou don't have permission to use this command."));
-                    return true;
-                }
-                String controllerName = args[2].toLowerCase();
-                String elevatorName = args[3];
-                String floorName = args[4];
-
-                ElevatorController elevatorController = this.elevatorControllerMap.get(controllerName);
-                if (elevatorController == null) {
-                    p.sendMessage("Elevator controller was not found.");
-                    return true;
-                }
-
-                ElevatorObject elevatorObject = elevatorController.getElevator(elevatorName);
-                if (elevatorObject == null) {
-                    p.sendMessage(Translate.chat("That elevator doesn't exist in the controller."));
-                    return true;
-                }
-
-                FloorObject floorObject = elevatorObject.getFloor(floorName);
-                if (floorObject == null) {
-                    p.sendMessage(Translate.chat("This floor doesn't exist."));
-                    return true;
-                }
-
-                floorObject.getSignList().add(new SignObject(PlayerUtils.getBlockPlayerIsLookingAt(p).getLocation()));
-                p.sendMessage(Translate.color("&e[&9Elevator&e] &6Floor: " + floorObject.getName() + " has been set."));
-                return true;
-            } else if (args.length == 6 && args[1].equalsIgnoreCase("door")) {
-                if (!p.hasPermission("world16elevators.floor.door")) {
-                    p.sendMessage(Translate.color("&bYou don't have permission to use this command."));
-                    return true;
-                }
-                Location location = FloorObject.ifIronDoorThenGetBlockUnderTheDoorIfNotThanReturn(PlayerUtils.getBlockPlayerIsLookingAt(p).getLocation()).getLocation();
-                ElevatorCommandCustomArguments eleArgs = getArgumentsElevators(args, 3);
-                String floorName = eleArgs.getOtherArgumentsAt(0);
-                String addOrRemove = eleArgs.getOtherArgumentsAt(1);
-
-                ElevatorController elevatorController = eleArgs.getElevatorController();
-                if (elevatorController == null) {
-                    p.sendMessage("Elevator controller was not found.");
-                    return true;
-                }
-
-                ElevatorObject elevatorObject = eleArgs.getElevatorObject();
-                if (elevatorObject == null) {
-                    p.sendMessage(Translate.chat("That elevator doesn't exist in the controller."));
-                    return true;
-                }
-
-                FloorObject floorObject = elevatorObject.getFloor(floorName);
-                if (floorObject == null) {
-                    p.sendMessage(Translate.chat("This floor doesn't exist."));
-                    return true;
-                }
-
-                if (addOrRemove.equalsIgnoreCase("add")) {
-                    floorObject.getDoorList().add(location);
-                    p.sendMessage(Translate.chat("The door for the floor: " + floorObject.getFloor() + " has been added to the elevator: " + elevatorObject.getElevatorName()));
-                } else if (addOrRemove.equalsIgnoreCase("remove") || addOrRemove.equalsIgnoreCase("delete")) {
-                    floorObject.getDoorList().remove(location);
-                    p.sendMessage(Translate.chat("The door for the floor: " + floorObject.getFloor() + " has been deleted for the elevator: " + elevatorObject.getElevatorName()));
-                }
-                return true;
-            } else if (args.length == 6 && args[1].equalsIgnoreCase("smartCreateFloors")) {
-                if (!p.hasPermission("world16elevators.floor.smartcreatefloors")) {
-                    p.sendMessage(Translate.color("&bYou don't have permission to use this command."));
-                    return true;
-                }
-                ElevatorCommandCustomArguments eleArgs = getArgumentsElevators(args, 3);
-
-                ElevatorController elevatorController = eleArgs.getElevatorController();
-                if (elevatorController == null) {
-                    p.sendMessage(Translate.color("&cCouldn't find elevator controller"));
-                    return true;
-                }
-
-                ElevatorObject elevatorObject = eleArgs.getElevatorObject();
-                if (elevatorObject == null) {
-                    p.sendMessage(Translate.color("&cCouldn't find elevator"));
-                    return true;
-                }
-
-                FloorObject floorObject = elevatorObject.getFloor(eleArgs.getOtherArgumentsAt(0));
-                if (floorObject == null) {
-                    p.sendMessage(Translate.color("&cCouldn't find floor"));
-                    return true;
-                }
-
-                Boolean bool = Utils.asBooleanOrElse(eleArgs.getOtherArgumentsAt(1), null);
-                if (bool == null) {
-                    p.sendMessage(Translate.color("Not a true/false"));
-                    return true;
-                }
-
-                elevatorObject.smartCreateFloors(floorObject, bool);
-                p.sendMessage(Translate.color("&esmartCreateFloors has started."));
-                return true;
             }
             return true;
         } else if (args.length == 3 && args[0].equalsIgnoreCase("delete")) {
@@ -391,20 +320,18 @@ public class ElevatorCMD implements CommandExecutor {
                 p.sendMessage(Translate.color("&bYou don't have permission to use this command."));
                 return true;
             }
+            ElevatorArguments elevatorArguments = getElevatorArguments(args, 2);
 
-            String controllerName = args[1].toLowerCase();
-            String elevatorName = args[2];
-
-            ElevatorController elevatorController = this.elevatorControllerMap.get(controllerName);
-            if (elevatorController == null) {
+            if (elevatorArguments.getElevatorController() == null) {
                 p.sendMessage("Elevator controller was not found.");
                 return true;
             }
-
-            if (elevatorController.getElevatorsMap().get(elevatorName) == null) {
+            if (elevatorArguments.getElevatorObject() == null) {
                 p.sendMessage(Translate.chat("That elevator doesn't exist."));
                 return true;
             }
+            String controllerName = elevatorArguments.getElevatorController().getControllerName();
+            String elevatorName = elevatorArguments.getElevatorObject().getElevatorName();
 
             this.plugin.getElevatorManager().deleteElevator(controllerName, elevatorName);
             p.sendMessage(Translate.chat("Elevator: " + elevatorName + " has been deleted from controller: " + controllerName));
@@ -480,7 +407,7 @@ public class ElevatorCMD implements CommandExecutor {
                 p.sendMessage(Translate.chat("&6/elevator call &e<Controller> &a<Floor> &b<Goup?>"));
                 return true;
             } else {
-                ElevatorCommandCustomArguments eleArgs = getArgumentsElevators(args, 2);
+                ElevatorArguments eleArgs = getElevatorArguments(args, 2);
                 ElevatorController elevatorController = eleArgs.getElevatorController();
                 ElevatorObject elevatorObject = eleArgs.getElevatorObject();
                 String floorName = eleArgs.getOtherArgumentsAt(0);
@@ -547,7 +474,7 @@ public class ElevatorCMD implements CommandExecutor {
                 p.sendMessage(Translate.chat("&6/elevator settings &e<Controller> &9<Elevator> &bcallButtonSystem &3<Bool>"));
                 p.sendMessage(Translate.chat("&6/elevator settings &e<Controller> &9<Elevator> &bsignFinderSystem &3<Bool>"));
             } else if (args.length > 2) {
-                ElevatorCommandCustomArguments eleArgs = getArgumentsElevators(args, 2);
+                ElevatorArguments eleArgs = getElevatorArguments(args, 2);
                 ElevatorController elevatorController = eleArgs.getElevatorController();
                 ElevatorObject elevatorObject = eleArgs.getElevatorObject();
                 String setting = eleArgs.getOtherArgumentsAt(0);
@@ -655,7 +582,7 @@ public class ElevatorCMD implements CommandExecutor {
                 p.sendMessage(Translate.chat("&6/elevator queue &e<Controller> &9<Elevator> floorQueueBuffer list/clear"));
                 return true;
             } else {
-                ElevatorCommandCustomArguments eleArgs = getArgumentsElevators(args, 2);
+                ElevatorArguments eleArgs = getElevatorArguments(args, 2);
                 ElevatorController elevatorController = eleArgs.getElevatorController();
                 if (elevatorController == null) {
                     p.sendMessage("Elevator controller was not found.");
@@ -681,8 +608,7 @@ public class ElevatorCMD implements CommandExecutor {
                         mainComponentBuilder.append(mainText).append("\n");
                         if (elevatorObject == null) {
                             elevatorController.getElevatorsMap().forEach((eleName, eleObject) -> mainComponentBuilder.append(makeQueueChatComponent(eleObject).create()));
-                        } else
-                            mainComponentBuilder.append(makeQueueChatComponent(elevatorObject).create());
+                        } else mainComponentBuilder.append(makeQueueChatComponent(elevatorObject).create());
                         p.spigot().sendMessage(mainComponentBuilder.create());
                         return true;
                     } else if (setting.equalsIgnoreCase("clear")) {
@@ -704,7 +630,7 @@ public class ElevatorCMD implements CommandExecutor {
                 p.sendMessage(Translate.color("&bYou don't have permission to use this command."));
                 return true;
             }
-            ElevatorCommandCustomArguments eleArgs = getArgumentsElevators(args, 2);
+            ElevatorArguments eleArgs = getElevatorArguments(args, 2);
 
             ElevatorController elevatorController = eleArgs.getElevatorController();
             if (elevatorController == null) {
@@ -747,19 +673,19 @@ public class ElevatorCMD implements CommandExecutor {
         return true;
     }
 
-    private ElevatorCommandCustomArguments getArgumentsElevators(String[] args, int start) {
-        ElevatorCommandCustomArguments elevatorCommandCustomArguments = new ElevatorCommandCustomArguments();
+    private ElevatorArguments getElevatorArguments(String[] args, int start) {
+        ElevatorArguments elevatorArguments = new ElevatorArguments();
         String[] newStringArray = Arrays.copyOfRange(args, start - 1, args.length);
         ArrayList<String> otherArgs = new ArrayList<>();
         for (int i = 0; i < newStringArray.length; i++) {
             if (i == 0) {
-                elevatorCommandCustomArguments.setElevatorController(this.elevatorControllerMap.get(newStringArray[0]));
-            } else if (i == 1 && elevatorCommandCustomArguments.getElevatorController() != null && elevatorCommandCustomArguments.getElevatorController().getElevatorsMap().containsKey((newStringArray[1]))) {
-                elevatorCommandCustomArguments.setElevatorObject(elevatorCommandCustomArguments.getElevatorController().getElevatorsMap().get(newStringArray[1]));
+                elevatorArguments.setElevatorController(this.elevatorControllerMap.get(newStringArray[0]));
+            } else if (i == 1 && elevatorArguments.getElevatorController() != null && elevatorArguments.getElevatorController().getElevatorsMap().containsKey((newStringArray[1]))) {
+                elevatorArguments.setElevatorObject(elevatorArguments.getElevatorController().getElevatorsMap().get(newStringArray[1]));
             } else otherArgs.add(newStringArray[i]);
         }
-        elevatorCommandCustomArguments.setOtherArgs(otherArgs);
-        return elevatorCommandCustomArguments;
+        elevatorArguments.setOtherArgs(otherArgs);
+        return elevatorArguments;
     }
 
     private ComponentBuilder makeQueueChatComponent(ElevatorObject eleObject) {
@@ -767,11 +693,7 @@ public class ElevatorCMD implements CommandExecutor {
         floorQueueObjectStringBuilder.color(ChatColor.BLUE).bold(false);
         floorQueueObjectStringBuilder.append("Elevator: " + eleObject.getElevatorName()).append("\n").color(ChatColor.YELLOW).bold(false);
         for (FloorQueueObject floorQueueObject : eleObject.getFloorQueueBuffer()) {
-            ComponentBuilder removeFloorFromFloorQueueBuffer = new ComponentBuilder()
-                    .append("Floor: " + floorQueueObject.getFloorNumber())
-                    .append(" ")
-                    .append("Status: " + floorQueueObject.getElevatorStatus().name())
-                    .append("\n");
+            ComponentBuilder removeFloorFromFloorQueueBuffer = new ComponentBuilder().append("Floor: " + floorQueueObject.getFloorNumber()).append(" ").append("Status: " + floorQueueObject.getElevatorStatus().name()).append("\n");
             floorQueueObjectStringBuilder.append(removeFloorFromFloorQueueBuffer.create());
         }
         return floorQueueObjectStringBuilder;
@@ -779,7 +701,7 @@ public class ElevatorCMD implements CommandExecutor {
 }
 
 @NoArgsConstructor
-class ElevatorCommandCustomArguments {
+class ElevatorArguments {
     @Getter
     @Setter
     private ElevatorController elevatorController = null;

@@ -146,9 +146,9 @@ public class ElevatorObject implements ConfigurationSerializable {
             elevatorStatus = ElevatorStatus.UP;
 
         switch (elevatorStatus) {
-            case UP -> player.sendMessage(Translate.color("&2[Elevator] &6Called the elevator to go to floor " + floorObject.getName() + " to go up"));
-            case DOWN -> player.sendMessage(Translate.color("&2[Elevator] &6Called the elevator to go to floor " + floorObject.getName() + " to go down"));
-            case DONT_KNOW -> player.sendMessage(Translate.color("&2[Elevator] &6Called the elevator to go to floor " + floorObject.getName()));
+            case UP -> player.sendMessage(Translate.color("&2[Elevator] &6Called elevator to go to floor " + floorObject.getName() + " to go up"));
+            case DOWN -> player.sendMessage(Translate.color("&2[Elevator] &6Called elevator to go to floor " + floorObject.getName() + " to go down"));
+            case DONT_KNOW -> player.sendMessage(Translate.color("&2[Elevator] &6Called elevator to go to floor " + floorObject.getName()));
         }
 
         goToFloor(floorObject.getFloor(), elevatorStatus, elevatorWho);

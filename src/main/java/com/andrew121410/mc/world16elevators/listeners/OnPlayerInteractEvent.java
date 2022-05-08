@@ -5,9 +5,7 @@ import com.andrew121410.mc.world16elevators.objects.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.Tag;
 import org.bukkit.block.data.Bisected;
 import org.bukkit.block.data.type.Door;
@@ -44,7 +42,7 @@ public class OnPlayerInteractEvent implements Listener {
                         if (elevatorKey == null) return;
 
                         // This isn't the main door
-                        if (!(blockUnderTheDoor.equals(elevatorKey.getBlockUnderMainDoor()))){
+                        if (!(blockUnderTheDoor.equals(elevatorKey.getBlockUnderMainDoor()))) {
                             continue;
                         }
 
