@@ -146,9 +146,12 @@ public class ElevatorObject implements ConfigurationSerializable {
             elevatorStatus = ElevatorStatus.UP;
 
         switch (elevatorStatus) {
-            case UP -> player.sendMessage(Translate.color("&2[Elevator] &6Called elevator to go to floor " + floorObject.getName() + " to go up"));
-            case DOWN -> player.sendMessage(Translate.color("&2[Elevator] &6Called elevator to go to floor " + floorObject.getName() + " to go down"));
-            case DONT_KNOW -> player.sendMessage(Translate.color("&2[Elevator] &6Called elevator to go to floor " + floorObject.getName()));
+            case UP ->
+                    player.sendMessage(Translate.color("&2[Elevator] &6Called elevator to go to floor " + floorObject.getName() + " to go up"));
+            case DOWN ->
+                    player.sendMessage(Translate.color("&2[Elevator] &6Called elevator to go to floor " + floorObject.getName() + " to go down"));
+            case DONT_KNOW ->
+                    player.sendMessage(Translate.color("&2[Elevator] &6Called elevator to go to floor " + floorObject.getName()));
         }
 
         goToFloor(floorObject.getFloor(), elevatorStatus, elevatorWho);
@@ -314,52 +317,84 @@ public class ElevatorObject implements ConfigurationSerializable {
     public void smartCreateFloors(FloorObject beginningFloor, boolean goUP) {
         long startTime = Instant.now().toEpochMilli();
         boolean whileLoop = true;
-        Location location = beginningFloor.getBlockUnderMainDoor().clone();
-        int a = beginningFloor.getFloor();
+
+        int beginningFloorNumber = beginningFloor.getFloor();
+        Location blockUnderMainDoor = beginningFloor.getBlockUnderMainDoor().clone();
+        List<Location> doors = new ArrayList<>();
+        doors.add(blockUnderMainDoor);
+        doors.addAll(beginningFloor.getDoorList().stream().map(Location::clone).toList());
 
         if (goUP) {
-            location.add(0, 1, 0);
+            doors.forEach(location -> location.add(0, 1, 0));
             while (whileLoop) {
-                if (location.getBlock().getType() != Material.AIR) {
-                    Block block1 = location.getBlock().getRelative(BlockFace.UP);
-                    if (block1.getType() == Material.AIR || block1.getType() == Material.IRON_DOOR) {
-                        Block block2 = block1.getRelative(BlockFace.UP);
-                        if (block2.getType() == Material.AIR || block2.getType() == Material.IRON_DOOR) {
-                            Block block3 = block2.getRelative(BlockFace.UP);
-                            if (block3.getType() != Material.AIR) {
-                                //Found a floor.
-                                a++;
-                                if (a == 0) a++; //0 won't be used as a floor anymore.
-                                FloorObject floorObject = new FloorObject(a, location.clone());
-                                addFloor(floorObject);
+                for (Location blockLocation : doors) {
+                    if (blockLocation.getBlock().getType() != Material.AIR) {
+                        Block block1 = blockLocation.getBlock().getRelative(BlockFace.UP);
+                        if (block1.getType() == Material.AIR || block1.getType() == Material.IRON_DOOR) {
+                            Block block2 = block1.getRelative(BlockFace.UP);
+                            if (block2.getType() == Material.AIR || block2.getType() == Material.IRON_DOOR) {
+                                Block block3 = block2.getRelative(BlockFace.UP);
+                                if (block3.getType() != Material.AIR) {
+                                    //We found a floor.
+
+                                    FloorObject floorObject = getFloor(beginningFloorNumber);
+                                    //If there is already a floor, then this means we just add the door to the doorList for that floor
+                                    if (floorObject != null) {
+                                        floorObject.getDoorList().add(blockLocation.clone());
+                                    } else {
+                                        beginningFloorNumber++;
+
+                                        //0 won't be used as a floor anymore.
+                                        if (beginningFloorNumber == 0) {
+                                            beginningFloorNumber++;
+                                        }
+
+                                        floorObject = new FloorObject(beginningFloorNumber, blockUnderMainDoor.clone());
+                                        addFloor(floorObject);
+                                    }
+                                }
                             }
                         }
                     }
                 }
-                location.add(0, 1, 0);
-                if (location.getBlockY() >= 256) whileLoop = false;
+                doors.forEach(location -> location.add(0, 1, 0));
+                if (blockUnderMainDoor.getBlockY() >= 319) whileLoop = false;
             }
         } else {
-            location.subtract(0, 1, 0);
+            doors.forEach(location -> location.subtract(0, 1, 0));
             while (whileLoop) {
-                if (location.getBlock().getType() != Material.AIR) {
-                    Block block1 = location.getBlock().getRelative(BlockFace.DOWN);
-                    if (block1.getType() == Material.AIR || block1.getType() == Material.IRON_DOOR) {
-                        Block block2 = block1.getRelative(BlockFace.DOWN);
-                        if (block2.getType() == Material.AIR || block2.getType() == Material.IRON_DOOR) {
-                            Block block3 = block2.getRelative(BlockFace.DOWN);
-                            if (block3.getType() != Material.AIR) {
-                                //Found a floor.
-                                a--;
-                                if (a == 0) a--; //0 won't be used as a floor anymore.
-                                FloorObject floorObject = new FloorObject(a, block3.getLocation().clone());
-                                addFloor(floorObject);
+                for (Location blockLocation : doors) {
+                    if (blockLocation.getBlock().getType() != Material.AIR) {
+                        Block block1 = blockLocation.getBlock().getRelative(BlockFace.DOWN);
+                        if (block1.getType() == Material.AIR || block1.getType() == Material.IRON_DOOR) {
+                            Block block2 = block1.getRelative(BlockFace.DOWN);
+                            if (block2.getType() == Material.AIR || block2.getType() == Material.IRON_DOOR) {
+                                Block block3 = block2.getRelative(BlockFace.DOWN);
+                                if (block3.getType() != Material.AIR) {
+                                    //We found a floor.
+
+                                    FloorObject floorObject = getFloor(beginningFloorNumber);
+                                    //If there is already a floor, then this means we just add the door to the doorList for that floor
+                                    if (floorObject != null) {
+                                        floorObject.getDoorList().add(blockLocation.clone());
+                                    } else {
+                                        beginningFloorNumber--;
+
+                                        //0 won't be used as a floor anymore.
+                                        if (beginningFloorNumber == 0) {
+                                            beginningFloorNumber--;
+                                        }
+
+                                        floorObject = new FloorObject(beginningFloorNumber, blockUnderMainDoor.clone());
+                                        addFloor(floorObject);
+                                    }
+                                }
                             }
                         }
                     }
                 }
-                location.subtract(0, 1, 0);
-                if (location.getBlockY() <= 1) whileLoop = false;
+                doors.forEach(location -> location.subtract(0, 1, 0));
+                if (blockUnderMainDoor.getBlockY() <= -64) whileLoop = false;
             }
         }
         long endTime = Instant.now().toEpochMilli();
