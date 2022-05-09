@@ -102,6 +102,7 @@ public class ElevatorCMD implements CommandExecutor {
             p.sendMessage(Translate.color("&6/elevator click &e<Controller> &9<Elevator>"));
             p.sendMessage(Translate.color("&6/elevator rename &e<Controller> &9<Elevator> &a<TOElevatorName>"));
             p.sendMessage(Translate.color("&6/elevator opendoor &e<Controller> &9<Elevator> <SecondsUntilDoorCloses>"));
+            p.sendMessage(Translate.chat("&6/elevator copysettingsfrom &e<Controller> &9<Elevator> &e<Controller> &9<Elevator>"));
             p.sendMessage("");
             p.sendMessage(Translate.color("&a&lMORE HELP COMMANDS..."));
             p.sendMessage("");
@@ -517,39 +518,42 @@ public class ElevatorCMD implements CommandExecutor {
                     p.sendMessage(Translate.chat("onlyTwoFloors has been set to: " + bool));
                     return true;
                 } else if (setting.equalsIgnoreCase("arrivalSound") || setting.equalsIgnoreCase("passingByFloorSound")) {
-                    String fakeSound = eleArgs.getOtherArgumentsAt(1);
-                    String fakeVolume = eleArgs.getOtherArgumentsAt(2);
-                    String fakePitch = eleArgs.getOtherArgumentsAt(3);
-                    if (fakeSound == null || fakeVolume == null || fakePitch == null) {
-                        p.sendMessage(Translate.chat("sound is null or volume is null or pitch is null."));
+                    if (args.length == 7) {
+                        String fakeSound = eleArgs.getOtherArgumentsAt(1);
+                        String fakeVolume = eleArgs.getOtherArgumentsAt(2);
+                        String fakePitch = eleArgs.getOtherArgumentsAt(3);
+                        if (fakeSound == null || fakeVolume == null || fakePitch == null) {
+                            p.sendMessage(Translate.chat("sound is null, or volume is null, or pitch is null."));
+                            return true;
+                        }
+                        Sound sound = Sound.valueOf(fakeSound);
+                        float volume = Utils.asFloatOrElse(fakeVolume, 99.1F);
+                        float pitch = Utils.asFloatOrElse(fakePitch, 99.1F);
+
+                        if (volume == 91.1F || pitch == 91.1F) {
+                            p.sendMessage(Translate.chat("Volume or pitch is messed up."));
+                            return true;
+                        }
+                        ElevatorSound elevatorSound = new ElevatorSound(sound, volume, pitch);
+                        if (setting.equalsIgnoreCase("arrivalSound")) {
+                            elevatorObject.getElevatorSettings().setArrivalSound(elevatorSound);
+                            p.sendMessage("Sound was set to: " + elevatorSound);
+                        } else if (setting.equalsIgnoreCase("passingByFloorSound")) {
+                            elevatorObject.getElevatorSettings().setPassingByFloorSound(elevatorSound);
+                            p.sendMessage("Sound was set to: " + elevatorSound);
+                        }
+
                         return true;
-                    }
-                    if (fakeSound.equalsIgnoreCase("null")) {
+                    } else if (args.length == 4) {
                         if (setting.equalsIgnoreCase("arrivalSound")) {
                             elevatorObject.getElevatorSettings().setArrivalSound(null);
                             p.sendMessage(Translate.chat("Removed arrival sound."));
-                        } else if (setting.equalsIgnoreCase("passingByFloorSound")) {
+                        } else {
                             elevatorObject.getElevatorSettings().setPassingByFloorSound(null);
                             p.sendMessage(Translate.chat("Removed passing by floor sound."));
                         }
                         return true;
                     }
-
-                    Sound sound = Sound.valueOf(fakeSound);
-                    float volume = Utils.asFloatOrElse(fakeVolume, 99.1F);
-                    float pitch = Utils.asFloatOrElse(fakePitch, 99.1F);
-
-                    if (volume == 91.1F || pitch == 91.1F) {
-                        p.sendMessage(Translate.chat("Volume or pitch is messed up."));
-                        return true;
-                    }
-                    ElevatorSound elevatorSound = new ElevatorSound(sound, volume, pitch);
-                    if (setting.equalsIgnoreCase("arrivalSound")) {
-                        elevatorObject.getElevatorSettings().setArrivalSound(elevatorSound);
-                    } else if (setting.equalsIgnoreCase("passingByFloorSound")) {
-                        elevatorObject.getElevatorSettings().setPassingByFloorSound(elevatorSound);
-                    }
-
                     return true;
                 } else if (setting.equalsIgnoreCase("callSystemType")) {
                     ElevatorCallSystem elevatorCallSystem;
