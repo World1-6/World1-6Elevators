@@ -3,18 +3,19 @@ package com.andrew121410.mc.world16elevators.objects;
 import com.andrew121410.mc.world16elevators.World16Elevators;
 import com.andrew121410.mc.world16utils.blocks.BlockUtils;
 import com.andrew121410.mc.world16utils.blocks.UniversalBlockUtils;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 import org.bukkit.Effect;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.Sign;
 import org.bukkit.block.data.Bisected;
+import org.bukkit.block.data.BlockData;
+import org.bukkit.block.data.Openable;
 import org.bukkit.block.data.type.Door;
+import org.bukkit.block.data.type.GlassPane;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.configuration.serialization.SerializableAs;
 
@@ -37,7 +38,7 @@ public class FloorObject implements ConfigurationSerializable {
     private List<SignObject> signList;
 
     //Do not save
-    private Map<Location, Material> oldBlocks = new HashMap<>();
+    private Map<Location, SavedBlock> oldBlocks = new HashMap<>();
 
     public FloorObject(int floor, String name, Location blockUnderMainDoor, List<Location> doorList, List<SignObject> signList) {
         this.floor = floor;
@@ -62,34 +63,6 @@ public class FloorObject implements ConfigurationSerializable {
     //Do not remove unnecessary bounding and .clone().
     public static FloorObject from(ElevatorMovement elevatorMovement) {
         return new FloorObject(elevatorMovement.getFloor().intValue(), elevatorMovement.getAtDoor().clone());
-    }
-
-    public void doDoor(boolean open, boolean forAllDoors) {
-        if (open) {
-            //Before
-            this.oldBlocks.put(this.blockUnderMainDoor, this.blockUnderMainDoor.getBlock().getType());
-            if (forAllDoors)
-                for (Location location : this.doorList) this.oldBlocks.put(location, location.getBlock().getType());
-        }
-
-        //Main door
-        if (!ifIronDoorThenSetOpenIfNotThenFalse(this.getBlockUnderMainDoor().getBlock().getRelative(BlockFace.UP), open)) {
-            if (open) this.blockUnderMainDoor.getBlock().setType(Material.REDSTONE_BLOCK);
-            else this.blockUnderMainDoor.getBlock().setType(this.oldBlocks.get(this.blockUnderMainDoor));
-        }
-
-        //For all the other doors
-        if (forAllDoors) {
-            for (Location location : this.doorList) {
-                Block block = location.getBlock().getRelative(BlockFace.UP);
-                if (!ifIronDoorThenSetOpenIfNotThenFalse(block, open)) {
-                    if (open) location.getBlock().setType(Material.REDSTONE_BLOCK);
-                    else location.getBlock().setType(this.oldBlocks.get(this.blockUnderMainDoor));
-                }
-            }
-        }
-
-        if (!open) this.oldBlocks.clear();
     }
 
     public void doSigns(ElevatorObject elevatorObject, ElevatorStatus elevatorStatus, boolean revert) {
@@ -121,6 +94,69 @@ public class FloorObject implements ConfigurationSerializable {
         switch (elevatorStatus) {
             case UP -> this.signList.removeIf(signObject -> !signObject.doUpArrow());
             case DOWN -> this.signList.removeIf(signObject -> !signObject.doDownArrow());
+        }
+    }
+
+    public void doDoor(boolean open, boolean forAllDoors) {
+        handleDoor(this.blockUnderMainDoor.getBlock(), open);
+
+        if (forAllDoors) {
+            for (Location location : this.doorList) {
+                handleDoor(location.getBlock(), open);
+            }
+        }
+
+        if (!open) this.oldBlocks.clear();
+    }
+
+    private void handleDoor(Block block, boolean open) {
+        Block openableAbove = block.getRelative(BlockFace.UP);
+        Block openableAbove2 = openableAbove.getRelative(BlockFace.UP);
+
+        if (!ifIronDoorThenSetOpenIfNotThenFalse(openableAbove, open)) {
+            if (open) {
+                // Ran when it's not an iron door & open is true, so we are going to check if this is some sort of other door,
+                // like a door made out of glass, or some sort of other Openable
+                // if not then just set the block that was passed into the function to redstone
+                if (openableAbove.getType() == Material.GLASS || openableAbove.getType() == Material.GLASS_PANE || openableAbove.getBlockData() instanceof GlassPane) {
+                    this.oldBlocks.putIfAbsent(openableAbove.getLocation(), new SavedBlock(openableAbove.getType(), openableAbove.getBlockData()));
+                    openableAbove.setType(Material.AIR);
+                    openableAbove.getWorld().playSound(openableAbove.getLocation(), Sound.BLOCK_GLASS_BREAK, 1f, 1f);
+
+                    // If there is 2 glass pane then also remove it
+                    if (openableAbove2.getType() == Material.GLASS || openableAbove2.getType() == Material.GLASS_PANE || openableAbove2.getBlockData() instanceof GlassPane) {
+                        this.oldBlocks.putIfAbsent(openableAbove2.getLocation(), new SavedBlock(openableAbove2.getType(), openableAbove2.getBlockData()));
+                        openableAbove2.setType(Material.AIR);
+                        openableAbove.getWorld().playSound(openableAbove2.getLocation(), Sound.BLOCK_GLASS_BREAK, 1f, 1f);
+                    }
+                } else if (openableAbove.getBlockData() instanceof Openable realOpenable) {
+                    realOpenable.setOpen(true);
+                    openableAbove.setBlockData(realOpenable);
+                } else {
+                    this.oldBlocks.putIfAbsent(block.getLocation(), new SavedBlock(block.getType(), null));
+                    block.setType(Material.REDSTONE_BLOCK);
+                }
+            }
+        }
+
+        if (!open) {
+            SavedBlock savedBlock;
+            if ((savedBlock = this.oldBlocks.getOrDefault(block.getLocation(), null)) != null) {
+                block.setType(savedBlock.getMaterial());
+            } else if ((savedBlock = this.oldBlocks.getOrDefault(openableAbove.getLocation(), null)) != null) {
+                openableAbove.setType(savedBlock.getMaterial());
+                openableAbove.setBlockData(savedBlock.getBlockData());
+                // See if there is also something above also
+                if ((savedBlock = this.oldBlocks.getOrDefault(openableAbove2.getLocation(), null)) != null) {
+                    openableAbove2.setType(savedBlock.getMaterial());
+                    openableAbove2.setBlockData(savedBlock.getBlockData());
+                }
+            } else {
+                if (openableAbove.getBlockData() instanceof Openable realOpenable) {
+                    realOpenable.setOpen(false);
+                    openableAbove.setBlockData(realOpenable);
+                }
+            }
         }
     }
 
@@ -172,4 +208,11 @@ public class FloorObject implements ConfigurationSerializable {
     public static FloorObject deserialize(Map<String, Object> map) {
         return new FloorObject((int) map.get("Floor"), (String) map.get("Name"), (Location) map.get("MainDoor"), (List<Location>) map.get("DoorList"), (List<SignObject>) map.get("SignList"));
     }
+}
+
+@Getter
+@AllArgsConstructor
+class SavedBlock {
+    private Material material;
+    private BlockData blockData;
 }
