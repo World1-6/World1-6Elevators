@@ -9,6 +9,9 @@ depend:
   - World1-6Utils
   - WorldEdit
 
+softdepend:
+  - Floodgate
+
 commands:
   elevator:
     permission: world16elevators.elevator

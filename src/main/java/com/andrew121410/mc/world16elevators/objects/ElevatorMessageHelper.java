@@ -3,8 +3,12 @@ package com.andrew121410.mc.world16elevators.objects;
 import com.andrew121410.mc.world16elevators.World16Elevators;
 import com.andrew121410.mc.world16utils.chat.ChatResponseManager;
 import com.andrew121410.mc.world16utils.chat.Translate;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.geysermc.cumulus.SimpleForm;
+import org.geysermc.cumulus.response.SimpleFormResponse;
+import org.geysermc.floodgate.api.FloodgateApi;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -68,25 +72,52 @@ public class ElevatorMessageHelper {
                         return;
                     }
                     switch (elevatorObject.getElevatorSettings().getCallSystemType()) {
-                        case CLICK_CHAT:
+                        case CLICK_CHAT -> {
+                            if (World16Elevators.getInstance().getOtherPlugins().hasFloodgate()) {
+                                if (FloodgateApi.getInstance().isFloodgatePlayer(player.getUniqueId())) {
+                                    handleFloodgatePlayer(player, elevatorObject);
+                                    break;
+                                }
+                            }
                             elevatorObject.clickMessageGoto(player);
-                            break;
-                        case GUI:
+                        }
+                        case GUI -> {
+                            if (World16Elevators.getInstance().getOtherPlugins().hasFloodgate()) {
+                                if (FloodgateApi.getInstance().isFloodgatePlayer(player.getUniqueId())) {
+                                    handleFloodgatePlayer(player, elevatorObject);
+                                    break;
+                                }
+                            }
                             GUIElevatorFloors guiElevatorFloors = new GUIElevatorFloors(plugin, elevatorObject);
                             guiElevatorFloors.open(player);
-                            break;
-                        case CHAT_RESPONSE:
+                        }
+                        case CHAT_RESPONSE -> {
                             ChatResponseManager chatResponseManager = plugin.getOtherPlugins().getWorld16Utils().getChatResponseManager();
                             player.sendMessage("Please type in the chat your response");
                             elevatorObject.elevatorFloorsMessage(player);
                             chatResponseManager.create(player, Translate.color("&bWhat floor?"), "", (thePlayer, response) -> {
                                 plugin.getServer().dispatchCommand(player, "elevator call " + elevatorObject.getElevatorControllerName() + " " + elevatorObject.getElevatorName() + " " + response);
                             });
+                        }
                     }
                     players.add(player.getUniqueId());
                 }
             }
         }.runTaskTimer(plugin, 1L, 20L);
+    }
+
+    private void handleFloodgatePlayer(Player player, ElevatorObject elevatorObject) {
+        SimpleForm.Builder simpleForm = SimpleForm.builder().title("Floors").content("List of floors!");
+        elevatorObject.getFloorsMap().forEach((floorNumber, floorObject) -> {
+            String realName = floorObject.getName();
+            simpleForm.button(realName);
+        });
+        simpleForm.responseHandler((form, data) -> {
+            SimpleFormResponse simpleFormResponse = form.parseResponse(data);
+            if (!simpleFormResponse.isCorrect()) return;
+            plugin.getServer().dispatchCommand(player, "elevator call " + elevatorObject.getElevatorControllerName() + " " + elevatorObject.getElevatorName() + " " + simpleFormResponse.getClickedButton().getText());
+        });
+        FloodgateApi.getInstance().sendForm(player.getUniqueId(), simpleForm.build());
     }
 
     public void start() {

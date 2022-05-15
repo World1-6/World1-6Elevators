@@ -10,11 +10,13 @@ public class OtherPlugins {
 
     //Plugins
     private World16Utils world16Utils;
+    private boolean hasFloodgate;
 
     public OtherPlugins(World16Elevators plugin) {
         this.plugin = plugin;
 
         setupWorld16Utils();
+        setupFloodgate();
     }
 
     private void setupWorld16Utils() {
@@ -25,8 +27,19 @@ public class OtherPlugins {
         }
     }
 
+    private void setupFloodgate() {
+        Plugin plugin = this.plugin.getServer().getPluginManager().getPlugin("floodgate");
+
+        if (plugin != null) {
+            hasFloodgate = true;
+        }
+    }
+
     public World16Utils getWorld16Utils() {
         return world16Utils;
     }
 
+    public boolean hasFloodgate() {
+        return hasFloodgate;
+    }
 }
