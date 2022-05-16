@@ -1,10 +1,7 @@
 package com.andrew121410.mc.world16elevators.commands.tabcomplete;
 
 import com.andrew121410.mc.world16elevators.World16Elevators;
-import com.andrew121410.mc.world16elevators.objects.ElevatorCallSystemType;
-import com.andrew121410.mc.world16elevators.objects.ElevatorController;
-import com.andrew121410.mc.world16elevators.objects.ElevatorObject;
-import com.andrew121410.mc.world16elevators.objects.FloorObject;
+import com.andrew121410.mc.world16elevators.objects.*;
 import org.bukkit.Sound;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -116,7 +113,7 @@ public class ElevatorTab implements TabCompleter {
             } else if (args.length == 3) {
                 return this.elevatorControllerMap.containsKey(args[1]) ? new ArrayList<>(this.elevatorControllerMap.get(args[1]).getElevatorsMap().keySet()) : null;
             } else if (args.length == 4) {
-                return getContainsString(args[3], Arrays.asList("ticksPerSecond", "doorHolderTicksPerSecond", "elevatorWaiterTicksPerSecond", "doElevatorLeveling", "onlyTwoFloors", "arrivalSound", "passingByFloorSound", "callSystemType", "callButtonSystem", "signFinderSystem"));
+                return getContainsString(args[3], Arrays.asList("ticksPerSecond", "doorHolderTicksPerSecond", "elevatorWaiterTicksPerSecond", "doElevatorLeveling", "onlyTwoFloors", "arrivalSound", "passingByFloorSound", "floorSelectorType", "callButtonType", "signFinderSystem"));
             } else if (args.length == 5) {
                 if (args[3].equalsIgnoreCase("doElevatorLeveling")) {
                     return StringUtil.copyPartialMatches(args[4], Arrays.asList("true", "false"), new ArrayList<>());
@@ -124,8 +121,10 @@ public class ElevatorTab implements TabCompleter {
                     return StringUtil.copyPartialMatches(args[4], Arrays.asList("true", "false"), new ArrayList<>());
                 } else if (args[3].equals("arrivalSound") || args[3].equals("passingByFloorSound")) {
                     return StringUtil.copyPartialMatches(args[4], this.soundList, new ArrayList<>());
-                } else if (args[3].equalsIgnoreCase("callSystemType")) {
-                    return StringUtil.copyPartialMatches(args[4], Arrays.stream(ElevatorCallSystemType.values()).map(Enum::name).collect(Collectors.toList()), new ArrayList<>());
+                } else if (args[3].equalsIgnoreCase("floorSelectorType")) {
+                    return StringUtil.copyPartialMatches(args[4], Arrays.stream(ElevatorFloorSelectorType.values()).map(Enum::name).collect(Collectors.toList()), new ArrayList<>());
+                } else if (args[3].equalsIgnoreCase("callButtonType")) {
+                    return StringUtil.copyPartialMatches(args[4], Arrays.stream(ElevatorCallButtonType.values()).map(Enum::name).collect(Collectors.toList()), new ArrayList<>());
                 }
             }
             return null;

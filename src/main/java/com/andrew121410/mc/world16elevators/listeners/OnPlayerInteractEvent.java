@@ -7,8 +7,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Location;
 import org.bukkit.Tag;
-import org.bukkit.block.data.Bisected;
-import org.bukkit.block.data.type.Door;
+import org.bukkit.block.BlockFace;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -33,29 +32,25 @@ public class OnPlayerInteractEvent implements Listener {
             if (event.getItem() != null && Tag.BUTTONS.isTagged(event.getItem().getType())) return;
 
             for (int x = -2; x < 3; x++) {
-                for (int z = -2; z < 3; z++) {
-                    Location blockLocation = event.getClickedBlock().getRelative(x, 0, z).getLocation();
-                    Door door = FloorObject.isIronDoor(blockLocation);
-                    if (door != null) {
-                        Location blockUnderTheDoor = FloorObject.ifIronDoorThenGetBlockUnderTheDoorIfNotThanReturn(blockLocation).getLocation();
-                        ElevatorKey elevatorKey = findElevatorKey(blockUnderTheDoor);
-                        if (elevatorKey == null) return;
+                for (int y = -2; y < 3; y++) {
+                    for (int z = -2; z < 3; z++) {
+                        Location blockLocation = event.getClickedBlock().getRelative(x, y, z).getLocation();
 
-                        // This isn't the main door
-                        if (!(blockUnderTheDoor.equals(elevatorKey.getBlockUnderMainDoor()))) {
-                            continue;
-                        }
+                        ElevatorKey elevatorKey = findElevatorKey(blockLocation);
+                        if (elevatorKey == null) continue;
 
                         event.setCancelled(true);
 
-                        if ((x == -2 || x == 2) || (z == -2 || z == 2)) {
-                            if (door.getHalf() == Bisected.Half.TOP) {
+                        ElevatorCallButtonType elevatorCallButtonType = elevatorKey.getElevatorObject().getElevatorSettings().getCallButtonType();
+
+                        if (elevatorCallButtonType == ElevatorCallButtonType.CALL_THE_NEAREST_ELEVATOR) {
+                            if (Tag.BUTTONS.isTagged(event.getClickedBlock().getRelative(BlockFace.DOWN).getType())) {
                                 elevatorKey.getElevatorController().callElevatorClosest(event.getPlayer(), elevatorKey.getFloorObject().getName(), ElevatorStatus.UP, ElevatorWho.BUTTON);
                             } else {
                                 elevatorKey.getElevatorController().callElevatorClosest(event.getPlayer(), elevatorKey.getFloorObject().getName(), ElevatorStatus.DOWN, ElevatorWho.BUTTON);
                             }
-                        } else {
-                            if (door.getHalf() == Bisected.Half.TOP) {
+                        } else if (elevatorCallButtonType == ElevatorCallButtonType.CALL_THE_ELEVATOR) {
+                            if (Tag.BUTTONS.isTagged(event.getClickedBlock().getRelative(BlockFace.DOWN).getType())) {
                                 elevatorKey.getElevatorObject().goToFloor(event.getPlayer(), elevatorKey.getFloorObject().getName(), ElevatorStatus.UP, ElevatorWho.BUTTON);
                             } else {
                                 elevatorKey.getElevatorObject().goToFloor(event.getPlayer(), elevatorKey.getFloorObject().getName(), ElevatorStatus.DOWN, ElevatorWho.BUTTON);
@@ -71,7 +66,7 @@ public class OnPlayerInteractEvent implements Listener {
     private ElevatorKey findElevatorKey(Location blockUnderTheDoor) {
         for (ElevatorController elevatorController : this.plugin.getSetListMap().getElevatorControllerMap().values()) {
             for (ElevatorObject elevatorObject : elevatorController.getElevatorsMap().values()) {
-                if (!elevatorObject.getElevatorSettings().isCallButtonSystem()) continue;
+                if (elevatorObject.getElevatorSettings().getCallButtonType() == ElevatorCallButtonType.OFF) continue;
                 for (FloorObject floorObject : elevatorObject.getFloorsMap().values()) {
                     if (floorObject.getBlockUnderMainDoor().equals(blockUnderTheDoor)) {
                         return new ElevatorKey(elevatorController, elevatorObject, floorObject, floorObject.getBlockUnderMainDoor());

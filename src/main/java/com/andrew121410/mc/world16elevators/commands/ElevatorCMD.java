@@ -555,21 +555,27 @@ public class ElevatorCMD implements CommandExecutor {
                         return true;
                     }
                     return true;
-                } else if (setting.equalsIgnoreCase("callSystemType")) {
-                    ElevatorCallSystemType elevatorCallSystemType;
+                } else if (setting.equalsIgnoreCase("floorSelectorType")) {
+                    ElevatorFloorSelectorType elevatorFloorSelectorType;
                     try {
-                        elevatorCallSystemType = ElevatorCallSystemType.valueOf(eleArgs.getOtherArgumentsAt(1));
+                        elevatorFloorSelectorType = ElevatorFloorSelectorType.valueOf(eleArgs.getOtherArgumentsAt(1));
                     } catch (Exception ignored) {
-                        p.sendMessage(Translate.color("&cThat's not a valid call system type."));
+                        p.sendMessage(Translate.color("&cThat's not a valid ElevatorFloorSelectorType"));
                         return true;
                     }
-                    elevatorObject.getElevatorSettings().setCallSystemType(elevatorCallSystemType);
-                    p.sendMessage(Translate.color("New call system type has been set to " + elevatorCallSystemType.name()));
+                    elevatorObject.getElevatorSettings().setFloorSelectorType(elevatorFloorSelectorType);
+                    p.sendMessage(Translate.color("floorSelectorType has been set to " + elevatorFloorSelectorType.name()));
                     return true;
-                } else if (setting.equalsIgnoreCase("callButtonSystem")) {
-                    boolean bool = Utils.asBooleanOrElse(eleArgs.getOtherArgumentsAt(1), true);
-                    elevatorObject.getElevatorSettings().setCallButtonSystem(bool);
-                    p.sendMessage(Translate.chat("The callButtonSystem has been set to: " + bool));
+                } else if (setting.equalsIgnoreCase("callButtonType")) {
+                    ElevatorCallButtonType elevatorCallButtonType;
+                    try {
+                        elevatorCallButtonType = ElevatorCallButtonType.valueOf(eleArgs.getOtherArgumentsAt(1));
+                    } catch (Exception ignored) {
+                        p.sendMessage(Translate.color("&cThat's not a valid ElevatorCallButtonType"));
+                        return true;
+                    }
+                    elevatorObject.getElevatorSettings().setCallButtonType(elevatorCallButtonType);
+                    p.sendMessage(Translate.color("callButtonType has been set to " + elevatorCallButtonType.name()));
                     return true;
                 } else if (setting.equalsIgnoreCase("signFinderSystem")) {
                     boolean bool = Utils.asBooleanOrElse(eleArgs.getOtherArgumentsAt(1), true);

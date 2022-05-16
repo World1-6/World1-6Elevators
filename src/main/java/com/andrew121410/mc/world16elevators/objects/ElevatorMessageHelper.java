@@ -3,7 +3,6 @@ package com.andrew121410.mc.world16elevators.objects;
 import com.andrew121410.mc.world16elevators.World16Elevators;
 import com.andrew121410.mc.world16utils.chat.ChatResponseManager;
 import com.andrew121410.mc.world16utils.chat.Translate;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.geysermc.cumulus.SimpleForm;
@@ -71,7 +70,7 @@ public class ElevatorMessageHelper {
                         players.add(player.getUniqueId());
                         return;
                     }
-                    switch (elevatorObject.getElevatorSettings().getCallSystemType()) {
+                    switch (elevatorObject.getElevatorSettings().getFloorSelectorType()) {
                         case CLICK_CHAT -> {
                             if (World16Elevators.getInstance().getOtherPlugins().hasFloodgate()) {
                                 if (FloodgateApi.getInstance().isFloodgatePlayer(player.getUniqueId())) {

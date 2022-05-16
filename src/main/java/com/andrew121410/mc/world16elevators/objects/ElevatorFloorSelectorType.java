@@ -1,6 +1,6 @@
 package com.andrew121410.mc.world16elevators.objects;
 
-public enum ElevatorCallSystemType {
+public enum ElevatorFloorSelectorType {
 
     CLICK_CHAT,
     GUI,
