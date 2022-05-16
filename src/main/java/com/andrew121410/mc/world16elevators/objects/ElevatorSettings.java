@@ -29,12 +29,12 @@ public class ElevatorSettings implements ConfigurationSerializable {
     private boolean onlyTwoFloors;
     private ElevatorSound arrivalSound;
     private ElevatorSound passingByFloorSound;
-    private ElevatorCallSystem callSystemType;
+    private ElevatorCallSystemType callSystemType;
     private boolean callButtonSystem;
     private boolean signFinderSystem;
     //...
 
-    public ElevatorSettings(long ticksPerSecond, long doorHolderTicksPerSecond, long elevatorWaiterTicksPerSecond, boolean doElevatorLeveling, boolean onlyTwoFloors, ElevatorSound arrivalSound, ElevatorSound passingByFloorSound, ElevatorCallSystem callSystemType, boolean callButtonSystem, boolean signFinderSystem) {
+    public ElevatorSettings(long ticksPerSecond, long doorHolderTicksPerSecond, long elevatorWaiterTicksPerSecond, boolean doElevatorLeveling, boolean onlyTwoFloors, ElevatorSound arrivalSound, ElevatorSound passingByFloorSound, ElevatorCallSystemType callSystemType, boolean callButtonSystem, boolean signFinderSystem) {
         this.ticksPerSecond = ticksPerSecond;
         this.doorHolderTicksPerSecond = doorHolderTicksPerSecond;
         this.elevatorWaiterTicksPerSecond = elevatorWaiterTicksPerSecond;
@@ -48,7 +48,7 @@ public class ElevatorSettings implements ConfigurationSerializable {
     }
 
     public ElevatorSettings() {
-        this(DEFAULT_TICKS_PER_SECOND, DEFAULT_DOOR_HOLDER_TICKS_PER_SECOND, DEFAULT_ELEVATOR_WAITER_TICKS_PER_SECOND, true, false, null, null, ElevatorCallSystem.CLICK_CHAT, true, true);
+        this(DEFAULT_TICKS_PER_SECOND, DEFAULT_DOOR_HOLDER_TICKS_PER_SECOND, DEFAULT_ELEVATOR_WAITER_TICKS_PER_SECOND, true, false, null, null, ElevatorCallSystemType.CLICK_CHAT, true, true);
     }
 
     public ElevatorSettings clone() {
@@ -83,7 +83,7 @@ public class ElevatorSettings implements ConfigurationSerializable {
     }
 
     public static ElevatorSettings deserialize(Map<String, Object> map) {
-        ElevatorCallSystem elevatorCallSystem = ElevatorCallSystem.valueOf((String) (map.containsKey("CallSystemType") ? map.get("CallSystemType") : map.get("ElevatorCallSystem")));
+        ElevatorCallSystemType elevatorCallSystemType = ElevatorCallSystemType.valueOf((String) (map.containsKey("CallSystemType") ? map.get("CallSystemType") : map.get("ElevatorCallSystem")));
 
         return new ElevatorSettings(((Integer) map.get("TicksPerSecond")).longValue(),
                 ((Integer) map.get("DoorHolderTicksPerSecond")).longValue(),
@@ -92,7 +92,7 @@ public class ElevatorSettings implements ConfigurationSerializable {
                 (Boolean) map.get("OnlyTwoFloors"),
                 (ElevatorSound) map.get("ArrivalSound"),
                 (ElevatorSound) map.get("PassingByFloorSound"),
-                elevatorCallSystem,
+                elevatorCallSystemType,
                 (Boolean) map.get("CallButtonSystem"),
                 (Boolean) map.get("SignFinderSystem"));
     }

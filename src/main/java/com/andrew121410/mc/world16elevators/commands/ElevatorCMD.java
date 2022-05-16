@@ -556,15 +556,15 @@ public class ElevatorCMD implements CommandExecutor {
                     }
                     return true;
                 } else if (setting.equalsIgnoreCase("callSystemType")) {
-                    ElevatorCallSystem elevatorCallSystem;
+                    ElevatorCallSystemType elevatorCallSystemType;
                     try {
-                        elevatorCallSystem = ElevatorCallSystem.valueOf(eleArgs.getOtherArgumentsAt(1));
+                        elevatorCallSystemType = ElevatorCallSystemType.valueOf(eleArgs.getOtherArgumentsAt(1));
                     } catch (Exception ignored) {
                         p.sendMessage(Translate.color("&cThat's not a valid call system type."));
                         return true;
                     }
-                    elevatorObject.getElevatorSettings().setCallSystemType(elevatorCallSystem);
-                    p.sendMessage(Translate.color("New call system type has been set to " + elevatorCallSystem.name()));
+                    elevatorObject.getElevatorSettings().setCallSystemType(elevatorCallSystemType);
+                    p.sendMessage(Translate.color("New call system type has been set to " + elevatorCallSystemType.name()));
                     return true;
                 } else if (setting.equalsIgnoreCase("callButtonSystem")) {
                     boolean bool = Utils.asBooleanOrElse(eleArgs.getOtherArgumentsAt(1), true);

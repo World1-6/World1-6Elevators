@@ -1,7 +1,7 @@
 package com.andrew121410.mc.world16elevators.commands.tabcomplete;
 
 import com.andrew121410.mc.world16elevators.World16Elevators;
-import com.andrew121410.mc.world16elevators.objects.ElevatorCallSystem;
+import com.andrew121410.mc.world16elevators.objects.ElevatorCallSystemType;
 import com.andrew121410.mc.world16elevators.objects.ElevatorController;
 import com.andrew121410.mc.world16elevators.objects.ElevatorObject;
 import com.andrew121410.mc.world16elevators.objects.FloorObject;
@@ -125,7 +125,7 @@ public class ElevatorTab implements TabCompleter {
                 } else if (args[3].equals("arrivalSound") || args[3].equals("passingByFloorSound")) {
                     return StringUtil.copyPartialMatches(args[4], this.soundList, new ArrayList<>());
                 } else if (args[3].equalsIgnoreCase("callSystemType")) {
-                    return StringUtil.copyPartialMatches(args[4], Arrays.stream(ElevatorCallSystem.values()).map(Enum::name).collect(Collectors.toList()), new ArrayList<>());
+                    return StringUtil.copyPartialMatches(args[4], Arrays.stream(ElevatorCallSystemType.values()).map(Enum::name).collect(Collectors.toList()), new ArrayList<>());
                 }
             }
             return null;
