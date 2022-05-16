@@ -107,6 +107,12 @@ public class ElevatorTab implements TabCompleter {
                 return getContainsString(args[1], controllerList);
             } else if (args.length == 3) {
                 return this.elevatorControllerMap.containsKey(args[1]) ? new ArrayList<>(this.elevatorControllerMap.get(args[1]).getElevatorsMap().keySet()) : null;
+            } else if (args.length == 4) {
+                ElevatorController elevatorController = this.elevatorControllerMap.get(args[1]);
+                if (elevatorController == null) return null;
+                ElevatorObject elevatorObject = elevatorController.getElevatorsMap().get(args[2]);
+                if (elevatorObject == null) return null;
+                return elevatorObject.getFloorsMap().values().stream().map(FloorObject::getName).collect(Collectors.toList());
             }
             return null;
         } else if (args[0].equalsIgnoreCase("settings")) {

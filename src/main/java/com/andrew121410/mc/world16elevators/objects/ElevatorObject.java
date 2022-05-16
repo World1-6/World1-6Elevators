@@ -139,8 +139,12 @@ public class ElevatorObject implements ConfigurationSerializable {
     }
 
     private void goToFloor(Player player, FloorObject floorObject, ElevatorStatus elevatorStatus, ElevatorWho elevatorWho) {
-        if (floorObject.getPermission() != null && !floorObject.getPermission().isEmpty()) {
-            if (!player.hasPermission(floorObject.getPermission())) {
+        Collection<UUID> peopleThatAreInTheElevator = getPlayersUUIDs();
+
+        if (floorObject.getPermission() != null && !floorObject.getPermission().isEmpty() && peopleThatAreInTheElevator.contains(player.getUniqueId())) {
+            if (player.hasPermission(floorObject.getPermission())) {
+                player.sendMessage(Translate.chat("&6Access granted for floor " + floorObject.getName()));
+            } else {
                 player.sendMessage(Translate.chat("&cYou need &c" + floorObject.getPermission() + " &cto go to this floor!"));
                 return;
             }
@@ -152,7 +156,7 @@ public class ElevatorObject implements ConfigurationSerializable {
             elevatorStatus = ElevatorStatus.UP;
 
         // Player is already inside the elevator have a different message for them
-        if (getPlayersUUIDs().contains(player.getUniqueId())) {
+        if (peopleThatAreInTheElevator.contains(player.getUniqueId())) {
             player.sendMessage(Translate.chat("&2Going to floor " + floorObject.getName()));
         } else {
             switch (elevatorStatus) {
@@ -335,7 +339,11 @@ public class ElevatorObject implements ConfigurationSerializable {
         doors.add(blockUnderMainDoor);
         doors.addAll(beginningFloor.getDoorList().stream().map(Location::clone).toList());
 
+        FloorObject lastNewFloor = null;
         if (goUP) {
+            beginningFloorNumber++;
+            //0 won't be used as a floor anymore.
+            if (beginningFloorNumber == 0) beginningFloorNumber++;
             doors.forEach(location -> location.add(0, 1, 0));
             while (whileLoop) {
                 for (Location blockLocation : doors) {
@@ -348,20 +356,17 @@ public class ElevatorObject implements ConfigurationSerializable {
                                 if (block3.getType() != Material.AIR) {
                                     //We found a floor.
 
-                                    FloorObject floorObject = getFloor(beginningFloorNumber);
-                                    //If there is already a floor, then this means we just add the door to the doorList for that floor
-                                    if (floorObject != null) {
-                                        floorObject.getDoorList().add(blockLocation.clone());
+                                    // If it's on the same y level as the floor then it's considered to be an extra door for that floor
+                                    if (lastNewFloor != null && lastNewFloor.getBlockUnderMainDoor().getBlockY() == blockLocation.getBlockY()) {
+                                        lastNewFloor.getDoorList().add(blockLocation.clone());
                                     } else {
+                                        lastNewFloor = new FloorObject(beginningFloorNumber, blockUnderMainDoor.clone());
+                                        addFloor(lastNewFloor);
+                                        Bukkit.getServer().broadcastMessage("Added floor " + beginningFloorNumber);
+
                                         beginningFloorNumber++;
-
                                         //0 won't be used as a floor anymore.
-                                        if (beginningFloorNumber == 0) {
-                                            beginningFloorNumber++;
-                                        }
-
-                                        floorObject = new FloorObject(beginningFloorNumber, blockUnderMainDoor.clone());
-                                        addFloor(floorObject);
+                                        if (beginningFloorNumber == 0) beginningFloorNumber++;
                                     }
                                 }
                             }
@@ -372,6 +377,9 @@ public class ElevatorObject implements ConfigurationSerializable {
                 if (blockUnderMainDoor.getBlockY() >= 319) whileLoop = false;
             }
         } else {
+            beginningFloorNumber--;
+            //0 won't be used as a floor anymore.
+            if (beginningFloorNumber == 0) beginningFloorNumber--;
             doors.forEach(location -> location.subtract(0, 1, 0));
             while (whileLoop) {
                 for (Location blockLocation : doors) {
@@ -384,20 +392,16 @@ public class ElevatorObject implements ConfigurationSerializable {
                                 if (block3.getType() != Material.AIR) {
                                     //We found a floor.
 
-                                    FloorObject floorObject = getFloor(beginningFloorNumber);
-                                    //If there is already a floor, then this means we just add the door to the doorList for that floor
-                                    if (floorObject != null) {
-                                        floorObject.getDoorList().add(blockLocation.clone());
+                                    // If it's on the same y level as the floor then it's considered to be an extra door for that floor
+                                    if (lastNewFloor != null && lastNewFloor.getBlockUnderMainDoor().getBlockY() == blockLocation.getBlockY()) {
+                                        lastNewFloor.getDoorList().add(blockLocation.clone());
                                     } else {
+                                        lastNewFloor = new FloorObject(beginningFloorNumber, blockUnderMainDoor.clone());
+                                        addFloor(lastNewFloor);
+
                                         beginningFloorNumber--;
-
                                         //0 won't be used as a floor anymore.
-                                        if (beginningFloorNumber == 0) {
-                                            beginningFloorNumber--;
-                                        }
-
-                                        floorObject = new FloorObject(beginningFloorNumber, blockUnderMainDoor.clone());
-                                        addFloor(floorObject);
+                                        if (beginningFloorNumber == 0) beginningFloorNumber--;
                                     }
                                 }
                             }
