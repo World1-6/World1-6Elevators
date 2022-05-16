@@ -59,7 +59,7 @@ public class ElevatorObject implements ConfigurationSerializable {
     private int topBottomFloor = 1;
 
     //Helpers
-    private ElevatorMessageHelper elevatorMessageHelper;
+    private ElevatorFloorSelectorManager elevatorFloorSelectorManager;
     //...
 
     private Queue<FloorQueueObject> floorQueueBuffer;
@@ -101,8 +101,7 @@ public class ElevatorObject implements ConfigurationSerializable {
 
         this.whereItsCurrentlyGoing = null;
 
-        //Helpers
-        this.elevatorMessageHelper = new ElevatorMessageHelper(plugin, this);
+        this.elevatorFloorSelectorManager = new ElevatorFloorSelectorManager(plugin, this);
 
         for (FloorObject value : this.floorsMap.values()) {
             if (value.getFloor() >= 2) {
@@ -223,7 +222,7 @@ public class ElevatorObject implements ConfigurationSerializable {
     protected void floorStop(FloorObject floorObject, ElevatorStatus elevatorStatus) {
         this.elevatorMovement.setFloor(floorObject.getFloor());
         this.whereItsCurrentlyGoing = null;
-        if (!this.elevatorMessageHelper.isRunning()) elevatorMessageHelper.start();
+        if (!this.elevatorFloorSelectorManager.isRunning()) elevatorFloorSelectorManager.start();
         //Sound
         if (elevatorSettings.getArrivalSound() != null) {
             floorObject.getBlockUnderMainDoor().getWorld().playSound(floorObject.getBlockUnderMainDoor(), elevatorSettings.getArrivalSound().getSound(), elevatorSettings.getArrivalSound().getVolume(), elevatorSettings.getArrivalSound().getPitch());
@@ -272,7 +271,7 @@ public class ElevatorObject implements ConfigurationSerializable {
                 floorObject.doSigns(ElevatorObject.this, elevatorStatus, true);
                 floorObject.doDoor(false, true);
                 isPlayersInItAfter = !getPlayers().isEmpty();
-                if (!isPlayersInItAfter) elevatorMessageHelper.stop();
+                if (!isPlayersInItAfter) elevatorFloorSelectorManager.stop();
             }
         }.runTaskLater(plugin, elevatorSettings.getDoorHolderTicksPerSecond());
     }

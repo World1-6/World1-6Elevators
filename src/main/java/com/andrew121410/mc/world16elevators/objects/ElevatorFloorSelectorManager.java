@@ -12,7 +12,7 @@ import org.geysermc.floodgate.api.FloodgateApi;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class ElevatorMessageHelper {
+public class ElevatorFloorSelectorManager {
 
     private World16Elevators plugin;
     private ElevatorObject elevatorObject;
@@ -21,7 +21,7 @@ public class ElevatorMessageHelper {
     private List<UUID> players;
     private int counter;
 
-    public ElevatorMessageHelper(World16Elevators plugin, ElevatorObject elevatorObject) {
+    public ElevatorFloorSelectorManager(World16Elevators plugin, ElevatorObject elevatorObject) {
         this.plugin = plugin;
         this.players = new ArrayList<>();
         this.elevatorObject = elevatorObject;
@@ -61,9 +61,7 @@ public class ElevatorMessageHelper {
 
                     FloorQueueObject floorQueueObject = getNextFloor(elevatorObject.getElevatorMovement().getFloor());
                     if (elevatorObject.getElevatorSettings().isOnlyTwoFloors() && floorQueueObject != null) {
-                        FloorObject floorObject = elevatorObject.getFloor(floorQueueObject.getFloorNumber());
-                        elevatorObject.goToFloor(floorQueueObject.getFloorNumber(), floorQueueObject.getElevatorStatus(), ElevatorWho.MESSAGE_HELPER);
-                        player.sendMessage(Translate.color("&6ElevatorMessageHelper: &9Going to floor: " + floorObject.getName()));
+                        elevatorObject.goToFloor(player, floorQueueObject.getFloorNumber(), floorQueueObject.getElevatorStatus(), ElevatorWho.FLOOR_SELECTOR_MANAGER);
                         players.add(player.getUniqueId());
                         return;
                     }

@@ -69,8 +69,6 @@ public class FloorObject implements ConfigurationSerializable {
 
     public void doSigns(ElevatorObject elevatorObject, ElevatorStatus elevatorStatus, boolean revert) {
         if ((this.signList.isEmpty() && !revert) && elevatorObject.getElevatorSettings().isSignFinderSystem()) {
-            BlockUtils blockUtils = World16Elevators.getInstance().getOtherPlugins().getWorld16Utils().getClassWrappers().getBlockUtils();
-
             List<Sign> signs = new ArrayList<>();
 
             //Find signs
