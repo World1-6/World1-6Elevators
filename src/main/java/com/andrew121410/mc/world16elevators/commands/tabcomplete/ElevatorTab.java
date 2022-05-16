@@ -106,7 +106,7 @@ public class ElevatorTab implements TabCompleter {
             if (args.length == 2) {
                 return getContainsString(args[1], controllerList);
             } else if (args.length == 3) {
-                return this.elevatorControllerMap.containsKey(args[2]) ? new ArrayList<>(this.elevatorControllerMap.get(args[2]).getElevatorsMap().keySet()) : null;
+                return this.elevatorControllerMap.containsKey(args[1]) ? new ArrayList<>(this.elevatorControllerMap.get(args[1]).getElevatorsMap().keySet()) : null;
             }
             return null;
         } else if (args[0].equalsIgnoreCase("settings")) {
