@@ -284,6 +284,28 @@ public class ElevatorCMD implements CommandExecutor {
                         p.sendMessage(Translate.chat("The door for the floor: " + floorObject.getFloor() + " has been deleted for the elevator: " + elevatorObject.getElevatorName()));
                     }
                     return true;
+                } else if (args[1].equalsIgnoreCase("permission") && args.length == 6) {
+                    if (!p.hasPermission("world16elevators.floor.permission")) {
+                        p.sendMessage(Translate.color("&bYou don't have permission to use this command."));
+                        return true;
+                    }
+                    String permission = elevatorArguments.getOtherArgumentsAt(1);
+
+                    if (permission.equalsIgnoreCase("null")) permission = null;
+
+                    FloorObject floorObject = elevatorObject.getFloor(floorName);
+                    if (floorObject == null) {
+                        p.sendMessage(Translate.chat("This floor doesn't exist."));
+                        return true;
+                    }
+
+                    floorObject.setPermission(permission);
+                    if (permission != null) {
+                        p.sendMessage("Changed permission for floor " + floorObject.getName() + " to " + permission);
+                    } else {
+                        p.sendMessage("Removed permission on floor " + floorObject.getName());
+                    }
+                    return true;
                 } else if (args[1].equalsIgnoreCase("smartCreateFloors") && args.length == 6) {
                     if (!p.hasPermission("world16elevators.floor.smartcreatefloors")) {
                         p.sendMessage(Translate.color("&bYou don't have permission to use this command."));
@@ -313,6 +335,7 @@ public class ElevatorCMD implements CommandExecutor {
                 p.sendMessage(Translate.color("&6/elevator floor setName &e<Controller> &9<Elevator> &a<FloorInt> &a<ToName>"));
                 p.sendMessage(Translate.color("&6/elevator floor sign &e<Controller> &9<Elevator> &a<Floor>"));
                 p.sendMessage(Translate.color("&6/elevator floor door &e<Controller> &9<Elevator> &a<Floor> &b<ADD OR DELETE>"));
+                p.sendMessage(Translate.color("&6/elevator floor permission &e<Controller> &9<Elevator> &a<Floor> <Permission>"));
                 p.sendMessage(Translate.color("&6/elevator floor smartCreateFloors &e<Controller> &9<Elevator> &a<FromFloor> &c<GoUp>"));
             }
             return true;
@@ -403,9 +426,7 @@ public class ElevatorCMD implements CommandExecutor {
             if (args.length == 1) {
                 p.sendMessage(Translate.chat("&a&l&o[Elevator Call Help]"));
                 p.sendMessage(Translate.chat("&6/elevator call &e<Controller> &9<ElevatorName> &b<Floor>"));
-                p.sendMessage(Translate.chat("&6/elevator call &e<Controller> &9<ElevatorName> &a<Floor> &b<Goup?>"));
                 p.sendMessage(Translate.chat("&6/elevator call &e<Controller> &a<Floor>"));
-                p.sendMessage(Translate.chat("&6/elevator call &e<Controller> &a<Floor> &b<Goup?>"));
                 return true;
             } else {
                 ElevatorArguments eleArgs = getElevatorArguments(args, 2);
@@ -423,12 +444,12 @@ public class ElevatorCMD implements CommandExecutor {
                 }
 
                 if (elevatorObject != null) {
-                    elevatorObject.goToFloor(floorName, goUp != null ? ElevatorStatus.upOrDown(goUp) : ElevatorStatus.DONT_KNOW, ElevatorWho.PLAYER_COMMAND);
-                    p.sendMessage(Translate.chat("Calling: " + elevatorObject.getElevatorName() + " to go to floor: " + floorName));
+                    elevatorObject.goToFloor(p, floorName, goUp != null ? ElevatorStatus.upOrDown(goUp) : ElevatorStatus.DONT_KNOW, ElevatorWho.PLAYER_COMMAND);
                     return true;
+                } else {
+                    elevatorController.callElevatorClosest(floorName, goUp != null ? ElevatorStatus.upOrDown(goUp) : ElevatorStatus.DONT_KNOW, ElevatorWho.PLAYER_COMMAND);
+                    p.sendMessage(Translate.chat("Called for the nearest elevator to go to floor: " + floorName + " on controller: " + elevatorController.getControllerName()));
                 }
-                elevatorController.callElevatorClosest(floorName, goUp != null ? ElevatorStatus.upOrDown(goUp) : ElevatorStatus.DONT_KNOW, ElevatorWho.PLAYER_COMMAND);
-                p.sendMessage(Translate.chat("Called for the nearest elevator to go to floor: " + floorName + " on controller: " + elevatorController.getControllerName()));
                 return true;
             }
         } else if (args.length == 4 && args[0].equalsIgnoreCase("rename")) {

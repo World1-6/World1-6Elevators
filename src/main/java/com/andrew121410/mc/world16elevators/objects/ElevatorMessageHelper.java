@@ -9,10 +9,7 @@ import org.geysermc.cumulus.SimpleForm;
 import org.geysermc.cumulus.response.SimpleFormResponse;
 import org.geysermc.floodgate.api.FloodgateApi;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class ElevatorMessageHelper {
@@ -107,15 +104,24 @@ public class ElevatorMessageHelper {
 
     private void handleFloodgatePlayer(Player player, ElevatorObject elevatorObject) {
         SimpleForm.Builder simpleForm = SimpleForm.builder().title("Floors").content("List of floors!");
-        elevatorObject.getFloorsMap().forEach((floorNumber, floorObject) -> {
-            String realName = floorObject.getName();
-            simpleForm.button(realName);
-        });
+
+        for (Map.Entry<Integer, FloorObject> integerFloorObjectEntry : elevatorObject.getFloorsMap().entrySet()) {
+            FloorObject floorObject = integerFloorObjectEntry.getValue();
+
+            // Don't show the floor to people whom don't have permission for that floor
+            if (floorObject.getPermission() != null && !floorObject.getPermission().isEmpty()) {
+                if (!player.hasPermission(floorObject.getPermission())) continue;
+            }
+
+            simpleForm.button(floorObject.getName());
+        }
+
         simpleForm.responseHandler((form, data) -> {
             SimpleFormResponse simpleFormResponse = form.parseResponse(data);
             if (!simpleFormResponse.isCorrect()) return;
             plugin.getServer().dispatchCommand(player, "elevator call " + elevatorObject.getElevatorControllerName() + " " + elevatorObject.getElevatorName() + " " + simpleFormResponse.getClickedButton().getText());
         });
+        
         FloodgateApi.getInstance().sendForm(player.getUniqueId(), simpleForm.build());
     }
 

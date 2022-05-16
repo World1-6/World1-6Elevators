@@ -36,28 +36,30 @@ public class FloorObject implements ConfigurationSerializable {
     private Location blockUnderMainDoor;
     private List<Location> doorList;
     private List<SignObject> signList;
+    private String permission;
 
     //Do not save
     private Map<Location, SavedBlock> oldBlocks = new HashMap<>();
 
-    public FloorObject(int floor, String name, Location blockUnderMainDoor, List<Location> doorList, List<SignObject> signList) {
+    public FloorObject(int floor, String name, Location blockUnderMainDoor, List<Location> doorList, List<SignObject> signList, String permission) {
         this.floor = floor;
         this.name = name;
         this.blockUnderMainDoor = ifIronDoorThenGetBlockUnderTheDoorIfNotThanReturn(blockUnderMainDoor).getLocation();
         this.doorList = doorList;
         this.signList = signList;
+        this.permission = permission;
     }
 
     public FloorObject(int floor, String name, Location blockUnderMainDoor) {
-        this(floor, name, blockUnderMainDoor, new ArrayList<>(), new ArrayList<>());
+        this(floor, name, blockUnderMainDoor, new ArrayList<>(), new ArrayList<>(), null);
     }
 
     public FloorObject(int floor, Location blockUnderMainDoor) {
-        this(floor, null, blockUnderMainDoor, new ArrayList<>(), new ArrayList<>());
+        this(floor, null, blockUnderMainDoor, new ArrayList<>(), new ArrayList<>(), null);
     }
 
     public FloorObject(String name, Location blockUnderMainDoor) {
-        this(Integer.MIN_VALUE, name, blockUnderMainDoor, new ArrayList<>(), new ArrayList<>());
+        this(Integer.MIN_VALUE, name, blockUnderMainDoor, new ArrayList<>(), new ArrayList<>(), null);
     }
 
     //Do not remove unnecessary bounding and .clone().
@@ -202,11 +204,12 @@ public class FloorObject implements ConfigurationSerializable {
         map.put("MainDoor", this.blockUnderMainDoor);
         map.put("DoorList", this.doorList);
         map.put("SignList", this.signList);
+        map.put("Permission", this.permission);
         return map;
     }
 
     public static FloorObject deserialize(Map<String, Object> map) {
-        return new FloorObject((int) map.get("Floor"), (String) map.get("Name"), (Location) map.get("MainDoor"), (List<Location>) map.get("DoorList"), (List<SignObject>) map.get("SignList"));
+        return new FloorObject((int) map.get("Floor"), (String) map.get("Name"), (Location) map.get("MainDoor"), (List<Location>) map.get("DoorList"), (List<SignObject>) map.get("SignList"), (String) map.get("Permission"));
     }
 }
 

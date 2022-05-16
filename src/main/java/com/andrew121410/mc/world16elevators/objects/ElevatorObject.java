@@ -122,9 +122,8 @@ public class ElevatorObject implements ConfigurationSerializable {
         return getEntities().stream().filter(entity -> entity instanceof Player).map(entity -> (Player) entity).collect(Collectors.toList());
     }
 
-    public void callElevator(int whatFloor, int toWhatFloor, ElevatorWho elevatorWho) {
-        goToFloor(whatFloor, ElevatorStatus.DONT_KNOW, elevatorWho);
-        goToFloor(toWhatFloor, ElevatorStatus.DONT_KNOW, elevatorWho);
+    public Collection<UUID> getPlayersUUIDs() {
+        return getPlayers().stream().map(Entity::getUniqueId).collect(Collectors.toList());
     }
 
     public void goToFloor(Player player, String floorName, ElevatorStatus elevatorStatus, ElevatorWho elevatorWho) {
@@ -140,18 +139,30 @@ public class ElevatorObject implements ConfigurationSerializable {
     }
 
     private void goToFloor(Player player, FloorObject floorObject, ElevatorStatus elevatorStatus, ElevatorWho elevatorWho) {
+        if (floorObject.getPermission() != null && !floorObject.getPermission().isEmpty()) {
+            if (!player.hasPermission(floorObject.getPermission())) {
+                player.sendMessage(Translate.chat("&cYou need &c" + floorObject.getPermission() + " &cto go to this floor!"));
+                return;
+            }
+        }
+
         if (elevatorStatus == ElevatorStatus.UP && floorObject.getFloor() == this.topFloor)
             elevatorStatus = ElevatorStatus.DOWN;
         if (elevatorStatus == ElevatorStatus.DOWN && floorObject.getFloor() == this.topBottomFloor)
             elevatorStatus = ElevatorStatus.UP;
 
-        switch (elevatorStatus) {
-            case UP ->
-                    player.sendMessage(Translate.color("&2[Elevator] &6Called elevator to go to floor " + floorObject.getName() + " to go up"));
-            case DOWN ->
-                    player.sendMessage(Translate.color("&2[Elevator] &6Called elevator to go to floor " + floorObject.getName() + " to go down"));
-            case DONT_KNOW ->
-                    player.sendMessage(Translate.color("&2[Elevator] &6Called elevator to go to floor " + floorObject.getName()));
+        // Player is already inside the elevator have a different message for them
+        if (getPlayersUUIDs().contains(player.getUniqueId())) {
+            player.sendMessage(Translate.chat("&2Going to floor " + floorObject.getName()));
+        } else {
+            switch (elevatorStatus) {
+                case UP ->
+                        player.sendMessage(Translate.color("&2[Elevator] &6Called elevator to go to floor " + floorObject.getName() + " to go up"));
+                case DOWN ->
+                        player.sendMessage(Translate.color("&2[Elevator] &6Called elevator to go to floor " + floorObject.getName() + " to go down"));
+                case DONT_KNOW ->
+                        player.sendMessage(Translate.color("&2[Elevator] &6Called elevator to go to floor " + floorObject.getName()));
+            }
         }
 
         goToFloor(floorObject.getFloor(), elevatorStatus, elevatorWho);
@@ -472,9 +483,14 @@ public class ElevatorObject implements ConfigurationSerializable {
 
     public void clickMessageGoto(Player player) {
         ComponentBuilder componentBuilder = new ComponentBuilder().append("[").color(ChatColor.WHITE).append("BexarSystems").color(ChatColor.GOLD).append(" - ").color(ChatColor.RED).append("Please click a floor in the chat to take the elevator to.").color(ChatColor.BLUE).append("]").color(ChatColor.WHITE).append("\n");
+
         for (Map.Entry<Integer, FloorObject> floorObjectEntry : this.floorsMap.entrySet()) {
-            Integer integer = floorObjectEntry.getKey();
             FloorObject floorObject = floorObjectEntry.getValue();
+
+            // Don't show the floor to people whom don't have permission for that floor
+            if (floorObject.getPermission() != null && !floorObject.getPermission().isEmpty()) {
+                if (!player.hasPermission(floorObject.getPermission())) continue;
+            }
 
             componentBuilder.reset().append(new ComponentBuilder(floorObject.getName() + ",")
                     .color(ChatColor.GOLD)
@@ -484,6 +500,7 @@ public class ElevatorObject implements ConfigurationSerializable {
                     .append(" ")
                     .create());
         }
+
         player.spigot().sendMessage(componentBuilder.create());
     }
 
@@ -491,8 +508,13 @@ public class ElevatorObject implements ConfigurationSerializable {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("&2[Elevator Floors]&r");
         for (Map.Entry<Integer, FloorObject> entry : this.floorsMap.entrySet()) {
-            Integer floor = entry.getKey();
             FloorObject floorObject = entry.getValue();
+
+            // Don't show the floor to people whom don't have permission for that floor
+            if (floorObject.getPermission() != null && !floorObject.getPermission().isEmpty()) {
+                if (!player.hasPermission(floorObject.getPermission())) continue;
+            }
+
             stringBuilder.append("&e, &a" + floorObject.getName());
         }
         player.sendMessage(Translate.color(stringBuilder.toString()));

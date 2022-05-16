@@ -89,7 +89,7 @@ public class ElevatorTab implements TabCompleter {
             return null;
         } else if (args[0].equalsIgnoreCase("floor")) {
             if (args.length == 2) {
-                return getContainsString(args[1], Arrays.asList("create", "door", "sign", "delete", "setName", "smartCreateFloors"));
+                return getContainsString(args[1], Arrays.asList("create", "delete", "setName", "sign", "door", "permission", "smartCreateFloors"));
             } else if (args.length == 3) {
                 return getContainsString(args[2], controllerList);
             } else if (args.length == 4) {
@@ -105,6 +105,8 @@ public class ElevatorTab implements TabCompleter {
         } else if (args[0].equalsIgnoreCase("call")) {
             if (args.length == 2) {
                 return getContainsString(args[1], controllerList);
+            } else if (args.length == 3) {
+                return this.elevatorControllerMap.containsKey(args[2]) ? new ArrayList<>(this.elevatorControllerMap.get(args[2]).getElevatorsMap().keySet()) : null;
             }
             return null;
         } else if (args[0].equalsIgnoreCase("settings")) {
