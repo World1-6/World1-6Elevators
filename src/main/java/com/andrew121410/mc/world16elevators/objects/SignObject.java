@@ -1,8 +1,6 @@
 package com.andrew121410.mc.world16elevators.objects;
 
 
-import com.andrew121410.mc.world16elevators.World16Elevators;
-import com.andrew121410.mc.world16utils.blocks.BlockUtils;
 import com.andrew121410.mc.world16utils.blocks.UniversalBlockUtils;
 import com.andrew121410.mc.world16utils.chat.Translate;
 import com.andrew121410.mc.world16utils.sign.SignCache;
@@ -25,12 +23,10 @@ public class SignObject implements ConfigurationSerializable {
 
     private Location location;
     private SignCache signCache;
-    private BlockUtils blockUtils;
 
     public SignObject(Location location) {
         this.location = location;
         this.signCache = new SignCache();
-        this.blockUtils = World16Elevators.getInstance().getOtherPlugins().getWorld16Utils().getClassWrappers().getBlockUtils();
     }
 
     public boolean doUpArrow() {

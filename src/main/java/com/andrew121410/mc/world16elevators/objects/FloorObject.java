@@ -1,7 +1,5 @@
 package com.andrew121410.mc.world16elevators.objects;
 
-import com.andrew121410.mc.world16elevators.World16Elevators;
-import com.andrew121410.mc.world16utils.blocks.BlockUtils;
 import com.andrew121410.mc.world16utils.blocks.UniversalBlockUtils;
 import lombok.*;
 import org.bukkit.Effect;
