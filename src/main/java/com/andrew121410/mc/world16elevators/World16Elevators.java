@@ -7,6 +7,7 @@ import com.andrew121410.mc.world16elevators.manager.ElevatorManager;
 import com.andrew121410.mc.world16elevators.objects.*;
 import com.andrew121410.mc.world16elevators.utils.OtherPlugins;
 import com.andrew121410.mc.world16elevators.utils.SetListMap;
+import com.andrew121410.mc.world16utils.updater.UpdateManager;
 import org.bukkit.configuration.serialization.ConfigurationSerialization;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -52,6 +53,8 @@ public final class World16Elevators extends JavaPlugin {
 
         registerEvents();
         registerCommands();
+
+        UpdateManager.registerUpdater(this, new com.andrew121410.mc.world16elevators.Updater(this));
     }
 
     @Override
