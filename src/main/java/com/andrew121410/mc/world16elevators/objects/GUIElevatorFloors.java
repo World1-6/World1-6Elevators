@@ -1,7 +1,7 @@
 package com.andrew121410.mc.world16elevators.objects;
 
 import com.andrew121410.mc.world16elevators.World16Elevators;
-import com.andrew121410.mc.world16utils.gui.AdvanceGUIWindow;
+import com.andrew121410.mc.world16utils.gui.GUIWindow;
 import com.andrew121410.mc.world16utils.gui.buttons.GUIButton;
 import com.andrew121410.mc.world16utils.gui.buttons.defaults.ClickEventButton;
 import com.andrew121410.mc.world16utils.utils.InventoryUtils;
@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Map;
 
 @AllArgsConstructor
-public class GUIElevatorFloors extends AdvanceGUIWindow {
+public class GUIElevatorFloors extends GUIWindow {
 
     private World16Elevators plugin;
     private ElevatorObject elevatorObject;
