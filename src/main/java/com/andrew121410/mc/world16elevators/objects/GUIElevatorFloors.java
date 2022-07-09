@@ -2,7 +2,7 @@ package com.andrew121410.mc.world16elevators.objects;
 
 import com.andrew121410.mc.world16elevators.World16Elevators;
 import com.andrew121410.mc.world16utils.gui.GUIWindow;
-import com.andrew121410.mc.world16utils.gui.buttons.GUIButton;
+import com.andrew121410.mc.world16utils.gui.buttons.AbstractGUIButton;
 import com.andrew121410.mc.world16utils.gui.buttons.defaults.ClickEventButton;
 import com.andrew121410.mc.world16utils.utils.InventoryUtils;
 import lombok.AllArgsConstructor;
@@ -22,7 +22,7 @@ public class GUIElevatorFloors extends GUIWindow {
 
     @Override
     public void onCreate(Player player) {
-        List<GUIButton> guiButtons = new ArrayList<>();
+        List<AbstractGUIButton> guiButtons = new ArrayList<>();
         int guiSlots = elevatorObject.getFloorsMap().size() + (9 - (elevatorObject.getFloorsMap().size() % 9));
 
         int slot = 0;

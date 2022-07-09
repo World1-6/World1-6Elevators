@@ -94,7 +94,7 @@
         <dependency>
             <groupId>com.github.World1-6.World1-6Utils</groupId>
             <artifactId>World1-6Utils-Plugin</artifactId>
-            <version>3a70cad2</version>
+            <version>ec599d60</version>
             <scope>provided</scope>
         </dependency>
 
