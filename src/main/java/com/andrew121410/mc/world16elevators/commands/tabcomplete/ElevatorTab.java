@@ -1,7 +1,11 @@
 package com.andrew121410.mc.world16elevators.commands.tabcomplete;
 
+import com.andrew121410.mc.world16elevators.ElevatorController;
+import com.andrew121410.mc.world16elevators.ElevatorObject;
+import com.andrew121410.mc.world16elevators.FloorObject;
 import com.andrew121410.mc.world16elevators.World16Elevators;
-import com.andrew121410.mc.world16elevators.objects.*;
+import com.andrew121410.mc.world16elevators.enums.ElevatorCallButtonType;
+import com.andrew121410.mc.world16elevators.enums.ElevatorFloorSelectorType;
 import org.bukkit.Sound;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;

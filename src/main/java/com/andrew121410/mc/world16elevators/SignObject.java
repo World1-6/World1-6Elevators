@@ -1,4 +1,4 @@
-package com.andrew121410.mc.world16elevators.objects;
+package com.andrew121410.mc.world16elevators;
 
 
 import com.andrew121410.mc.world16utils.blocks.UniversalBlockUtils;

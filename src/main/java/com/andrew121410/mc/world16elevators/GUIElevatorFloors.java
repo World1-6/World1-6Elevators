@@ -1,6 +1,5 @@
-package com.andrew121410.mc.world16elevators.objects;
+package com.andrew121410.mc.world16elevators;
 
-import com.andrew121410.mc.world16elevators.World16Elevators;
 import com.andrew121410.mc.world16utils.gui.GUIWindow;
 import com.andrew121410.mc.world16utils.gui.buttons.AbstractGUIButton;
 import com.andrew121410.mc.world16utils.gui.buttons.defaults.ClickEventButton;

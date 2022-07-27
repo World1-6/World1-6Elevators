@@ -1,6 +1,6 @@
 package com.andrew121410.mc.world16elevators.utils;
 
-import com.andrew121410.mc.world16elevators.objects.ElevatorController;
+import com.andrew121410.mc.world16elevators.ElevatorController;
 import org.bukkit.Location;
 
 import java.util.HashMap;

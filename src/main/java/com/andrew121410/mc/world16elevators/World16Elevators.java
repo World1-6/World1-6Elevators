@@ -2,9 +2,8 @@ package com.andrew121410.mc.world16elevators;
 
 import com.andrew121410.mc.world16elevators.commands.ElevatorCMD;
 import com.andrew121410.mc.world16elevators.listeners.OnPlayerInteractEvent;
-import com.andrew121410.mc.world16elevators.manager.ElevatorChunkSmartManager;
-import com.andrew121410.mc.world16elevators.manager.ElevatorManager;
-import com.andrew121410.mc.world16elevators.objects.*;
+import com.andrew121410.mc.world16elevators.storage.ElevatorChunkSmartManager;
+import com.andrew121410.mc.world16elevators.storage.ElevatorManager;
 import com.andrew121410.mc.world16elevators.utils.OtherPlugins;
 import com.andrew121410.mc.world16elevators.utils.SetListMap;
 import com.andrew121410.mc.world16utils.updater.UpdateManager;

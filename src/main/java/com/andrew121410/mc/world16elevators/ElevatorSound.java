@@ -1,4 +1,4 @@
-package com.andrew121410.mc.world16elevators.objects;
+package com.andrew121410.mc.world16elevators;
 
 import lombok.*;
 import org.bukkit.Sound;

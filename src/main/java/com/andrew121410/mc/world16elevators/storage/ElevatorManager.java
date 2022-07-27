@@ -1,7 +1,7 @@
-package com.andrew121410.mc.world16elevators.manager;
+package com.andrew121410.mc.world16elevators.storage;
 
 import com.andrew121410.mc.world16elevators.World16Elevators;
-import com.andrew121410.mc.world16elevators.objects.ElevatorController;
+import com.andrew121410.mc.world16elevators.ElevatorController;
 import com.andrew121410.mc.world16utils.chat.Translate;
 import com.andrew121410.mc.world16utils.config.CustomYmlManager;
 import org.bukkit.Location;

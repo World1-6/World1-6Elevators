@@ -1,5 +1,7 @@
-package com.andrew121410.mc.world16elevators.objects;
+package com.andrew121410.mc.world16elevators;
 
+import com.andrew121410.mc.world16elevators.enums.ElevatorCallButtonType;
+import com.andrew121410.mc.world16elevators.enums.ElevatorFloorSelectorType;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;

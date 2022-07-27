@@ -1,6 +1,7 @@
-package com.andrew121410.mc.world16elevators.objects;
+package com.andrew121410.mc.world16elevators;
 
-import com.andrew121410.mc.world16elevators.World16Elevators;
+import com.andrew121410.mc.world16elevators.enums.ElevatorStatus;
+import com.andrew121410.mc.world16elevators.enums.ElevatorWho;
 import com.andrew121410.mc.world16utils.chat.ChatResponseManager;
 import com.andrew121410.mc.world16utils.chat.Translate;
 import org.bukkit.entity.Player;

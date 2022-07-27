@@ -1,9 +1,12 @@
 package com.andrew121410.mc.world16elevators.commands;
 
-import com.andrew121410.mc.world16elevators.World16Elevators;
+import com.andrew121410.mc.world16elevators.*;
 import com.andrew121410.mc.world16elevators.commands.tabcomplete.ElevatorTab;
-import com.andrew121410.mc.world16elevators.manager.ElevatorManager;
-import com.andrew121410.mc.world16elevators.objects.*;
+import com.andrew121410.mc.world16elevators.enums.ElevatorCallButtonType;
+import com.andrew121410.mc.world16elevators.enums.ElevatorFloorSelectorType;
+import com.andrew121410.mc.world16elevators.enums.ElevatorStatus;
+import com.andrew121410.mc.world16elevators.enums.ElevatorWho;
+import com.andrew121410.mc.world16elevators.storage.ElevatorManager;
 import com.andrew121410.mc.world16utils.chat.Translate;
 import com.andrew121410.mc.world16utils.player.PlayerUtils;
 import com.andrew121410.mc.world16utils.utils.Utils;
