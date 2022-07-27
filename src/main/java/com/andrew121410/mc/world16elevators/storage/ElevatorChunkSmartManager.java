@@ -1,18 +1,19 @@
 package com.andrew121410.mc.world16elevators.storage;
 
-import com.andrew121410.mc.world16elevators.World16Elevators;
 import com.andrew121410.mc.world16elevators.ElevatorController;
+import com.andrew121410.mc.world16elevators.World16Elevators;
 import org.bukkit.Location;
 
 import java.util.Iterator;
 import java.util.Map;
 
+// The purpose of this class is to load and unload elevator controllers when they are in chunks that are loaded or unloaded.
 public class ElevatorChunkSmartManager implements Runnable {
 
-    private Map<Location, String> chunksToControllerNameMap;
-    private Map<String, ElevatorController> elevatorControllerMap;
+    private final Map<Location, String> chunksToControllerNameMap;
+    private final Map<String, ElevatorController> elevatorControllerMap;
 
-    private World16Elevators plugin;
+    private final World16Elevators plugin;
 
     public ElevatorChunkSmartManager(World16Elevators plugin) {
         this.plugin = plugin;
