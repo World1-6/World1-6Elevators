@@ -2,7 +2,7 @@ package com.andrew121410.mc.world16elevators.objects;
 
 
 import com.andrew121410.mc.world16elevators.World16Elevators;
-import com.andrew121410.mc.world16utils.player.SmoothTeleport;
+import com.andrew121410.mc.world16utils.player.PlayerUtils;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -10,7 +10,6 @@ public class ElevatorRunnable extends BukkitRunnable {
 
     private World16Elevators plugin;
     private ElevatorObject elevatorObject;
-    private SmoothTeleport smoothTeleport;
 
     private boolean goUP;
     private FloorObject floorObject;
@@ -23,7 +22,6 @@ public class ElevatorRunnable extends BukkitRunnable {
     public ElevatorRunnable(World16Elevators plugin, ElevatorObject elevatorObject, boolean goUP, FloorObject floorObject, ElevatorStatus elevatorStatus, int counter, FloorObject floorThatWeAreGoingToPass) {
         this.plugin = plugin;
         this.elevatorObject = elevatorObject;
-        this.smoothTeleport = this.plugin.getOtherPlugins().getWorld16Utils().getClassWrappers().getSmoothTeleport();
         this.goUP = goUP;
         this.floorObject = floorObject;
         this.elevatorStatus = elevatorStatus;
@@ -78,7 +76,7 @@ public class ElevatorRunnable extends BukkitRunnable {
 
             //TP THEM UP 1
             for (Player player : elevatorObject.getPlayers()) {
-                smoothTeleport.teleport(player, player.getLocation().add(0, 1, 0));
+                PlayerUtils.smoothTeleport(player, player.getLocation().add(0, 1, 0));
             }
 
             if (elevatorObject.getElevatorSettings().isDoElevatorLeveling()) {
@@ -94,7 +92,7 @@ public class ElevatorRunnable extends BukkitRunnable {
 
             //TP THEM DOWN 1
             for (Player player : elevatorObject.getPlayers()) {
-                smoothTeleport.teleport(player, player.getLocation().subtract(0, 1, 0));
+                PlayerUtils.smoothTeleport(player, player.getLocation().subtract(0, 1, 0));
             }
 
             if (elevatorObject.getElevatorSettings().isDoElevatorLeveling()) {
