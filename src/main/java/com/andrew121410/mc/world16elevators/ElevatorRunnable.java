@@ -43,7 +43,7 @@ public class ElevatorRunnable extends BukkitRunnable {
             Integer intFloorThatWeAreGoingToPass = elevatorObject.getFloorBuffer().peek();
             floorThatWeAreGoingToPass = intFloorThatWeAreGoingToPass != null ? elevatorObject.getFloor(intFloorThatWeAreGoingToPass) : null;
         } else {
-            //We are passing a floor.
+            // We are passing a floor.
             if (elevatorObject.getElevatorMovement().getAtDoor().getBlockY() == floorThatWeAreGoingToPass.getBlockUnderMainDoor().getBlockY()) {
                 if (elevatorObject.getElevatorSettings().getPassingByFloorSound() != null) {
                     elevatorObject.getElevatorMovement().getAtDoor().getWorld().playSound(elevatorObject.getElevatorMovement().getAtDoor(), elevatorObject.getElevatorSettings().getPassingByFloorSound().getSound(), elevatorObject.getElevatorSettings().getPassingByFloorSound().getVolume(), elevatorObject.getElevatorSettings().getPassingByFloorSound().getPitch());
@@ -52,7 +52,7 @@ public class ElevatorRunnable extends BukkitRunnable {
             }
         }
 
-//        Check's if at the floor if so then stop the elevator.
+        // Check's if at the floor if so then stop the elevator.
         if (elevatorObject.getElevatorMovement().getAtDoor().getBlockY() == floorObject.getBlockUnderMainDoor().getBlockY()) {
             this.cancel();
             elevatorObject.floorStop(floorObject, elevatorStatus);
@@ -62,7 +62,7 @@ public class ElevatorRunnable extends BukkitRunnable {
             return;
         }
 
-//       Stop's the elevator if emergencyStop is on.
+        // Stop's the elevator if emergencyStop is on.
         if (elevatorObject.isEmergencyStop()) {
             elevatorObject.setIdling(false);
             elevatorObject.setGoing(false);
@@ -72,9 +72,9 @@ public class ElevatorRunnable extends BukkitRunnable {
         }
 
         if (goUP) {
-            elevatorObject.goUP();
+            elevatorObject.goUp();
 
-            //TP THEM UP 1
+            // Teleport them up 1
             for (Player player : elevatorObject.getPlayers()) {
                 PlayerUtils.smoothTeleport(player, player.getLocation().add(0, 1, 0));
             }
@@ -88,9 +88,9 @@ public class ElevatorRunnable extends BukkitRunnable {
                 }
             }
         } else {
-            elevatorObject.goDOWN();
+            elevatorObject.goDown();
 
-            //TP THEM DOWN 1
+            // Teleport them down 1
             for (Player player : elevatorObject.getPlayers()) {
                 PlayerUtils.smoothTeleport(player, player.getLocation().subtract(0, 1, 0));
             }
@@ -105,6 +105,10 @@ public class ElevatorRunnable extends BukkitRunnable {
             }
         }
         this.cancel();
+
+        // Don't try to register another task if the plugin is disabled.
+        if (!this.plugin.isEnabled()) return;
+
         new ElevatorRunnable(plugin, elevatorObject, goUP, floorObject, elevatorStatus, counter, floorThatWeAreGoingToPass).runTaskLater(plugin, counter);
     }
 }

@@ -28,6 +28,7 @@ import org.bukkit.util.BoundingBox;
 
 import java.time.Instant;
 import java.util.*;
+import java.util.logging.Level;
 import java.util.stream.Collectors;
 
 @EqualsAndHashCode
@@ -242,17 +243,37 @@ public class ElevatorObject implements ConfigurationSerializable {
         doFloorIdle();
     }
 
-    protected void goUP() {
-        WorldEdit worldEdit = this.plugin.getOtherPlugins().getWorld16Utils().getClassWrappers().getWorldEdit();
-        worldEdit.moveCuboidRegion(getBukkitWorld(), elevatorMovement.getBoundingBox(), new Location(getBukkitWorld(), 0, 1, 0), 1);
+    protected void goUp() {
+        try {
+            WorldEdit worldEdit = this.plugin.getOtherPlugins().getWorld16Utils().getClassWrappers().getWorldEdit();
+            worldEdit.moveCuboidRegion(getBukkitWorld(), elevatorMovement.getBoundingBox(), new Location(getBukkitWorld(), 0, 1, 0), 1);
+        } catch (Exception e) {
+            this.plugin.getServer().broadcast(Translate.miniMessage("<red>Error while moving elevator up! <red><bold>Check the console for more info."));
+            this.plugin.getServer().broadcastMessage("");
+            this.plugin.getServer().broadcast(Translate.miniMessage("<yellow> ElevatorController: " + this.elevatorControllerName + " Elevator: " + this.elevatorName));
+            this.plugin.getLogger().log(Level.SEVERE, e.getMessage());
+
+            this.plugin.getServer().getPluginManager().disablePlugin(this.plugin);
+            return;
+        }
 
         elevatorMovement.moveUP();
         this.boundingBoxExpanded.shift(0, 1, 0);
     }
 
-    protected void goDOWN() {
-        WorldEdit worldEdit = this.plugin.getOtherPlugins().getWorld16Utils().getClassWrappers().getWorldEdit();
-        worldEdit.moveCuboidRegion(getBukkitWorld(), elevatorMovement.getBoundingBox(), new Location(getBukkitWorld(), 0, -1, 0), 1);
+    protected void goDown() {
+        try {
+            WorldEdit worldEdit = this.plugin.getOtherPlugins().getWorld16Utils().getClassWrappers().getWorldEdit();
+            worldEdit.moveCuboidRegion(getBukkitWorld(), elevatorMovement.getBoundingBox(), new Location(getBukkitWorld(), 0, -1, 0), 1);
+        } catch (Exception e) {
+            this.plugin.getServer().broadcast(Translate.miniMessage("<red>Error while moving elevator down! <red><bold>Check the console for more info."));
+            this.plugin.getServer().broadcastMessage("");
+            this.plugin.getServer().broadcast(Translate.miniMessage("<yellow> ElevatorController: " + this.elevatorControllerName + " Elevator: " + this.elevatorName));
+            this.plugin.getLogger().log(Level.SEVERE, e.getMessage());
+
+            this.plugin.getServer().getPluginManager().disablePlugin(this.plugin);
+            return;
+        }
 
         elevatorMovement.moveDOWN();
         this.boundingBoxExpanded.shift(0, -1, 0);
@@ -283,6 +304,12 @@ public class ElevatorObject implements ConfigurationSerializable {
     }
 
     private void calculateFloorBuffer(int floor, boolean isUp) {
+        // Don't try to calculateFloorBuffer If floor number is null
+        // This happens if the elevator was stopped abruptly like using /elevator stop
+        if (this.elevatorMovement.getFloor() == null) {
+            return;
+        }
+
         if (isUp) for (int num = this.elevatorMovement.getFloor() + 1; num < floor; num++) {
             if (num == 0) continue; //0 won't be used as a floor anymore.
             floorBuffer.add(num);
