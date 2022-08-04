@@ -512,45 +512,6 @@ public class ElevatorObject implements ConfigurationSerializable {
         return floorObject;
     }
 
-    public void clickMessageGoto(Player player) {
-        ComponentBuilder componentBuilder = new ComponentBuilder().append("[").color(ChatColor.WHITE).append("BexarSystems").color(ChatColor.GOLD).append(" - ").color(ChatColor.RED).append("Please click a floor in the chat to take the elevator to.").color(ChatColor.BLUE).append("]").color(ChatColor.WHITE).append("\n");
-
-        for (Map.Entry<Integer, FloorObject> floorObjectEntry : this.floorsMap.entrySet()) {
-            FloorObject floorObject = floorObjectEntry.getValue();
-
-            // Don't show the floor to people whom don't have permission for that floor
-            if (floorObject.getPermission() != null && !floorObject.getPermission().isEmpty()) {
-                if (!player.hasPermission(floorObject.getPermission())) continue;
-            }
-
-            componentBuilder.reset().append(new ComponentBuilder(floorObject.getName() + ",")
-                    .color(ChatColor.GOLD)
-                    .bold(true)
-                    .event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/elevator call " + elevatorControllerName + " " + elevatorName + " " + floorObject.getName()))
-                    .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text("Click me to go to: " + floorObject.getName())))
-                    .append(" ")
-                    .create());
-        }
-
-        player.spigot().sendMessage(componentBuilder.create());
-    }
-
-    public void elevatorFloorsMessage(Player player) {
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("&2[Elevator Floors]&r");
-        for (Map.Entry<Integer, FloorObject> entry : this.floorsMap.entrySet()) {
-            FloorObject floorObject = entry.getValue();
-
-            // Don't show the floor to people whom don't have permission for that floor
-            if (floorObject.getPermission() != null && !floorObject.getPermission().isEmpty()) {
-                if (!player.hasPermission(floorObject.getPermission())) continue;
-            }
-
-            stringBuilder.append("&e, &a" + floorObject.getName());
-        }
-        player.sendMessage(Translate.color(stringBuilder.toString()));
-    }
-
     private void arrivalChime(Location location) {
         getBukkitWorld().playSound(location, Sound.BLOCK_NOTE_BLOCK_PLING, 10F, 1.8F);
     }

@@ -99,7 +99,11 @@ public class ElevatorController implements ConfigurationSerializable {
     }
 
     public boolean isSingle() {
-        return this.elevatorsMap.size() == 0;
+        return this.elevatorsMap.size() == 1;
+    }
+
+    public boolean isEmpty() {
+        return this.elevatorsMap.isEmpty();
     }
 
     @Override
