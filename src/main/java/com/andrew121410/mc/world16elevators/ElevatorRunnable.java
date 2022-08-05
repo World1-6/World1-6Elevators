@@ -71,9 +71,8 @@ public class ElevatorRunnable extends BukkitRunnable {
             return;
         }
 
+        elevatorObject.move(1, goUP);
         if (goUP) {
-            elevatorObject.goUp();
-
             // Teleport them up 1
             for (Player player : elevatorObject.getPlayers()) {
                 PlayerUtils.smoothTeleport(player, player.getLocation().add(0, 1, 0));
@@ -88,8 +87,6 @@ public class ElevatorRunnable extends BukkitRunnable {
                 }
             }
         } else {
-            elevatorObject.goDown();
-
             // Teleport them down 1
             for (Player player : elevatorObject.getPlayers()) {
                 PlayerUtils.smoothTeleport(player, player.getLocation().subtract(0, 1, 0));

@@ -34,9 +34,20 @@ public class ElevatorSettings implements ConfigurationSerializable {
     private ElevatorFloorSelectorType floorSelectorType;
     private ElevatorCallButtonType callButtonType;
     private boolean signFinderSystem;
+    private boolean teleportElevatorOnEmpty;
     //...
 
-    public ElevatorSettings(long ticksPerSecond, long doorHolderTicksPerSecond, long elevatorWaiterTicksPerSecond, boolean doElevatorLeveling, boolean onlyTwoFloors, ElevatorSound arrivalSound, ElevatorSound passingByFloorSound, ElevatorFloorSelectorType floorSelectorType, ElevatorCallButtonType callButtonType, boolean signFinderSystem) {
+    public ElevatorSettings(long ticksPerSecond,
+                            long doorHolderTicksPerSecond,
+                            long elevatorWaiterTicksPerSecond,
+                            boolean doElevatorLeveling,
+                            boolean onlyTwoFloors,
+                            ElevatorSound arrivalSound,
+                            ElevatorSound passingByFloorSound,
+                            ElevatorFloorSelectorType floorSelectorType,
+                            ElevatorCallButtonType callButtonType,
+                            boolean signFinderSystem,
+                            boolean teleportElevatorOnEmpty) {
         this.ticksPerSecond = ticksPerSecond;
         this.doorHolderTicksPerSecond = doorHolderTicksPerSecond;
         this.elevatorWaiterTicksPerSecond = elevatorWaiterTicksPerSecond;
@@ -47,10 +58,11 @@ public class ElevatorSettings implements ConfigurationSerializable {
         this.floorSelectorType = floorSelectorType;
         this.callButtonType = callButtonType;
         this.signFinderSystem = signFinderSystem;
+        this.teleportElevatorOnEmpty = teleportElevatorOnEmpty;
     }
 
     public ElevatorSettings() {
-        this(DEFAULT_TICKS_PER_SECOND, DEFAULT_DOOR_HOLDER_TICKS_PER_SECOND, DEFAULT_ELEVATOR_WAITER_TICKS_PER_SECOND, true, false, null, null, ElevatorFloorSelectorType.CLICK_CHAT, ElevatorCallButtonType.CALL_THE_ELEVATOR, true);
+        this(DEFAULT_TICKS_PER_SECOND, DEFAULT_DOOR_HOLDER_TICKS_PER_SECOND, DEFAULT_ELEVATOR_WAITER_TICKS_PER_SECOND, true, false, null, null, ElevatorFloorSelectorType.CLICK_CHAT, ElevatorCallButtonType.CALL_THE_ELEVATOR, true, false);
     }
 
     public ElevatorSettings clone() {
@@ -64,7 +76,8 @@ public class ElevatorSettings implements ConfigurationSerializable {
                 this.passingByFloorSound,
                 this.floorSelectorType,
                 this.callButtonType,
-                this.signFinderSystem
+                this.signFinderSystem,
+                this.teleportElevatorOnEmpty
         );
     }
 
@@ -81,6 +94,7 @@ public class ElevatorSettings implements ConfigurationSerializable {
         map.put("FloorSelectorType", this.floorSelectorType.name());
         map.put("CallButtonType", this.callButtonType.name());
         map.put("SignFinderSystem", this.signFinderSystem);
+        map.put("TeleportElevatorOnEmpty", this.teleportElevatorOnEmpty);
         return map;
     }
 
@@ -98,6 +112,7 @@ public class ElevatorSettings implements ConfigurationSerializable {
                 (ElevatorSound) map.get("PassingByFloorSound"),
                 elevatorFloorSelectorType,
                 elevatorCallButtonType,
-                (Boolean) map.get("SignFinderSystem"));
+                (Boolean) map.get("SignFinderSystem"),
+                (Boolean) map.getOrDefault("TeleportElevatorOnEmpty", false));
     }
 }

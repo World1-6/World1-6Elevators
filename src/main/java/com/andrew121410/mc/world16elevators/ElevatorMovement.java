@@ -30,16 +30,6 @@ public class ElevatorMovement implements ConfigurationSerializable {
         this.boundingBox = boundingBox;
     }
 
-    public void moveUP() {
-        this.atDoor.add(0, 1, 0);
-        this.boundingBox.shift(0, 1, 0);
-    }
-
-    public void moveDOWN() {
-        this.atDoor.subtract(0, 1, 0);
-        this.boundingBox.shift(0, -1, 0);
-    }
-
     @Override
     public Map<String, Object> serialize() {
         Map<String, Object> map = new HashMap<>();

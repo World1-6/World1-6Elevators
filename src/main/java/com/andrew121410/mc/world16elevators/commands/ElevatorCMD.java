@@ -498,6 +498,7 @@ public class ElevatorCMD implements CommandExecutor {
                 p.sendMessage(Translate.chat("&6/elevator settings &e<Controller> &9<Elevator> &bcallSystemType &3<Type>"));
                 p.sendMessage(Translate.chat("&6/elevator settings &e<Controller> &9<Elevator> &bcallButtonSystem &3<Bool>"));
                 p.sendMessage(Translate.chat("&6/elevator settings &e<Controller> &9<Elevator> &bsignFinderSystem &3<Bool>"));
+                p.sendMessage(Translate.chat("&6/elevator settings &e<Controller> &9<Elevator> &bteleportElevatorOnEmpty &3<Bool>"));
             } else if (args.length > 2) {
                 ElevatorArguments eleArgs = getElevatorArguments(args, 2);
                 ElevatorController elevatorController = eleArgs.getElevatorController();
@@ -605,6 +606,11 @@ public class ElevatorCMD implements CommandExecutor {
                     boolean bool = Utils.asBooleanOrElse(eleArgs.getOtherArgumentsAt(1), true);
                     elevatorObject.getElevatorSettings().setSignFinderSystem(bool);
                     p.sendMessage(Translate.chat("The signFinderSystem has been set to: " + bool));
+                    return true;
+                }else if (setting.equalsIgnoreCase("teleportElevatorOnEmpty")) {
+                    boolean bool = Utils.asBooleanOrElse(eleArgs.getOtherArgumentsAt(1), false);
+                    elevatorObject.getElevatorSettings().setTeleportElevatorOnEmpty(bool);
+                    p.sendMessage(Translate.chat("The teleportElevatorOnEmpty has been set to: " + bool));
                     return true;
                 }
                 return true;

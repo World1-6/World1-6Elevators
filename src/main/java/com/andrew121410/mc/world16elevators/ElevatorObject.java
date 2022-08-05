@@ -8,11 +8,6 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.chat.ClickEvent;
-import net.md_5.bungee.api.chat.ComponentBuilder;
-import net.md_5.bungee.api.chat.HoverEvent;
-import net.md_5.bungee.api.chat.hover.content.Text;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -28,7 +23,6 @@ import org.bukkit.util.BoundingBox;
 
 import java.time.Instant;
 import java.util.*;
-import java.util.logging.Level;
 import java.util.stream.Collectors;
 
 @EqualsAndHashCode
@@ -216,6 +210,24 @@ public class ElevatorObject implements ConfigurationSerializable {
 
         this.whereItsCurrentlyGoing = new FloorQueueObject(floorNumber, elevatorStatus);
 
+        // Handle teleport elevator on empty
+        if (this.elevatorSettings.isTeleportElevatorOnEmpty() && getPlayers().isEmpty()) {
+            Location destination = floorObject.getBlockUnderMainDoor().clone();
+            Location elevatorDoor = this.elevatorMovement.getAtDoor().clone();
+
+            int difference;
+            if (goUp) {
+                destination.subtract(0, 5, 0);
+                difference = destination.getBlockY() - elevatorDoor.getBlockY();
+            } else {
+                destination.add(0, 5, 0);
+                difference = elevatorDoor.getBlockY() - destination.getBlockY();
+            }
+            if (difference >= 6) {
+                move(difference, goUp);
+            }
+        }
+
         //Start ticking the elevator.
         new ElevatorRunnable(plugin, this, goUp, floorObject, elevatorStatus).runTask(plugin);
     }
@@ -243,40 +255,23 @@ public class ElevatorObject implements ConfigurationSerializable {
         doFloorIdle();
     }
 
-    protected void goUp() {
+    protected void move(int howManyY, boolean goUP) {
         try {
             WorldEdit worldEdit = this.plugin.getOtherPlugins().getWorld16Utils().getClassWrappers().getWorldEdit();
-            worldEdit.moveCuboidRegion(getBukkitWorld(), elevatorMovement.getBoundingBox(), new Location(getBukkitWorld(), 0, 1, 0), 1);
+            worldEdit.moveCuboidRegion(getBukkitWorld(), elevatorMovement.getBoundingBox(), new Location(getBukkitWorld(), 0, goUP ? 1 : -1, 0), howManyY);
         } catch (Exception e) {
-            this.plugin.getServer().broadcast(Translate.miniMessage("<red>Error while moving elevator up! <red><bold>Check the console for more info."));
-            this.plugin.getServer().broadcastMessage("");
-            this.plugin.getServer().broadcast(Translate.miniMessage("<yellow> ElevatorController: " + this.elevatorControllerName + " Elevator: " + this.elevatorName));
-            this.plugin.getLogger().log(Level.SEVERE, e.getMessage());
-
-            this.plugin.getServer().getPluginManager().disablePlugin(this.plugin);
-            return;
+            e.printStackTrace();
         }
 
-        elevatorMovement.moveUP();
-        this.boundingBoxExpanded.shift(0, 1, 0);
-    }
-
-    protected void goDown() {
-        try {
-            WorldEdit worldEdit = this.plugin.getOtherPlugins().getWorld16Utils().getClassWrappers().getWorldEdit();
-            worldEdit.moveCuboidRegion(getBukkitWorld(), elevatorMovement.getBoundingBox(), new Location(getBukkitWorld(), 0, -1, 0), 1);
-        } catch (Exception e) {
-            this.plugin.getServer().broadcast(Translate.miniMessage("<red>Error while moving elevator down! <red><bold>Check the console for more info."));
-            this.plugin.getServer().broadcastMessage("");
-            this.plugin.getServer().broadcast(Translate.miniMessage("<yellow> ElevatorController: " + this.elevatorControllerName + " Elevator: " + this.elevatorName));
-            this.plugin.getLogger().log(Level.SEVERE, e.getMessage());
-
-            this.plugin.getServer().getPluginManager().disablePlugin(this.plugin);
-            return;
+        if (goUP) {
+            this.elevatorMovement.getAtDoor().add(0, howManyY, 0);
+            this.elevatorMovement.getBoundingBox().shift(0, howManyY, 0);
+            this.boundingBoxExpanded.shift(0, howManyY, 0);
+        } else {
+            this.elevatorMovement.getAtDoor().subtract(0, howManyY, 0);
+            this.elevatorMovement.getBoundingBox().shift(0, -howManyY, 0);
+            this.boundingBoxExpanded.shift(0, -howManyY, 0);
         }
-
-        elevatorMovement.moveDOWN();
-        this.boundingBoxExpanded.shift(0, -1, 0);
     }
 
     public void emergencyStop() {

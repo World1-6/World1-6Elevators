@@ -125,11 +125,15 @@ public class ElevatorTab implements TabCompleter {
             } else if (args.length == 3) {
                 return this.elevatorControllerMap.containsKey(args[1]) ? new ArrayList<>(this.elevatorControllerMap.get(args[1]).getElevatorsMap().keySet()) : null;
             } else if (args.length == 4) {
-                return getContainsString(args[3], Arrays.asList("ticksPerSecond", "doorHolderTicksPerSecond", "elevatorWaiterTicksPerSecond", "doElevatorLeveling", "onlyTwoFloors", "arrivalSound", "passingByFloorSound", "floorSelectorType", "callButtonType", "signFinderSystem"));
+                return getContainsString(args[3], Arrays.asList("ticksPerSecond", "doorHolderTicksPerSecond", "elevatorWaiterTicksPerSecond", "doElevatorLeveling", "onlyTwoFloors", "arrivalSound", "passingByFloorSound", "floorSelectorType", "callButtonType", "signFinderSystem", "teleportElevatorOnEmpty"));
             } else if (args.length == 5) {
-                if (args[3].equalsIgnoreCase("doElevatorLeveling")) {
-                    return StringUtil.copyPartialMatches(args[4], Arrays.asList("true", "false"), new ArrayList<>());
-                } else if (args[3].equalsIgnoreCase("onlyTwoFloors")) {
+                List<String> shouldShowBool = new ArrayList<>();
+                shouldShowBool.add("doElevatorLeveling");
+                shouldShowBool.add("onlyTwoFloors");
+                shouldShowBool.add("signFinderSystem");
+                shouldShowBool.add("teleportElevatorOnEmpty");
+
+                if (shouldShowBool.contains(args[3])) {
                     return StringUtil.copyPartialMatches(args[4], Arrays.asList("true", "false"), new ArrayList<>());
                 } else if (args[3].equals("arrivalSound") || args[3].equals("passingByFloorSound")) {
                     return StringUtil.copyPartialMatches(args[4], this.soundList, new ArrayList<>());
