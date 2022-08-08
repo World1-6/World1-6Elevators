@@ -260,7 +260,10 @@ public class ElevatorObject implements ConfigurationSerializable {
             WorldEdit worldEdit = this.plugin.getOtherPlugins().getWorld16Utils().getClassWrappers().getWorldEdit();
             worldEdit.moveCuboidRegion(getBukkitWorld(), elevatorMovement.getBoundingBox(), new Location(getBukkitWorld(), 0, goUP ? 1 : -1, 0), howManyY);
         } catch (Exception e) {
+            Bukkit.broadcast(Translate.miniMessage("<red>Error while trying to move the elevator: " + this.elevatorName + " on controller: " + this.elevatorControllerName));
             e.printStackTrace();
+            this.plugin.getPluginLoader().disablePlugin(this.plugin);
+            return;
         }
 
         if (goUP) {
