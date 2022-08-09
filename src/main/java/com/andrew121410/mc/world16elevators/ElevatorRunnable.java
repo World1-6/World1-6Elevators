@@ -58,6 +58,7 @@ public class ElevatorRunnable extends BukkitRunnable {
             elevatorObject.floorStop(floorObject, elevatorStatus);
             return;
         } else if (stopByFloor != null && elevatorObject.getElevatorMovement().getAtDoor().getY() == stopByFloor.getBlockUnderMainDoor().getY()) {
+            this.cancel();
             elevatorObject.floorStop(floorObject, elevatorStatus, elevatorObject.getStopBy(), stopByFloor);
             return;
         }

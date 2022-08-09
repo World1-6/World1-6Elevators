@@ -232,29 +232,6 @@ public class ElevatorObject implements ConfigurationSerializable {
         new ElevatorRunnable(plugin, this, goUp, floorObject, elevatorStatus).runTask(plugin);
     }
 
-    //Ran when it actually reaches a floor.
-    protected void floorStop(FloorObject floorObject, ElevatorStatus elevatorStatus) {
-        this.elevatorMovement.setFloor(floorObject.getFloor());
-        this.whereItsCurrentlyGoing = null;
-        if (!this.elevatorFloorSelectorManager.isRunning()) elevatorFloorSelectorManager.start();
-        //Sound
-        if (elevatorSettings.getArrivalSound() != null) {
-            floorObject.getBlockUnderMainDoor().getWorld().playSound(floorObject.getBlockUnderMainDoor(), elevatorSettings.getArrivalSound().getSound(), elevatorSettings.getArrivalSound().getVolume(), elevatorSettings.getArrivalSound().getPitch());
-        }
-        floorDone(floorObject, elevatorStatus);
-        doFloorIdle();
-        isGoing = false;
-    }
-
-    //Ran when it reaches a StopBy floor.
-    protected void floorStop(FloorObject floorObject, ElevatorStatus elevatorStatus, StopBy stopBy, FloorObject stopByFloorOp) {
-        isIdling = true;
-        stopBy.getStopByQueue().remove();
-        elevatorMovement.setFloor(stopByFloorOp.getFloor());
-        floorDone(stopByFloorOp, elevatorStatus);
-        doFloorIdle();
-    }
-
     protected void move(int howManyY, boolean goUP) {
         try {
             WorldEdit worldEdit = this.plugin.getOtherPlugins().getWorld16Utils().getClassWrappers().getWorldEdit();
@@ -275,6 +252,31 @@ public class ElevatorObject implements ConfigurationSerializable {
             this.elevatorMovement.getBoundingBox().shift(0, -howManyY, 0);
             this.boundingBoxExpanded.shift(0, -howManyY, 0);
         }
+    }
+
+    // Ran when it actually reaches a floor.
+    protected void floorStop(FloorObject floorObject, ElevatorStatus elevatorStatus) {
+        this.elevatorMovement.setFloor(floorObject.getFloor());
+        this.whereItsCurrentlyGoing = null;
+        if (!this.elevatorFloorSelectorManager.isRunning()) elevatorFloorSelectorManager.start();
+        //Sound
+        if (elevatorSettings.getArrivalSound() != null) {
+            floorObject.getBlockUnderMainDoor().getWorld().playSound(floorObject.getBlockUnderMainDoor(), elevatorSettings.getArrivalSound().getSound(), elevatorSettings.getArrivalSound().getVolume(), elevatorSettings.getArrivalSound().getPitch());
+        }
+        floorDone(floorObject, elevatorStatus);
+        doFloorIdle();
+        isGoing = false;
+    }
+
+    // Ran when it reaches a StopBy floor.
+    protected void floorStop(FloorObject floorObject, ElevatorStatus elevatorStatus, StopBy stopBy, FloorObject stopByFloorOp) {
+        this.isIdling = true;
+        this.isGoing = false;
+        stopBy.getStopByQueue().remove();
+        elevatorMovement.setFloor(stopByFloorOp.getFloor());
+        floorDone(stopByFloorOp, elevatorStatus);
+        doFloorIdle();
+        goToFloor(floorObject.getFloor(), elevatorStatus, ElevatorWho.STOP_BY);
     }
 
     public void emergencyStop() {
