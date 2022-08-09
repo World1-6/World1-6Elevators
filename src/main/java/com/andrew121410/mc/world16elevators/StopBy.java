@@ -30,10 +30,10 @@ public class StopBy {
     }
 
     public ElevatorStatus toElevatorStatus() {
-        return ElevatorStatus.upOrDown(goUp);
+        return ElevatorStatus.upOrDown(this.goUp);
     }
 
-    public Queue<Integer> getStopByQueue() {
+    public Queue<Integer> getPriorityQueue() {
         return stopByQueue;
     }
 }

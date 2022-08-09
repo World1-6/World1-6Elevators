@@ -185,7 +185,7 @@ public class ElevatorObject implements ConfigurationSerializable {
         //Add to the queue if elevator is running or idling.
         if (isGoing || isIdling) {
             if (this.floorBuffer.contains(floorNumber) && elevatorStatus != ElevatorStatus.DONT_KNOW && this.stopBy.toElevatorStatus() == elevatorStatus) {
-                this.stopBy.getStopByQueue().add(floorNumber);
+                this.stopBy.getPriorityQueue().add(floorNumber);
             } else {
                 if (isGoing && floorNumber == this.whereItsCurrentlyGoing.getFloorNumber()) return;
                 if (isIdling && floorNumber == this.elevatorMovement.getFloor()) return;
@@ -272,7 +272,7 @@ public class ElevatorObject implements ConfigurationSerializable {
     protected void floorStop(FloorObject floorObject, ElevatorStatus elevatorStatus, StopBy stopBy, FloorObject stopByFloorOp) {
         this.isIdling = true;
         this.isGoing = false;
-        stopBy.getStopByQueue().remove();
+        stopBy.getPriorityQueue().remove();
         elevatorMovement.setFloor(stopByFloorOp.getFloor());
         floorDone(stopByFloorOp, elevatorStatus);
         doFloorIdle();
@@ -356,7 +356,13 @@ public class ElevatorObject implements ConfigurationSerializable {
         }.runTaskTimer(plugin, 40L, 40L);
     }
 
-    public void smartCreateFloors(FloorObject beginningFloor, boolean goUP) {
+    /**
+     * Finds floors, and adds them to the elevator
+     *
+     * @param beginningFloor the floor where to start at
+     * @param goingUp        true if going up, false if going down
+     */
+    public void smartCreateFloors(FloorObject beginningFloor, boolean goingUp) {
         long startTime = Instant.now().toEpochMilli();
         boolean whileLoop = true;
 
@@ -367,7 +373,7 @@ public class ElevatorObject implements ConfigurationSerializable {
         doors.addAll(beginningFloor.getDoorList().stream().map(Location::clone).toList());
 
         FloorObject lastNewFloor = null;
-        if (goUP) {
+        if (goingUp) {
             beginningFloorNumber++;
             //0 won't be used as a floor anymore.
             if (beginningFloorNumber == 0) beginningFloorNumber++;

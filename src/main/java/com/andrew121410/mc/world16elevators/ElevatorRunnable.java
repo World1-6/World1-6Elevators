@@ -8,36 +8,36 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 public class ElevatorRunnable extends BukkitRunnable {
 
-    private World16Elevators plugin;
-    private ElevatorObject elevatorObject;
+    private final World16Elevators plugin;
+    private final ElevatorObject elevatorObject;
 
-    private boolean goUP;
-    private FloorObject floorObject;
-    private ElevatorStatus elevatorStatus;
+    private final boolean goingUp;
+    private final FloorObject floorObject;
+    private final ElevatorStatus elevatorStatus;
 
     private int counter;
 
     private FloorObject floorThatWeAreGoingToPass;
 
-    public ElevatorRunnable(World16Elevators plugin, ElevatorObject elevatorObject, boolean goUP, FloorObject floorObject, ElevatorStatus elevatorStatus, int counter, FloorObject floorThatWeAreGoingToPass) {
+    public ElevatorRunnable(World16Elevators plugin, ElevatorObject elevatorObject, boolean goingUp, FloorObject floorObject, ElevatorStatus elevatorStatus, int counter, FloorObject floorThatWeAreGoingToPass) {
         this.plugin = plugin;
         this.elevatorObject = elevatorObject;
-        this.goUP = goUP;
+        this.goingUp = goingUp;
         this.floorObject = floorObject;
         this.elevatorStatus = elevatorStatus;
         this.counter = counter;
         this.floorThatWeAreGoingToPass = floorThatWeAreGoingToPass;
     }
 
-    public ElevatorRunnable(World16Elevators plugin, ElevatorObject elevatorObject, boolean goUp, FloorObject floorObject, ElevatorStatus elevatorStatus) {
-        this(plugin, elevatorObject, goUp, floorObject, elevatorStatus, (int) elevatorObject.getElevatorSettings().getTicksPerSecond(), null);
+    public ElevatorRunnable(World16Elevators plugin, ElevatorObject elevatorObject, boolean goingUp, FloorObject floorObject, ElevatorStatus elevatorStatus) {
+        this(plugin, elevatorObject, goingUp, floorObject, elevatorStatus, (int) elevatorObject.getElevatorSettings().getTicksPerSecond(), null);
     }
 
     @Override
     public void run() {
         if (elevatorObject.isIdling()) return;
-        elevatorObject.reCalculateFloorBuffer(goUP);
-        FloorObject stopByFloor = !elevatorObject.getStopBy().getStopByQueue().isEmpty() ? elevatorObject.getFloor(elevatorObject.getStopBy().getStopByQueue().peek()) : null;
+        elevatorObject.reCalculateFloorBuffer(goingUp);
+        FloorObject stopByFloor = !elevatorObject.getStopBy().getPriorityQueue().isEmpty() ? elevatorObject.getFloor(elevatorObject.getStopBy().getPriorityQueue().peek()) : null;
 
         if (floorThatWeAreGoingToPass == null) {
             Integer intFloorThatWeAreGoingToPass = elevatorObject.getFloorBuffer().peek();
@@ -54,11 +54,9 @@ public class ElevatorRunnable extends BukkitRunnable {
 
         // Check's if at the floor if so then stop the elevator.
         if (elevatorObject.getElevatorMovement().getAtDoor().getBlockY() == floorObject.getBlockUnderMainDoor().getBlockY()) {
-            this.cancel();
             elevatorObject.floorStop(floorObject, elevatorStatus);
             return;
         } else if (stopByFloor != null && elevatorObject.getElevatorMovement().getAtDoor().getY() == stopByFloor.getBlockUnderMainDoor().getY()) {
-            this.cancel();
             elevatorObject.floorStop(floorObject, elevatorStatus, elevatorObject.getStopBy(), stopByFloor);
             return;
         }
@@ -68,45 +66,33 @@ public class ElevatorRunnable extends BukkitRunnable {
             elevatorObject.setIdling(false);
             elevatorObject.setGoing(false);
             elevatorObject.setEmergencyStop(false);
-            this.cancel();
             return;
         }
 
-        elevatorObject.move(1, goUP);
-        if (goUP) {
-            // Teleport them up 1
-            for (Player player : elevatorObject.getPlayers()) {
-                PlayerUtils.smoothTeleport(player, player.getLocation().add(0, 1, 0));
-            }
+        // Move the elevator
+        elevatorObject.move(1, goingUp);
 
-            if (elevatorObject.getElevatorSettings().isDoElevatorLeveling()) {
-                int x = elevatorObject.getElevatorMovement().getAtDoor().getBlockY();
-                int z = floorObject.getBlockUnderMainDoor().getBlockY();
+        // Teleport the passengers
+        for (Player player : elevatorObject.getPlayers()) {
+            PlayerUtils.smoothTeleport(player, player.getLocation().add(0, goingUp ? 1 : -1, 0));
+        }
+
+        // Elevator leveling
+        int x = elevatorObject.getElevatorMovement().getAtDoor().getBlockY();
+        int z = floorObject.getBlockUnderMainDoor().getBlockY();
+        if (elevatorObject.getElevatorSettings().isDoElevatorLeveling()) {
+            if (goingUp) {
                 x += 5;
-                if (x >= z) {
-                    counter += 1;
-                }
-            }
-        } else {
-            // Teleport them down 1
-            for (Player player : elevatorObject.getPlayers()) {
-                PlayerUtils.smoothTeleport(player, player.getLocation().subtract(0, 1, 0));
-            }
-
-            if (elevatorObject.getElevatorSettings().isDoElevatorLeveling()) {
-                int x = elevatorObject.getElevatorMovement().getAtDoor().getBlockY();
-                int z = floorObject.getBlockUnderMainDoor().getBlockY();
+                if (x >= z) counter += 1;
+            } else {
                 x -= 5;
-                if (x <= z) {
-                    counter += 1;
-                }
+                if (x <= z) counter += 1;
             }
         }
-        this.cancel();
 
         // Don't try to register another task if the plugin is disabled.
         if (!this.plugin.isEnabled()) return;
 
-        new ElevatorRunnable(plugin, elevatorObject, goUP, floorObject, elevatorStatus, counter, floorThatWeAreGoingToPass).runTaskLater(plugin, counter);
+        new ElevatorRunnable(plugin, elevatorObject, goingUp, floorObject, elevatorStatus, counter, floorThatWeAreGoingToPass).runTaskLater(plugin, counter);
     }
 }
