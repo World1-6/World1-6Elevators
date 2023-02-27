@@ -1,4 +1,5 @@
 plugins {
+    id("io.freefair.lombok") version "6.6.3"
     `java-library`
     `maven-publish`
 }
@@ -6,16 +7,22 @@ plugins {
 group = "com.andrew121410.mc"
 version = "1.0-SNAPSHOT"
 description = "World1-6Elevators"
-java.sourceCompatibility = JavaVersion.VERSION_1_8
+java.sourceCompatibility = JavaVersion.VERSION_17
 
 tasks {
     compileJava {
         options.encoding = "UTF-8"
     }
+
+    jar {
+        archiveFileName.set("World1-6Elevators.jar")
+    }
 }
 
 repositories {
+    mavenCentral()
     mavenLocal()
+
     maven {
         url = uri("https://hub.spigotmc.org/nexus/content/repositories/snapshots/")
     }
@@ -39,15 +46,11 @@ repositories {
     maven {
         url = uri("https://jitpack.io")
     }
-
-    maven {
-        url = uri("https://repo.maven.apache.org/maven2/")
-    }
 }
 
 dependencies {
     compileOnly("io.papermc.paper:paper-api:1.19.3-R0.1-SNAPSHOT")
-    compileOnly("com.github.World1-6.World1-6Utils:World1-6Utils-Plugin:eb356eb1")
+    compileOnly("com.github.World1-6.World1-6Utils:World1-6Utils-Plugin:7dd0adad1f")
     compileOnly("org.projectlombok:lombok:1.18.24")
     compileOnly("org.geysermc.floodgate:api:2.2.0-SNAPSHOT")
 }
