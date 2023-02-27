@@ -1,3 +1,8 @@
+build/
+buildSrc/
 target/
 .idea/
 *.iml
+.gradle/
+*/target
+*/build
