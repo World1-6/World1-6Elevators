@@ -5,6 +5,7 @@ import com.andrew121410.mc.world16utils.config.serializers.SerializerUtils;
 import com.andrew121410.mc.world16utils.utils.spongepowered.configurate.ConfigurationNode;
 import com.andrew121410.mc.world16utils.utils.spongepowered.configurate.serialize.SerializationException;
 import com.andrew121410.mc.world16utils.utils.spongepowered.configurate.serialize.TypeSerializer;
+import io.leangen.geantyref.TypeToken;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.lang.reflect.Type;
@@ -21,7 +22,10 @@ public class ElevatorSerializer implements TypeSerializer<Elevator> {
         String world = SerializerUtils.nonVirtualNode(node, "World").getString();
         ElevatorMovement elevatorMovement = SerializerUtils.nonVirtualNode(node, "Shaft").get(ElevatorMovement.class);
         ElevatorSettings elevatorSettings = SerializerUtils.nonVirtualNode(node, "Settings").get(ElevatorSettings.class);
-        Map<Integer, ElevatorFloor> elevatorFloorMap = SerializerUtils.nonVirtualNode(node, "FloorMap").get(Map.class);
+
+        TypeToken<Map<Integer, ElevatorFloor>> typeToken = new TypeToken<>() {
+        };
+        Map<Integer, ElevatorFloor> elevatorFloorMap = SerializerUtils.nonVirtualNode(node, "FloorMap").get(typeToken);
 
         return new Elevator(World16Elevators.getInstance(), name, world, elevatorMovement, elevatorSettings, elevatorFloorMap);
     }
