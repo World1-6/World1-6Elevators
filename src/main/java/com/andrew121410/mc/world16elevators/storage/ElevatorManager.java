@@ -6,11 +6,9 @@ import com.andrew121410.mc.world16utils.config.World16ConfigurateManager;
 import com.andrew121410.mc.world16utils.utils.spongepowered.configurate.CommentedConfigurationNode;
 import com.andrew121410.mc.world16utils.utils.spongepowered.configurate.serialize.TypeSerializerCollection;
 import com.andrew121410.mc.world16utils.utils.spongepowered.configurate.yaml.YamlConfigurationLoader;
-import io.leangen.geantyref.TypeToken;
 import lombok.SneakyThrows;
 import org.bukkit.Location;
 
-import java.util.HashMap;
 import java.util.Map;
 
 public class ElevatorManager {
@@ -59,21 +57,14 @@ public class ElevatorManager {
 
     @SneakyThrows
     public void saveAllElevators() {
-        CommentedConfigurationNode node = this.elevatorsYml.load().node("ElevatorControllers");
-        if (node.virtual()) {
-            TypeToken<Map<String, ElevatorController>> typeToken = new TypeToken<>() {
-            };
-            node.set(typeToken, new HashMap<>());
-            this.elevatorsYml.save(node);
-        }
+        CommentedConfigurationNode node = this.elevatorsYml.load();
 
         for (Map.Entry<String, ElevatorController> mapEntry : this.elevatorControllerMap.entrySet()) {
             String key = mapEntry.getKey();
             ElevatorController elevatorController = mapEntry.getValue();
-            node.node(key).set(elevatorController);
+            node.node("ElevatorControllers", key).set(elevatorController);
+            this.elevatorsYml.save(node);
         }
-
-        this.elevatorsYml.save(node);
     }
 
     @SneakyThrows
