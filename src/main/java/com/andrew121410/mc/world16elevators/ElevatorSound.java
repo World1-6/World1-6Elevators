@@ -1,6 +1,7 @@
 package com.andrew121410.mc.world16elevators;
 
 import com.andrew121410.mc.world16utils.utils.spongepowered.configurate.objectmapping.ConfigSerializable;
+import com.andrew121410.mc.world16utils.utils.spongepowered.configurate.objectmapping.meta.Setting;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -13,8 +14,12 @@ import org.bukkit.Sound;
 @AllArgsConstructor
 @ConfigSerializable
 public class ElevatorSound {
+
+    @Setting(value = "Sound")
     private final Sound sound;
+    @Setting(value = "Volume")
     private final float volume;
+    @Setting(value = "Pitch")
     private final float pitch;
 
     public ElevatorSound() {
