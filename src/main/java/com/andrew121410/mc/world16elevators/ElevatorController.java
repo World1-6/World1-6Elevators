@@ -9,8 +9,6 @@ import lombok.Setter;
 import lombok.ToString;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
-import org.bukkit.configuration.serialization.ConfigurationSerializable;
-import org.bukkit.configuration.serialization.SerializableAs;
 import org.bukkit.entity.Player;
 
 import java.util.Comparator;
@@ -22,16 +20,15 @@ import java.util.Optional;
 @ToString
 @Getter
 @Setter
-@SerializableAs("ElevatorController")
-public class ElevatorController implements ConfigurationSerializable {
+public class ElevatorController {
 
     private World16Elevators plugin;
 
     private String controllerName;
     private Location mainChunk;
-    private Map<String, ElevatorObject> elevatorsMap;
+    private Map<String, Elevator> elevatorsMap;
 
-    public ElevatorController(World16Elevators plugin, String controllerName, Location mainChunk, Map<String, ElevatorObject> elevatorsMap) {
+    public ElevatorController(World16Elevators plugin, String controllerName, Location mainChunk, Map<String, Elevator> elevatorsMap) {
         this.plugin = plugin;
         this.controllerName = controllerName;
         this.mainChunk = mainChunk;
@@ -44,58 +41,58 @@ public class ElevatorController implements ConfigurationSerializable {
     }
 
     public void callElevatorClosest(Player player, int floorNumber, ElevatorStatus elevatorStatus, ElevatorWho elevatorWho) {
-        ElevatorObject elevatorObject = getClosestElevator(floorNumber, true, elevatorStatus);
-        if (elevatorObject == null) return;
+        Elevator elevator = getClosestElevator(floorNumber, true, elevatorStatus);
+        if (elevator == null) return;
         player.sendMessage(Translate.color("&e&oCalled the nearest elevator on the controller"));
-        elevatorObject.goToFloor(player, floorNumber, elevatorStatus, elevatorWho);
+        elevator.goToFloor(player, floorNumber, elevatorStatus, elevatorWho);
     }
 
     public void callElevatorClosest(Player player, String floorName, ElevatorStatus elevatorStatus, ElevatorWho elevatorWho) {
-        ElevatorObject elevatorObject = getClosestElevator(floorName, true, elevatorStatus);
-        if (elevatorObject == null) return;
+        Elevator elevator = getClosestElevator(floorName, true, elevatorStatus);
+        if (elevator == null) return;
         player.sendMessage(Translate.color("&e&oCalled the nearest elevator on the controller"));
-        elevatorObject.goToFloor(player, floorName, elevatorStatus, elevatorWho);
+        elevator.goToFloor(player, floorName, elevatorStatus, elevatorWho);
     }
 
     public void callElevatorClosest(int floorNumber, ElevatorStatus elevatorStatus, ElevatorWho elevatorWho) {
-        ElevatorObject elevatorObject = getClosestElevator(floorNumber, true, elevatorStatus);
-        if (elevatorObject == null) return;
-        elevatorObject.goToFloor(floorNumber, elevatorStatus, elevatorWho);
+        Elevator elevator = getClosestElevator(floorNumber, true, elevatorStatus);
+        if (elevator == null) return;
+        elevator.goToFloor(floorNumber, elevatorStatus, elevatorWho);
     }
 
     public void callElevatorClosest(String floorName, ElevatorStatus elevatorStatus, ElevatorWho elevatorWho) {
-        ElevatorObject elevatorObject = getClosestElevator(floorName, true, elevatorStatus);
-        if (elevatorObject == null) return;
-        elevatorObject.goToFloor(floorName, elevatorStatus, elevatorWho);
+        Elevator elevator = getClosestElevator(floorName, true, elevatorStatus);
+        if (elevator == null) return;
+        elevator.goToFloor(floorName, elevatorStatus, elevatorWho);
     }
 
     public void callAllElevators(int floorNum, ElevatorStatus elevatorStatus, ElevatorWho elevatorWho) {
         this.elevatorsMap.forEach((k, v) -> v.goToFloor(floorNum, elevatorStatus, elevatorWho));
     }
 
-    public ElevatorObject getClosestElevator(int floorNumber, boolean smart, ElevatorStatus elevatorStatus) {
-        Optional<ElevatorObject> optionalElevatorObject = this.elevatorsMap.values().stream().filter(elevatorObject -> !elevatorObject.isGoing()).min(Comparator.comparingInt(i -> Math.abs(i.getElevatorMovement().getAtDoor().getBlockY() - i.getFloor(floorNumber).getBlockUnderMainDoor().getBlockY())));
-        Optional<ElevatorObject> optionalElevatorObject1 = this.elevatorsMap.values().stream().filter(ElevatorObject::isGoing).filter(elevatorObject -> elevatorObject.getFloorBuffer().contains(floorNumber) && elevatorObject.getStopBy().toElevatorStatus() == elevatorStatus).findFirst();
+    public Elevator getClosestElevator(int floorNumber, boolean smart, ElevatorStatus elevatorStatus) {
+        Optional<Elevator> optionalElevatorObject = this.elevatorsMap.values().stream().filter(elevatorObject -> !elevatorObject.isGoing()).min(Comparator.comparingInt(i -> Math.abs(i.getElevatorMovement().getAtDoor().getBlockY() - i.getFloor(floorNumber).getBlockUnderMainDoor().getBlockY())));
+        Optional<Elevator> optionalElevatorObject1 = this.elevatorsMap.values().stream().filter(Elevator::isGoing).filter(elevatorObject -> elevatorObject.getFloorBuffer().contains(floorNumber) && elevatorObject.getStopBy().toElevatorStatus() == elevatorStatus).findFirst();
         return optionalElevatorObject1.orElse(optionalElevatorObject.orElse(null));
     }
 
-    public ElevatorObject getClosestElevator(String floorName, boolean smart, ElevatorStatus elevatorStatus) {
-        Optional<ElevatorObject> optionalElevatorObject = this.elevatorsMap.values().stream().filter(elevatorObject -> !elevatorObject.isGoing()).min(Comparator.comparingInt(i -> Math.abs(i.getElevatorMovement().getAtDoor().getBlockY() - i.getFloor(floorName).getBlockUnderMainDoor().getBlockY())));
-        Optional<ElevatorObject> optionalElevatorObject1 = this.elevatorsMap.values().stream().filter(ElevatorObject::isGoing).filter(elevatorObject -> elevatorObject.getFloorBuffer().contains(elevatorObject.getFloor(floorName).getFloor()) && elevatorObject.getStopBy().toElevatorStatus() == elevatorStatus).findFirst();
+    public Elevator getClosestElevator(String floorName, boolean smart, ElevatorStatus elevatorStatus) {
+        Optional<Elevator> optionalElevatorObject = this.elevatorsMap.values().stream().filter(elevatorObject -> !elevatorObject.isGoing()).min(Comparator.comparingInt(i -> Math.abs(i.getElevatorMovement().getAtDoor().getBlockY() - i.getFloor(floorName).getBlockUnderMainDoor().getBlockY())));
+        Optional<Elevator> optionalElevatorObject1 = this.elevatorsMap.values().stream().filter(Elevator::isGoing).filter(elevatorObject -> elevatorObject.getFloorBuffer().contains(elevatorObject.getFloor(floorName).getFloor()) && elevatorObject.getStopBy().toElevatorStatus() == elevatorStatus).findFirst();
         return optionalElevatorObject1.orElse(optionalElevatorObject.orElse(null));
     }
 
-    public ElevatorObject getElevator(String name) {
+    public Elevator getElevator(String name) {
         return elevatorsMap.getOrDefault(name, null);
     }
 
-    public void registerElevator(String name, ElevatorObject elevatorObject) {
+    public void registerElevator(String name, Elevator elevator) {
         if (this.mainChunk == null) {
-            Chunk chunk = elevatorObject.getFloor(1).getBlockUnderMainDoor().getChunk();
+            Chunk chunk = elevator.getFloor(1).getBlockUnderMainDoor().getChunk();
             this.mainChunk = new Location(chunk.getWorld(), chunk.getX(), 0, chunk.getZ());
         }
-        elevatorObject.setElevatorControllerName(this.controllerName);
-        this.elevatorsMap.putIfAbsent(name, elevatorObject);
+        elevator.setElevatorControllerName(this.controllerName);
+        this.elevatorsMap.putIfAbsent(name, elevator);
     }
 
     public boolean isSingle() {
@@ -104,18 +101,5 @@ public class ElevatorController implements ConfigurationSerializable {
 
     public boolean isEmpty() {
         return this.elevatorsMap.isEmpty();
-    }
-
-    @Override
-    public Map<String, Object> serialize() {
-        Map<String, Object> map = new HashMap<>();
-        map.put("ControllerName", this.controllerName);
-        map.put("MainChunk", this.mainChunk);
-        map.put("ElevatorMap", this.elevatorsMap);
-        return map;
-    }
-
-    public static ElevatorController deserialize(Map<String, Object> map) {
-        return new ElevatorController(World16Elevators.getInstance(), (String) map.get("ControllerName"), (Location) map.get("MainChunk"), (Map<String, ElevatorObject>) map.get("ElevatorMap"));
     }
 }

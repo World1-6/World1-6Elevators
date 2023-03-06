@@ -1,8 +1,8 @@
 package com.andrew121410.mc.world16elevators.listeners;
 
 import com.andrew121410.mc.world16elevators.ElevatorController;
-import com.andrew121410.mc.world16elevators.ElevatorObject;
-import com.andrew121410.mc.world16elevators.FloorObject;
+import com.andrew121410.mc.world16elevators.Elevator;
+import com.andrew121410.mc.world16elevators.ElevatorFloor;
 import com.andrew121410.mc.world16elevators.World16Elevators;
 import com.andrew121410.mc.world16elevators.enums.ElevatorCallButtonType;
 import com.andrew121410.mc.world16elevators.enums.ElevatorStatus;
@@ -46,19 +46,19 @@ public class OnPlayerInteractEvent implements Listener {
 
                         event.setCancelled(true);
 
-                        ElevatorCallButtonType elevatorCallButtonType = elevatorKey.getElevatorObject().getElevatorSettings().getCallButtonType();
+                        ElevatorCallButtonType elevatorCallButtonType = elevatorKey.getElevator().getElevatorSettings().getCallButtonType();
 
                         if (elevatorCallButtonType == ElevatorCallButtonType.CALL_THE_NEAREST_ELEVATOR) {
                             if (Tag.BUTTONS.isTagged(event.getClickedBlock().getRelative(BlockFace.DOWN).getType())) {
-                                elevatorKey.getElevatorController().callElevatorClosest(event.getPlayer(), elevatorKey.getFloorObject().getName(), ElevatorStatus.UP, ElevatorWho.BUTTON);
+                                elevatorKey.getElevatorController().callElevatorClosest(event.getPlayer(), elevatorKey.getElevatorFloor().getName(), ElevatorStatus.UP, ElevatorWho.BUTTON);
                             } else {
-                                elevatorKey.getElevatorController().callElevatorClosest(event.getPlayer(), elevatorKey.getFloorObject().getName(), ElevatorStatus.DOWN, ElevatorWho.BUTTON);
+                                elevatorKey.getElevatorController().callElevatorClosest(event.getPlayer(), elevatorKey.getElevatorFloor().getName(), ElevatorStatus.DOWN, ElevatorWho.BUTTON);
                             }
                         } else if (elevatorCallButtonType == ElevatorCallButtonType.CALL_THE_ELEVATOR) {
                             if (Tag.BUTTONS.isTagged(event.getClickedBlock().getRelative(BlockFace.DOWN).getType())) {
-                                elevatorKey.getElevatorObject().goToFloor(event.getPlayer(), elevatorKey.getFloorObject().getName(), ElevatorStatus.UP, ElevatorWho.BUTTON);
+                                elevatorKey.getElevator().goToFloor(event.getPlayer(), elevatorKey.getElevatorFloor().getName(), ElevatorStatus.UP, ElevatorWho.BUTTON);
                             } else {
-                                elevatorKey.getElevatorObject().goToFloor(event.getPlayer(), elevatorKey.getFloorObject().getName(), ElevatorStatus.DOWN, ElevatorWho.BUTTON);
+                                elevatorKey.getElevator().goToFloor(event.getPlayer(), elevatorKey.getElevatorFloor().getName(), ElevatorStatus.DOWN, ElevatorWho.BUTTON);
                             }
                         }
                         return;
@@ -70,15 +70,15 @@ public class OnPlayerInteractEvent implements Listener {
 
     private ElevatorKey findElevatorKey(Location blockUnderTheDoor) {
         for (ElevatorController elevatorController : this.plugin.getSetListMap().getElevatorControllerMap().values()) {
-            for (ElevatorObject elevatorObject : elevatorController.getElevatorsMap().values()) {
-                if (elevatorObject.getElevatorSettings().getCallButtonType() == ElevatorCallButtonType.OFF) continue;
-                for (FloorObject floorObject : elevatorObject.getFloorsMap().values()) {
-                    if (floorObject.getBlockUnderMainDoor().equals(blockUnderTheDoor)) {
-                        return new ElevatorKey(elevatorController, elevatorObject, floorObject, floorObject.getBlockUnderMainDoor());
+            for (Elevator elevator : elevatorController.getElevatorsMap().values()) {
+                if (elevator.getElevatorSettings().getCallButtonType() == ElevatorCallButtonType.OFF) continue;
+                for (ElevatorFloor elevatorFloor : elevator.getFloorsMap().values()) {
+                    if (elevatorFloor.getBlockUnderMainDoor().equals(blockUnderTheDoor)) {
+                        return new ElevatorKey(elevatorController, elevator, elevatorFloor, elevatorFloor.getBlockUnderMainDoor());
                     }
-                    Optional<Location> foundWithOtherDoor = floorObject.getDoorList().stream().filter(location -> location.equals(blockUnderTheDoor)).findFirst();
+                    Optional<Location> foundWithOtherDoor = elevatorFloor.getDoorList().stream().filter(location -> location.equals(blockUnderTheDoor)).findFirst();
                     if (foundWithOtherDoor.isPresent()) {
-                        return new ElevatorKey(elevatorController, elevatorObject, floorObject, floorObject.getBlockUnderMainDoor());
+                        return new ElevatorKey(elevatorController, elevator, elevatorFloor, elevatorFloor.getBlockUnderMainDoor());
                     }
                 }
             }
@@ -92,7 +92,7 @@ public class OnPlayerInteractEvent implements Listener {
 @AllArgsConstructor
 class ElevatorKey {
     private ElevatorController elevatorController;
-    private ElevatorObject elevatorObject;
-    private FloorObject floorObject;
+    private Elevator elevator;
+    private ElevatorFloor elevatorFloor;
     private Location blockUnderMainDoor;
 }

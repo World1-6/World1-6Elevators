@@ -14,8 +14,6 @@ import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
-import org.bukkit.configuration.serialization.ConfigurationSerializable;
-import org.bukkit.configuration.serialization.SerializableAs;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -29,8 +27,7 @@ import java.util.stream.Collectors;
 @ToString
 @Getter
 @Setter
-@SerializableAs("ElevatorObject")
-public class ElevatorObject implements ConfigurationSerializable {
+public class Elevator {
 
     private String elevatorControllerName;
 
@@ -41,7 +38,7 @@ public class ElevatorObject implements ConfigurationSerializable {
 
     private BoundingBox boundingBoxExpanded;
 
-    private Map<Integer, FloorObject> floorsMap;
+    private Map<Integer, ElevatorFloor> floorsMap;
 
     //TEMP DON'T SAVE
     private World16Elevators plugin;
@@ -67,11 +64,11 @@ public class ElevatorObject implements ConfigurationSerializable {
 
     private FloorQueueObject whereItsCurrentlyGoing;
 
-    public ElevatorObject(World16Elevators plugin, String nameOfElevator, String world, ElevatorMovement elevatorMovement) {
+    public Elevator(World16Elevators plugin, String nameOfElevator, String world, ElevatorMovement elevatorMovement) {
         this(plugin, nameOfElevator, world, elevatorMovement, new ElevatorSettings(), new HashMap<>());
     }
 
-    public ElevatorObject(World16Elevators plugin, String name, String world, ElevatorMovement elevatorMovement, ElevatorSettings elevatorSettings, Map<Integer, FloorObject> floorsMap) {
+    public Elevator(World16Elevators plugin, String name, String world, ElevatorMovement elevatorMovement, ElevatorSettings elevatorSettings, Map<Integer, ElevatorFloor> floorsMap) {
         if (plugin != null) this.plugin = plugin;
 
         this.world = world; //NEEDS TO BE SECOND.
@@ -99,7 +96,7 @@ public class ElevatorObject implements ConfigurationSerializable {
 
         this.elevatorFloorSelectorManager = new ElevatorFloorSelectorManager(plugin, this);
 
-        for (FloorObject value : this.floorsMap.values()) {
+        for (ElevatorFloor value : this.floorsMap.values()) {
             if (value.getFloor() >= 2) {
                 this.topFloor++;
             } else if (value.getFloor() < 0) {
@@ -122,65 +119,65 @@ public class ElevatorObject implements ConfigurationSerializable {
     }
 
     public void goToFloor(Player player, String floorName, ElevatorStatus elevatorStatus, ElevatorWho elevatorWho) {
-        FloorObject floorObject = getFloor(floorName);
-        if (floorObject == null) return;
-        goToFloor(player, floorObject, elevatorStatus, elevatorWho);
+        ElevatorFloor elevatorFloor = getFloor(floorName);
+        if (elevatorFloor == null) return;
+        goToFloor(player, elevatorFloor, elevatorStatus, elevatorWho);
     }
 
     public void goToFloor(Player player, int floorNumber, ElevatorStatus elevatorStatus, ElevatorWho elevatorWho) {
-        FloorObject floorObject = getFloor(floorNumber);
-        if (floorObject == null) return;
-        goToFloor(player, floorObject, elevatorStatus, elevatorWho);
+        ElevatorFloor elevatorFloor = getFloor(floorNumber);
+        if (elevatorFloor == null) return;
+        goToFloor(player, elevatorFloor, elevatorStatus, elevatorWho);
     }
 
-    private void goToFloor(Player player, FloorObject floorObject, ElevatorStatus elevatorStatus, ElevatorWho elevatorWho) {
+    private void goToFloor(Player player, ElevatorFloor elevatorFloor, ElevatorStatus elevatorStatus, ElevatorWho elevatorWho) {
         Collection<UUID> peopleThatAreInTheElevator = getPlayersUUIDs();
 
-        if (floorObject.getPermission() != null && !floorObject.getPermission().isEmpty() && peopleThatAreInTheElevator.contains(player.getUniqueId())) {
-            if (player.hasPermission(floorObject.getPermission())) {
-                player.sendMessage(Translate.chat("&6Access granted for floor " + floorObject.getName()));
+        if (elevatorFloor.getPermission() != null && !elevatorFloor.getPermission().isEmpty() && peopleThatAreInTheElevator.contains(player.getUniqueId())) {
+            if (player.hasPermission(elevatorFloor.getPermission())) {
+                player.sendMessage(Translate.chat("&6Access granted for floor " + elevatorFloor.getName()));
             } else {
-                player.sendMessage(Translate.chat("&cYou need &c" + floorObject.getPermission() + " &cto go to this floor!"));
+                player.sendMessage(Translate.chat("&cYou need &c" + elevatorFloor.getPermission() + " &cto go to this floor!"));
                 return;
             }
         }
 
-        if (elevatorStatus == ElevatorStatus.UP && floorObject.getFloor() == this.topFloor)
+        if (elevatorStatus == ElevatorStatus.UP && elevatorFloor.getFloor() == this.topFloor)
             elevatorStatus = ElevatorStatus.DOWN;
-        if (elevatorStatus == ElevatorStatus.DOWN && floorObject.getFloor() == this.topBottomFloor)
+        if (elevatorStatus == ElevatorStatus.DOWN && elevatorFloor.getFloor() == this.topBottomFloor)
             elevatorStatus = ElevatorStatus.UP;
 
         // Player is already inside the elevator have a different message for them
         if (peopleThatAreInTheElevator.contains(player.getUniqueId())) {
-            player.sendMessage(Translate.chat("&2Going to floor " + floorObject.getName()));
+            player.sendMessage(Translate.chat("&2Going to floor " + elevatorFloor.getName()));
         } else {
             switch (elevatorStatus) {
                 case UP ->
-                        player.sendMessage(Translate.color("&2[Elevator] &6Called elevator to go to floor " + floorObject.getName() + " to go up"));
+                        player.sendMessage(Translate.color("&2[Elevator] &6Called elevator to go to floor " + elevatorFloor.getName() + " to go up"));
                 case DOWN ->
-                        player.sendMessage(Translate.color("&2[Elevator] &6Called elevator to go to floor " + floorObject.getName() + " to go down"));
+                        player.sendMessage(Translate.color("&2[Elevator] &6Called elevator to go to floor " + elevatorFloor.getName() + " to go down"));
                 case DONT_KNOW ->
-                        player.sendMessage(Translate.color("&2[Elevator] &6Called elevator to go to floor " + floorObject.getName()));
+                        player.sendMessage(Translate.color("&2[Elevator] &6Called elevator to go to floor " + elevatorFloor.getName()));
             }
         }
 
-        goToFloor(floorObject.getFloor(), elevatorStatus, elevatorWho);
+        goToFloor(elevatorFloor.getFloor(), elevatorStatus, elevatorWho);
     }
 
     public void goToFloor(String floorName, ElevatorStatus elevatorStatus, ElevatorWho elevatorWho) {
-        FloorObject floorObject = getFloor(floorName);
-        if (floorObject == null) return;
-        goToFloor(floorObject.getFloor(), elevatorStatus, elevatorWho);
+        ElevatorFloor elevatorFloor = getFloor(floorName);
+        if (elevatorFloor == null) return;
+        goToFloor(elevatorFloor.getFloor(), elevatorStatus, elevatorWho);
     }
 
     public void goToFloor(int floorNumber, ElevatorStatus elevatorStatus, ElevatorWho elevatorWho) {
         boolean goUp;
 
         //Gets the floor before the elevator starts ticking.
-        FloorObject floorObject = getFloor(floorNumber);
+        ElevatorFloor elevatorFloor = getFloor(floorNumber);
 
         //Check's if the floor exists; if not then cancel.
-        if (floorObject == null) return;
+        if (elevatorFloor == null) return;
 
         //Add to the queue if elevator is running or idling.
         if (isGoing || isIdling) {
@@ -199,7 +196,7 @@ public class ElevatorObject implements ConfigurationSerializable {
         floorBuffer.clear(); //Clears the floorBuffer
 
         //Checks if the elevator should go up or down.
-        goUp = floorObject.getBlockUnderMainDoor().getY() > this.elevatorMovement.getAtDoor().getY();
+        goUp = elevatorFloor.getBlockUnderMainDoor().getY() > this.elevatorMovement.getAtDoor().getY();
 
         //This calculates what floors it's going to pass going up or down this has to be run before it sets this.elevatorFloor to not a floor.
         calculateFloorBuffer(floorNumber, goUp);
@@ -212,7 +209,7 @@ public class ElevatorObject implements ConfigurationSerializable {
 
         // Handle teleport elevator on empty
         if (this.elevatorSettings.isTeleportElevatorOnEmpty() && getPlayers().isEmpty()) {
-            Location destination = floorObject.getBlockUnderMainDoor().clone();
+            Location destination = elevatorFloor.getBlockUnderMainDoor().clone();
             Location elevatorDoor = this.elevatorMovement.getAtDoor().clone();
 
             int difference;
@@ -229,7 +226,7 @@ public class ElevatorObject implements ConfigurationSerializable {
         }
 
         //Start ticking the elevator.
-        new ElevatorRunnable(plugin, this, goUp, floorObject, elevatorStatus).runTask(plugin);
+        new ElevatorRunnable(plugin, this, goUp, elevatorFloor, elevatorStatus).runTask(plugin);
     }
 
     protected void move(int howManyY, boolean goUP) {
@@ -255,43 +252,43 @@ public class ElevatorObject implements ConfigurationSerializable {
     }
 
     // Ran when it actually reaches a floor.
-    protected void floorStop(FloorObject floorObject, ElevatorStatus elevatorStatus) {
-        this.elevatorMovement.setFloor(floorObject.getFloor());
+    protected void floorStop(ElevatorFloor elevatorFloor, ElevatorStatus elevatorStatus) {
+        this.elevatorMovement.setFloor(elevatorFloor.getFloor());
         this.whereItsCurrentlyGoing = null;
         if (!this.elevatorFloorSelectorManager.isRunning()) elevatorFloorSelectorManager.start();
         //Sound
         if (elevatorSettings.getArrivalSound() != null) {
-            floorObject.getBlockUnderMainDoor().getWorld().playSound(floorObject.getBlockUnderMainDoor(), elevatorSettings.getArrivalSound().getSound(), elevatorSettings.getArrivalSound().getVolume(), elevatorSettings.getArrivalSound().getPitch());
+            elevatorFloor.getBlockUnderMainDoor().getWorld().playSound(elevatorFloor.getBlockUnderMainDoor(), elevatorSettings.getArrivalSound().getSound(), elevatorSettings.getArrivalSound().getVolume(), elevatorSettings.getArrivalSound().getPitch());
         }
-        floorDone(floorObject, elevatorStatus);
+        floorDone(elevatorFloor, elevatorStatus);
         doFloorIdle();
         isGoing = false;
     }
 
     // Ran when it reaches a StopBy floor.
-    protected void floorStop(FloorObject floorObject, ElevatorStatus elevatorStatus, StopBy stopBy, FloorObject stopByFloorOp) {
+    protected void floorStop(ElevatorFloor elevatorFloor, ElevatorStatus elevatorStatus, StopBy stopBy, ElevatorFloor stopByFloorOp) {
         this.isIdling = true;
         this.isGoing = false;
         stopBy.getPriorityQueue().remove();
         elevatorMovement.setFloor(stopByFloorOp.getFloor());
         floorDone(stopByFloorOp, elevatorStatus);
         doFloorIdle();
-        goToFloor(floorObject.getFloor(), elevatorStatus, ElevatorWho.STOP_BY);
+        goToFloor(elevatorFloor.getFloor(), elevatorStatus, ElevatorWho.STOP_BY);
     }
 
     public void emergencyStop() {
         this.isEmergencyStop = true;
     }
 
-    private void floorDone(FloorObject floorObject, ElevatorStatus elevatorStatus) {
-        floorObject.doDoor(true, true);
-        floorObject.doSigns(this, elevatorStatus, false);
+    private void floorDone(ElevatorFloor elevatorFloor, ElevatorStatus elevatorStatus) {
+        elevatorFloor.doDoor(true, true);
+        elevatorFloor.doSigns(this, elevatorStatus, false);
 
         new BukkitRunnable() {
             @Override
             public void run() {
-                floorObject.doSigns(ElevatorObject.this, elevatorStatus, true);
-                floorObject.doDoor(false, true);
+                elevatorFloor.doSigns(Elevator.this, elevatorStatus, true);
+                elevatorFloor.doDoor(false, true);
                 isPlayersInItAfter = !getPlayers().isEmpty();
                 if (!isPlayersInItAfter) elevatorFloorSelectorManager.stop();
             }
@@ -323,12 +320,12 @@ public class ElevatorObject implements ConfigurationSerializable {
     protected void reCalculateFloorBuffer(boolean goUp) {
         Integer peek = this.floorBuffer.peek();
         if (peek == null) return;
-        FloorObject floorObject = getFloor(peek);
+        ElevatorFloor elevatorFloor = getFloor(peek);
         if (goUp) {
-            if (this.elevatorMovement.getAtDoor().getBlockY() >= floorObject.getBlockUnderMainDoor().getBlockY())
+            if (this.elevatorMovement.getAtDoor().getBlockY() >= elevatorFloor.getBlockUnderMainDoor().getBlockY())
                 this.floorBuffer.remove();
         } else {
-            if (this.elevatorMovement.getAtDoor().getBlockY() <= floorObject.getBlockUnderMainDoor().getBlockY())
+            if (this.elevatorMovement.getAtDoor().getBlockY() <= elevatorFloor.getBlockUnderMainDoor().getBlockY())
                 this.floorBuffer.remove();
         }
     }
@@ -362,7 +359,7 @@ public class ElevatorObject implements ConfigurationSerializable {
      * @param beginningFloor the floor where to start at
      * @param goingUp        true if going up, false if going down
      */
-    public void smartCreateFloors(FloorObject beginningFloor, boolean goingUp) {
+    public void smartCreateFloors(ElevatorFloor beginningFloor, boolean goingUp) {
         long startTime = Instant.now().toEpochMilli();
         boolean whileLoop = true;
 
@@ -372,7 +369,7 @@ public class ElevatorObject implements ConfigurationSerializable {
         doors.add(blockUnderMainDoor);
         doors.addAll(beginningFloor.getDoorList().stream().map(Location::clone).toList());
 
-        FloorObject lastNewFloor = null;
+        ElevatorFloor lastNewFloor = null;
         if (goingUp) {
             beginningFloorNumber++;
             //0 won't be used as a floor anymore.
@@ -393,7 +390,7 @@ public class ElevatorObject implements ConfigurationSerializable {
                                     if (lastNewFloor != null && lastNewFloor.getBlockUnderMainDoor().getBlockY() == blockLocation.getBlockY()) {
                                         lastNewFloor.getDoorList().add(blockLocation.clone());
                                     } else {
-                                        lastNewFloor = new FloorObject(beginningFloorNumber, blockUnderMainDoor.clone());
+                                        lastNewFloor = new ElevatorFloor(beginningFloorNumber, blockUnderMainDoor.clone());
                                         addFloor(lastNewFloor);
                                         Bukkit.getServer().broadcastMessage("Added floor " + beginningFloorNumber);
 
@@ -429,7 +426,7 @@ public class ElevatorObject implements ConfigurationSerializable {
                                     if (lastNewFloor != null && lastNewFloor.getBlockUnderMainDoor().getBlockY() == blockLocation.getBlockY()) {
                                         lastNewFloor.getDoorList().add(blockLocation.clone());
                                     } else {
-                                        lastNewFloor = new FloorObject(beginningFloorNumber, blockUnderMainDoor.clone());
+                                        lastNewFloor = new ElevatorFloor(beginningFloorNumber, blockUnderMainDoor.clone());
                                         addFloor(lastNewFloor);
 
                                         beginningFloorNumber--;
@@ -450,30 +447,30 @@ public class ElevatorObject implements ConfigurationSerializable {
         Bukkit.getServer().broadcastMessage("smartCreateFloors has completed took: " + totalTime + " milliseconds");
     }
 
-    public void addFloor(FloorObject floorObject) {
+    public void addFloor(ElevatorFloor elevatorFloor) {
         //We have to find out the elevator floor by ourself.
-        if (floorObject.getFloor() == Integer.MIN_VALUE) {
+        if (elevatorFloor.getFloor() == Integer.MIN_VALUE) {
             //Checks if the elevator should go up or down.
-            boolean goUp = floorObject.getBlockUnderMainDoor().getY() > this.elevatorMovement.getAtDoor().getY();
+            boolean goUp = elevatorFloor.getBlockUnderMainDoor().getY() > this.elevatorMovement.getAtDoor().getY();
             int a = goUp ? 1 : -1;
             while (this.getFloorsMap().containsKey(a) && a != 0) {
                 if (goUp) a++;
                 else a--;
             }
-            floorObject.setFloor(a);
+            elevatorFloor.setFloor(a);
             Bukkit.getServer().broadcastMessage("New floor has been set to " + a);
         }
 
-        if (this.floorsMap.containsKey(floorObject.getFloor())) return; //Don't add the floor if we already have it.
-        if (floorObject.getFloor() == 0) return; //0 won't be used as a floor anymore.
+        if (this.floorsMap.containsKey(elevatorFloor.getFloor())) return; //Don't add the floor if we already have it.
+        if (elevatorFloor.getFloor() == 0) return; //0 won't be used as a floor anymore.
 
-        if (floorObject.getFloor() >= 2) {
+        if (elevatorFloor.getFloor() >= 2) {
             this.topFloor++;
-        } else if (floorObject.getFloor() < 0) {
+        } else if (elevatorFloor.getFloor() < 0) {
             if (topBottomFloor == 1) this.topBottomFloor--;
             this.topBottomFloor--;
         }
-        this.floorsMap.put(floorObject.getFloor(), floorObject);
+        this.floorsMap.put(elevatorFloor.getFloor(), elevatorFloor);
     }
 
     public void deleteFloor(int floor) {
@@ -489,21 +486,21 @@ public class ElevatorObject implements ConfigurationSerializable {
     }
 
     public void deleteFloor(String name) {
-        FloorObject floorObject = getFloor(name);
-        if (floorObject == null) return;
-        deleteFloor(floorObject.getFloor());
+        ElevatorFloor elevatorFloor = getFloor(name);
+        if (elevatorFloor == null) return;
+        deleteFloor(elevatorFloor.getFloor());
     }
 
-    public FloorObject getFloor(int floor) {
+    public ElevatorFloor getFloor(int floor) {
         if (this.floorsMap.containsKey(floor)) {
             return this.floorsMap.get(floor);
         }
         return null;
     }
 
-    public FloorObject getFloor(String name) {
-        FloorObject floorObject = this.floorsMap.values().stream().filter(floorObject1 -> floorObject1.getName().equalsIgnoreCase(name)).findFirst().orElse(null);
-        if (floorObject == null) {
+    public ElevatorFloor getFloor(String name) {
+        ElevatorFloor elevatorFloor = this.floorsMap.values().stream().filter(floorObject1 -> floorObject1.getName().equalsIgnoreCase(name)).findFirst().orElse(null);
+        if (elevatorFloor == null) {
             Integer integer = null;
             try {
                 integer = Integer.parseInt(name);
@@ -511,11 +508,11 @@ public class ElevatorObject implements ConfigurationSerializable {
             }
             if (integer != null) {
                 if (this.floorsMap.containsKey(integer)) {
-                    floorObject = this.floorsMap.get(integer);
+                    elevatorFloor = this.floorsMap.get(integer);
                 }
             }
         }
-        return floorObject;
+        return elevatorFloor;
     }
 
     private void arrivalChime(Location location) {
@@ -529,20 +526,5 @@ public class ElevatorObject implements ConfigurationSerializable {
 
     public org.bukkit.World getBukkitWorld() {
         return Bukkit.getServer().getWorld(this.world);
-    }
-
-    @Override
-    public Map<String, Object> serialize() {
-        Map<String, Object> map = new HashMap<>();
-        map.put("Name", this.elevatorName);
-        map.put("World", this.world);
-        map.put("Shaft", this.elevatorMovement);
-        map.put("Settings", this.elevatorSettings);
-        map.put("FloorMap", this.floorsMap);
-        return map;
-    }
-
-    public static ElevatorObject deserialize(Map<String, Object> map) {
-        return new ElevatorObject(World16Elevators.getInstance(), (String) map.get("Name"), (String) map.get("World"), (ElevatorMovement) map.get("Shaft"), (ElevatorSettings) map.get("Settings"), (Map<Integer, FloorObject>) map.get("FloorMap"));
     }
 }

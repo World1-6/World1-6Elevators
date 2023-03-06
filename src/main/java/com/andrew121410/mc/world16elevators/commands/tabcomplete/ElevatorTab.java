@@ -1,8 +1,8 @@
 package com.andrew121410.mc.world16elevators.commands.tabcomplete;
 
 import com.andrew121410.mc.world16elevators.ElevatorController;
-import com.andrew121410.mc.world16elevators.ElevatorObject;
-import com.andrew121410.mc.world16elevators.FloorObject;
+import com.andrew121410.mc.world16elevators.Elevator;
+import com.andrew121410.mc.world16elevators.ElevatorFloor;
 import com.andrew121410.mc.world16elevators.World16Elevators;
 import com.andrew121410.mc.world16elevators.enums.ElevatorCallButtonType;
 import com.andrew121410.mc.world16elevators.enums.ElevatorFloorSelectorType;
@@ -101,9 +101,9 @@ public class ElevatorTab implements TabCompleter {
             } else if (args.length == 5 && !args[1].equalsIgnoreCase("create")) {
                 ElevatorController elevatorController = this.elevatorControllerMap.get(args[2]);
                 if (elevatorController == null) return null;
-                ElevatorObject elevatorObject = elevatorController.getElevatorsMap().get(args[3]);
-                if (elevatorObject == null) return null;
-                return elevatorObject.getFloorsMap().values().stream().map(FloorObject::getName).collect(Collectors.toList());
+                Elevator elevator = elevatorController.getElevatorsMap().get(args[3]);
+                if (elevator == null) return null;
+                return elevator.getFloorsMap().values().stream().map(ElevatorFloor::getName).collect(Collectors.toList());
             }
             return null;
         } else if (args[0].equalsIgnoreCase("call")) {
@@ -114,9 +114,9 @@ public class ElevatorTab implements TabCompleter {
             } else if (args.length == 4) {
                 ElevatorController elevatorController = this.elevatorControllerMap.get(args[1]);
                 if (elevatorController == null) return null;
-                ElevatorObject elevatorObject = elevatorController.getElevatorsMap().get(args[2]);
-                if (elevatorObject == null) return null;
-                return elevatorObject.getFloorsMap().values().stream().map(FloorObject::getName).collect(Collectors.toList());
+                Elevator elevator = elevatorController.getElevatorsMap().get(args[2]);
+                if (elevator == null) return null;
+                return elevator.getFloorsMap().values().stream().map(ElevatorFloor::getName).collect(Collectors.toList());
             }
             return null;
         } else if (args[0].equalsIgnoreCase("settings")) {

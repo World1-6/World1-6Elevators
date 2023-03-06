@@ -5,19 +5,13 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import org.bukkit.Location;
-import org.bukkit.configuration.serialization.ConfigurationSerializable;
-import org.bukkit.configuration.serialization.SerializableAs;
 import org.bukkit.util.BoundingBox;
-
-import java.util.HashMap;
-import java.util.Map;
 
 @EqualsAndHashCode
 @ToString
 @Getter
 @Setter
-@SerializableAs("ElevatorMovement")
-public class ElevatorMovement implements ConfigurationSerializable {
+public class ElevatorMovement {
 
     private Integer floor;
 
@@ -26,22 +20,7 @@ public class ElevatorMovement implements ConfigurationSerializable {
 
     public ElevatorMovement(Integer floor, Location atDoor, BoundingBox boundingBox) {
         this.floor = floor;
-        this.atDoor = FloorObject.ifIronDoorThenGetBlockUnderTheDoorIfNotThanReturn(atDoor).getLocation();
+        this.atDoor = ElevatorFloor.ifIronDoorThenGetBlockUnderTheDoorIfNotThanReturn(atDoor).getLocation();
         this.boundingBox = boundingBox;
-    }
-
-    @Override
-    public Map<String, Object> serialize() {
-        Map<String, Object> map = new HashMap<>();
-        map.put("Floor", this.floor);
-        map.put("AtDoor", this.atDoor);
-        map.put("BoundingBox", this.boundingBox);
-        return map;
-    }
-
-    public static ElevatorMovement deserialize(Map<String, Object> map) {
-        return new ElevatorMovement((Integer) map.get("Floor"),
-                (Location) map.get("AtDoor"),
-                (BoundingBox) map.get("BoundingBox"));
     }
 }

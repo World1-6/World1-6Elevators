@@ -1,35 +1,25 @@
 package com.andrew121410.mc.world16elevators;
 
-import lombok.*;
+import com.andrew121410.mc.world16utils.utils.spongepowered.configurate.objectmapping.ConfigSerializable;
+import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.ToString;
 import org.bukkit.Sound;
-import org.bukkit.configuration.serialization.ConfigurationSerializable;
-import org.bukkit.configuration.serialization.SerializableAs;
-
-import java.util.HashMap;
-import java.util.Map;
 
 @Getter
 @EqualsAndHashCode
 @ToString
 @AllArgsConstructor
-@SerializableAs("ElevatorSound")
-public class ElevatorSound implements ConfigurationSerializable {
+@ConfigSerializable
+public class ElevatorSound {
     private final Sound sound;
     private final float volume;
     private final float pitch;
 
-    @Override
-    public Map<String, Object> serialize() {
-        Map<String, Object> map = new HashMap<>();
-        map.put("Sound", this.sound.name());
-        map.put("Volume", this.volume);
-        map.put("Pitch", this.pitch);
-        return map;
-    }
-
-    public static ElevatorSound deserialize(Map<String, Object> map) {
-        double fakeVolume = (double) map.get("Volume");
-        double fakePitch = (double) map.get("Pitch");
-        return new ElevatorSound(Sound.valueOf((String) map.get("Sound")), (float) fakeVolume, (float) fakePitch);
+    public ElevatorSound() {
+        this.sound = Sound.BLOCK_NOTE_BLOCK_PLING;
+        this.volume = 1.0F;
+        this.pitch = 1.0F;
     }
 }

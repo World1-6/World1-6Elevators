@@ -2,22 +2,18 @@ package com.andrew121410.mc.world16elevators;
 
 import com.andrew121410.mc.world16elevators.enums.ElevatorCallButtonType;
 import com.andrew121410.mc.world16elevators.enums.ElevatorFloorSelectorType;
+import com.andrew121410.mc.world16utils.utils.spongepowered.configurate.objectmapping.ConfigSerializable;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import org.bukkit.configuration.serialization.ConfigurationSerializable;
-import org.bukkit.configuration.serialization.SerializableAs;
-
-import java.util.HashMap;
-import java.util.Map;
 
 @Getter
 @Setter
 @EqualsAndHashCode
 @ToString
-@SerializableAs("ElevatorSettings")
-public class ElevatorSettings implements ConfigurationSerializable {
+@ConfigSerializable
+public class ElevatorSettings {
 
     public static final long DEFAULT_TICKS_PER_SECOND = 6L;
     public static final long DEFAULT_DOOR_HOLDER_TICKS_PER_SECOND = 20L * 5L;
@@ -62,7 +58,18 @@ public class ElevatorSettings implements ConfigurationSerializable {
     }
 
     public ElevatorSettings() {
-        this(DEFAULT_TICKS_PER_SECOND, DEFAULT_DOOR_HOLDER_TICKS_PER_SECOND, DEFAULT_ELEVATOR_WAITER_TICKS_PER_SECOND, true, false, null, null, ElevatorFloorSelectorType.CLICK_CHAT, ElevatorCallButtonType.CALL_THE_ELEVATOR, true, false);
+        this(
+                DEFAULT_TICKS_PER_SECOND,
+                DEFAULT_DOOR_HOLDER_TICKS_PER_SECOND,
+                DEFAULT_ELEVATOR_WAITER_TICKS_PER_SECOND,
+                true,
+                false,
+                null,
+                null,
+                ElevatorFloorSelectorType.CLICK_CHAT,
+                ElevatorCallButtonType.CALL_THE_ELEVATOR,
+                true,
+                false);
     }
 
     public ElevatorSettings clone() {
@@ -79,40 +86,5 @@ public class ElevatorSettings implements ConfigurationSerializable {
                 this.signFinderSystem,
                 this.teleportElevatorOnEmpty
         );
-    }
-
-    @Override
-    public Map<String, Object> serialize() {
-        Map<String, Object> map = new HashMap<>();
-        map.put("TicksPerSecond", this.ticksPerSecond);
-        map.put("DoorHolderTicksPerSecond", this.doorHolderTicksPerSecond);
-        map.put("ElevatorWaiterTicksPerSecond", this.elevatorWaiterTicksPerSecond);
-        map.put("DoElevatorLeveling", this.doElevatorLeveling);
-        map.put("OnlyTwoFloors", this.onlyTwoFloors);
-        map.put("ArrivalSound", this.arrivalSound);
-        map.put("PassingByFloorSound", this.passingByFloorSound);
-        map.put("FloorSelectorType", this.floorSelectorType.name());
-        map.put("CallButtonType", this.callButtonType.name());
-        map.put("SignFinderSystem", this.signFinderSystem);
-        map.put("TeleportElevatorOnEmpty", this.teleportElevatorOnEmpty);
-        return map;
-    }
-
-    public static ElevatorSettings deserialize(Map<String, Object> map) {
-        ElevatorFloorSelectorType elevatorFloorSelectorType = ElevatorFloorSelectorType.valueOf((String) map.get("FloorSelectorType"));
-        ElevatorCallButtonType elevatorCallButtonType = ElevatorCallButtonType.valueOf((String) map.get("CallButtonType"));
-
-        return new ElevatorSettings(
-                ((Integer) map.get("TicksPerSecond")).longValue(),
-                ((Integer) map.get("DoorHolderTicksPerSecond")).longValue(),
-                ((Integer) map.get("ElevatorWaiterTicksPerSecond")).longValue(),
-                (Boolean) map.get("DoElevatorLeveling"),
-                (Boolean) map.get("OnlyTwoFloors"),
-                (ElevatorSound) map.get("ArrivalSound"),
-                (ElevatorSound) map.get("PassingByFloorSound"),
-                elevatorFloorSelectorType,
-                elevatorCallButtonType,
-                (Boolean) map.get("SignFinderSystem"),
-                (Boolean) map.getOrDefault("TeleportElevatorOnEmpty", false));
     }
 }

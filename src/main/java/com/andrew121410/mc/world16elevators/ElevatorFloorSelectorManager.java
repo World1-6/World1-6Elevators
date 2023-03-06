@@ -26,15 +26,15 @@ import java.util.*;
 public class ElevatorFloorSelectorManager {
 
     private final World16Elevators plugin;
-    private final ElevatorObject elevatorObject;
+    private final Elevator elevator;
 
     private boolean isRunning;
     private List<UUID> players;
     private int counter;
 
-    public ElevatorFloorSelectorManager(World16Elevators plugin, ElevatorObject elevatorObject) {
+    public ElevatorFloorSelectorManager(World16Elevators plugin, Elevator elevator) {
         this.plugin = plugin;
-        this.elevatorObject = elevatorObject;
+        this.elevator = elevator;
         this.players = new ArrayList<>();
     }
 
@@ -52,34 +52,34 @@ public class ElevatorFloorSelectorManager {
                 Iterator<UUID> iterator = players.iterator();
                 while (iterator.hasNext()) {
                     UUID uuid = iterator.next();
-                    ArrayList<UUID> uuidArrayList = (ArrayList<UUID>) elevatorObject.getPlayersUUIDs();
+                    ArrayList<UUID> uuidArrayList = (ArrayList<UUID>) elevator.getPlayersUUIDs();
                     if (!uuidArrayList.contains(uuid)) iterator.remove();
                 }
 
                 // After 20 seconds, check if players are in the elevator if not then stop the message helper.
                 if (counter >= 20) {
-                    if (players.isEmpty() && !elevatorObject.isGoing() && !elevatorObject.isIdling()) {
+                    if (players.isEmpty() && !elevator.isGoing() && !elevator.isIdling()) {
                         stop();
                         return;
                     }
                 }
 
-                for (Player player : elevatorObject.getPlayers()) {
+                for (Player player : elevator.getPlayers()) {
                     // The player already got the message.
                     if (players.contains(player.getUniqueId())) {
                         return;
                     }
 
                     // Handle only two floors
-                    FloorQueueObject floorQueueObject = getNextFloor(elevatorObject.getElevatorMovement().getFloor());
-                    if (elevatorObject.getElevatorSettings().isOnlyTwoFloors() && floorQueueObject != null) {
-                        elevatorObject.goToFloor(player, floorQueueObject.getFloorNumber(), floorQueueObject.getElevatorStatus(), ElevatorWho.FLOOR_SELECTOR_MANAGER);
+                    FloorQueueObject floorQueueObject = getNextFloor(elevator.getElevatorMovement().getFloor());
+                    if (elevator.getElevatorSettings().isOnlyTwoFloors() && floorQueueObject != null) {
+                        elevator.goToFloor(player, floorQueueObject.getFloorNumber(), floorQueueObject.getElevatorStatus(), ElevatorWho.FLOOR_SELECTOR_MANAGER);
                         players.add(player.getUniqueId());
                         return;
                     }
 
                     // Handle floor selector types
-                    switch (elevatorObject.getElevatorSettings().getFloorSelectorType()) {
+                    switch (elevator.getElevatorSettings().getFloorSelectorType()) {
                         case CLICK_CHAT -> {
                             if (World16Elevators.getInstance().getOtherPlugins().hasFloodgate()) {
                                 if (FloodgateApi.getInstance().isFloodgatePlayer(player.getUniqueId())) {
@@ -103,7 +103,7 @@ public class ElevatorFloorSelectorManager {
                             player.sendMessage("Please type in the chat your response");
                             sendElevatorFloorsMessage(player);
                             chatResponseManager.create(player, Translate.color("&bWhat floor?"), "", (thePlayer, response) -> {
-                                plugin.getServer().dispatchCommand(player, "elevator call " + elevatorObject.getElevatorControllerName() + " " + elevatorObject.getElevatorName() + " " + response);
+                                plugin.getServer().dispatchCommand(player, "elevator call " + elevator.getElevatorControllerName() + " " + elevator.getElevatorName() + " " + response);
                             });
                         }
                     }
@@ -116,19 +116,19 @@ public class ElevatorFloorSelectorManager {
     private void handleFloodgatePlayer(Player player) {
         SimpleForm.Builder simpleForm = SimpleForm.builder().title("Floors").content("List of floors!");
 
-        for (Map.Entry<Integer, FloorObject> integerFloorObjectEntry : elevatorObject.getFloorsMap().entrySet()) {
-            FloorObject floorObject = integerFloorObjectEntry.getValue();
+        for (Map.Entry<Integer, ElevatorFloor> integerFloorObjectEntry : elevator.getFloorsMap().entrySet()) {
+            ElevatorFloor elevatorFloor = integerFloorObjectEntry.getValue();
 
             // Don't show the floor to people who don't have permission for that floor
-            if (floorObject.getPermission() != null && !floorObject.getPermission().isEmpty()) {
-                if (!player.hasPermission(floorObject.getPermission())) continue;
+            if (elevatorFloor.getPermission() != null && !elevatorFloor.getPermission().isEmpty()) {
+                if (!player.hasPermission(elevatorFloor.getPermission())) continue;
             }
 
-            simpleForm.button(floorObject.getName());
+            simpleForm.button(elevatorFloor.getName());
         }
 
         simpleForm.validResultHandler((form, simpleFormResponse) -> {
-            elevatorObject.goToFloor(player, simpleFormResponse.clickedButton().text(), ElevatorStatus.DONT_KNOW, ElevatorWho.FLOOR_SELECTOR_MANAGER);
+            elevator.goToFloor(player, simpleFormResponse.clickedButton().text(), ElevatorStatus.DONT_KNOW, ElevatorWho.FLOOR_SELECTOR_MANAGER);
         });
 
         FloodgateApi.getInstance().sendForm(player.getUniqueId(), simpleForm.build());
@@ -139,20 +139,20 @@ public class ElevatorFloorSelectorManager {
                 .append(Translate.miniMessage("[<gold>BexarSystems <red>- <blue>Please click a floor in the chat to go to that floor.<reset>] "));
 
         int i = 0;
-        for (Map.Entry<Integer, FloorObject> floorObjectEntry : this.elevatorObject.getFloorsMap().entrySet()) {
-            FloorObject floorObject = floorObjectEntry.getValue();
+        for (Map.Entry<Integer, ElevatorFloor> floorObjectEntry : this.elevator.getFloorsMap().entrySet()) {
+            ElevatorFloor elevatorFloor = floorObjectEntry.getValue();
 
             // Don't show the floor to people who don't have permission for that floor
-            if (floorObject.getPermission() != null && !floorObject.getPermission().isEmpty()) {
-                if (!player.hasPermission(floorObject.getPermission())) continue;
+            if (elevatorFloor.getPermission() != null && !elevatorFloor.getPermission().isEmpty()) {
+                if (!player.hasPermission(elevatorFloor.getPermission())) continue;
             }
 
             componentBuilder.resetStyle()
-                    .append(Component.text(i == 0 ? floorObject.getName() : ", " + floorObject.getName())
+                    .append(Component.text(i == 0 ? elevatorFloor.getName() : ", " + elevatorFloor.getName())
                             .color(NamedTextColor.GOLD)
                             .decoration(TextDecoration.BOLD, true)
-                            .clickEvent(ClickEvent.runCommand("/elevator call " + elevatorObject.getElevatorControllerName() + " " + elevatorObject.getElevatorName() + " " + floorObject.getName()))
-                            .hoverEvent(HoverEvent.showText(Translate.miniMessage("<green> Click me to go to floor <#E10600>" + floorObject.getName() + "!"))));
+                            .clickEvent(ClickEvent.runCommand("/elevator call " + elevator.getElevatorControllerName() + " " + elevator.getElevatorName() + " " + elevatorFloor.getName()))
+                            .hoverEvent(HoverEvent.showText(Translate.miniMessage("<green> Click me to go to floor <#E10600>" + elevatorFloor.getName() + "!"))));
 
             i++;
         }
@@ -164,19 +164,19 @@ public class ElevatorFloorSelectorManager {
             @Override
             public void onCreate(Player player) {
                 List<AbstractGUIButton> guiButtons = new ArrayList<>();
-                int guiSlots = elevatorObject.getFloorsMap().size() + (9 - (elevatorObject.getFloorsMap().size() % 9));
+                int guiSlots = elevator.getFloorsMap().size() + (9 - (elevator.getFloorsMap().size() % 9));
 
                 int slot = 0;
-                for (Map.Entry<Integer, FloorObject> entry : elevatorObject.getFloorsMap().entrySet()) {
-                    FloorObject floorObject = entry.getValue();
+                for (Map.Entry<Integer, ElevatorFloor> entry : elevator.getFloorsMap().entrySet()) {
+                    ElevatorFloor elevatorFloor = entry.getValue();
 
                     // Don't show the floor to people who don't have permission for that floor
-                    if (floorObject.getPermission() != null && !floorObject.getPermission().isEmpty()) {
-                        if (!player.hasPermission(floorObject.getPermission())) continue;
+                    if (elevatorFloor.getPermission() != null && !elevatorFloor.getPermission().isEmpty()) {
+                        if (!player.hasPermission(elevatorFloor.getPermission())) continue;
                     }
 
-                    guiButtons.add(new ClickEventButton(slot, InventoryUtils.createItem(Material.GREEN_CONCRETE, 1, floorObject.getName(), "Click to go to floor."), (guiClickEvent -> {
-                        elevatorObject.goToFloor(player, floorObject.getFloor(), ElevatorStatus.DONT_KNOW, ElevatorWho.FLOOR_SELECTOR_MANAGER);
+                    guiButtons.add(new ClickEventButton(slot, InventoryUtils.createItem(Material.GREEN_CONCRETE, 1, elevatorFloor.getName(), "Click to go to floor."), (guiClickEvent -> {
+                        elevator.goToFloor(player, elevatorFloor.getFloor(), ElevatorStatus.DONT_KNOW, ElevatorWho.FLOOR_SELECTOR_MANAGER);
                         player.closeInventory();
                     })));
                     slot++;
@@ -194,15 +194,15 @@ public class ElevatorFloorSelectorManager {
     private void sendElevatorFloorsMessage(Player player) {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("&2[Elevator Floors]&r");
-        for (Map.Entry<Integer, FloorObject> entry : this.elevatorObject.getFloorsMap().entrySet()) {
-            FloorObject floorObject = entry.getValue();
+        for (Map.Entry<Integer, ElevatorFloor> entry : this.elevator.getFloorsMap().entrySet()) {
+            ElevatorFloor elevatorFloor = entry.getValue();
 
             // Don't show the floor to people who don't have permission for that floor
-            if (floorObject.getPermission() != null && !floorObject.getPermission().isEmpty()) {
-                if (!player.hasPermission(floorObject.getPermission())) continue;
+            if (elevatorFloor.getPermission() != null && !elevatorFloor.getPermission().isEmpty()) {
+                if (!player.hasPermission(elevatorFloor.getPermission())) continue;
             }
 
-            stringBuilder.append("&e, &a").append(floorObject.getName());
+            stringBuilder.append("&e, &a").append(elevatorFloor.getName());
         }
         player.sendMessage(Translate.color(stringBuilder.toString()));
     }
@@ -220,25 +220,25 @@ public class ElevatorFloorSelectorManager {
     }
 
     public FloorQueueObject getNextFloor(int floorNumber) {
-        FloorObject floorObject = null;
+        ElevatorFloor elevatorFloor = null;
         ElevatorStatus elevatorStatus = null;
         if (floorNumber == 1) {
-            floorObject = elevatorObject.getFloor(2);
-            if (floorObject == null) {
-                floorObject = elevatorObject.getFloor(-1);
+            elevatorFloor = elevator.getFloor(2);
+            if (elevatorFloor == null) {
+                elevatorFloor = elevator.getFloor(-1);
                 elevatorStatus = ElevatorStatus.UP;
             } else {
                 elevatorStatus = ElevatorStatus.DOWN;
             }
         } else if (floorNumber == 2) {
-            floorObject = elevatorObject.getFloor(1);
+            elevatorFloor = elevator.getFloor(1);
             elevatorStatus = ElevatorStatus.UP;
         } else if (floorNumber == -1) {
-            floorObject = elevatorObject.getFloor(1);
+            elevatorFloor = elevator.getFloor(1);
             elevatorStatus = ElevatorStatus.DOWN;
         }
-        if (floorObject == null) return null;
-        return new FloorQueueObject(floorObject.getFloor(), elevatorStatus);
+        if (elevatorFloor == null) return null;
+        return new FloorQueueObject(elevatorFloor.getFloor(), elevatorStatus);
     }
 
     public boolean isRunning() {
