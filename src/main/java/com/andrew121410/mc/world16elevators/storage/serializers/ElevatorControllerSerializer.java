@@ -40,6 +40,9 @@ public class ElevatorControllerSerializer implements TypeSerializer<ElevatorCont
 
         node.node("ControllerName").set(obj.getControllerName());
         node.node("MainChunk").set(obj.getMainChunk());
-        node.node("ElevatorMap").set(obj.getElevatorsMap());
+
+        TypeToken<Map<String, Elevator>> elevatorMapTypeToken = new TypeToken<>() {
+        };
+        node.node("ElevatorMap").set(elevatorMapTypeToken, obj.getElevatorsMap());
     }
 }

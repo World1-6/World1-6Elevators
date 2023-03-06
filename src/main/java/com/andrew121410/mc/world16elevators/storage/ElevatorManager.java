@@ -6,9 +6,11 @@ import com.andrew121410.mc.world16utils.config.World16ConfigurateManager;
 import com.andrew121410.mc.world16utils.utils.spongepowered.configurate.CommentedConfigurationNode;
 import com.andrew121410.mc.world16utils.utils.spongepowered.configurate.serialize.TypeSerializerCollection;
 import com.andrew121410.mc.world16utils.utils.spongepowered.configurate.yaml.YamlConfigurationLoader;
+import io.leangen.geantyref.TypeToken;
 import lombok.SneakyThrows;
 import org.bukkit.Location;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public class ElevatorManager {
@@ -45,10 +47,10 @@ public class ElevatorManager {
     public void loadAllElevatorControllers() {
         CommentedConfigurationNode node = this.elevatorsYml.load().node("ElevatorControllers");
 
-        for (CommentedConfigurationNode commentedConfigurationNode : node.childrenList()) {
-            String key = commentedConfigurationNode.getString();
+        for (Map.Entry<Object, CommentedConfigurationNode> objectCommentedConfigurationNodeEntry : node.childrenMap().entrySet()) {
+            String key = (String) objectCommentedConfigurationNodeEntry.getKey();
+            ElevatorController elevatorController = objectCommentedConfigurationNodeEntry.getValue().get(ElevatorController.class);
 
-            ElevatorController elevatorController = commentedConfigurationNode.get(ElevatorController.class);
             if (this.plugin.isChunkSmartManagement())
                 this.chunksToControllerNameMap.put(elevatorController.getMainChunk(), key);
             else this.elevatorControllerMap.put(key, elevatorController);
@@ -58,6 +60,12 @@ public class ElevatorManager {
     @SneakyThrows
     public void saveAllElevators() {
         CommentedConfigurationNode node = this.elevatorsYml.load().node("ElevatorControllers");
+        if (node.virtual()) {
+            TypeToken<Map<String, ElevatorController>> typeToken = new TypeToken<>() {
+            };
+            node.set(typeToken, new HashMap<>());
+            this.elevatorsYml.save(node);
+        }
 
         for (Map.Entry<String, ElevatorController> mapEntry : this.elevatorControllerMap.entrySet()) {
             String key = mapEntry.getKey();
@@ -95,8 +103,7 @@ public class ElevatorManager {
             this.chunksToControllerNameMap.remove(elevatorController.getMainChunk());
         }
         this.elevatorControllerMap.remove(name.toLowerCase());
-        CommentedConfigurationNode node = this.elevatorsYml.load();
-        node = node.node("ElevatorControllers");
+        CommentedConfigurationNode node = this.elevatorsYml.load().node("ElevatorControllers");
         node.removeChild(name.toLowerCase());
         this.elevatorsYml.save(node);
     }

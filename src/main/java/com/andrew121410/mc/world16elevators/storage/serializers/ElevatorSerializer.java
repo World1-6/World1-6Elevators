@@ -41,6 +41,9 @@ public class ElevatorSerializer implements TypeSerializer<Elevator> {
         node.node("World").set(obj.getWorld());
         node.node("Shaft").set(obj.getElevatorMovement());
         node.node("Settings").set(obj.getElevatorSettings());
-        node.node("FloorMap").set(obj.getFloorsMap());
+
+        TypeToken<Map<Integer, ElevatorFloor>> typeToken = new TypeToken<>() {
+        };
+        node.node("FloorMap").set(typeToken, obj.getFloorsMap());
     }
 }
