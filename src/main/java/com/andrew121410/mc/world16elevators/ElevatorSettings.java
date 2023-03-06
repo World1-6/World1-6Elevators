@@ -3,6 +3,7 @@ package com.andrew121410.mc.world16elevators;
 import com.andrew121410.mc.world16elevators.enums.ElevatorCallButtonType;
 import com.andrew121410.mc.world16elevators.enums.ElevatorFloorSelectorType;
 import com.andrew121410.mc.world16utils.utils.spongepowered.configurate.objectmapping.ConfigSerializable;
+import com.andrew121410.mc.world16utils.utils.spongepowered.configurate.objectmapping.meta.Setting;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
@@ -20,16 +21,27 @@ public class ElevatorSettings {
     public static final long DEFAULT_ELEVATOR_WAITER_TICKS_PER_SECOND = 20L * 6L;
 
     //Config
+    @Setting(value = "TicksPerSecond")
     private long ticksPerSecond;
+    @Setting(value = "DoorHolderTicksPerSecond")
     private long doorHolderTicksPerSecond;
+    @Setting(value = "ElevatorWaiterTicksPerSecond")
     private long elevatorWaiterTicksPerSecond;
+    @Setting(value = "DoElevatorLeveling")
     private boolean doElevatorLeveling;
+    @Setting(value = "OnlyTwoFloors")
     private boolean onlyTwoFloors;
+    @Setting(value = "ArrivalSound")
     private ElevatorSound arrivalSound;
+    @Setting(value = "PassingByFloorSound")
     private ElevatorSound passingByFloorSound;
+    @Setting(value = "FloorSelectorType")
     private ElevatorFloorSelectorType floorSelectorType;
+    @Setting(value = "CallButtonType")
     private ElevatorCallButtonType callButtonType;
+    @Setting(value = "SignFinderSystem")
     private boolean signFinderSystem;
+    @Setting(value = "TeleportElevatorOnEmpty")
     private boolean teleportElevatorOnEmpty;
     //...
 
