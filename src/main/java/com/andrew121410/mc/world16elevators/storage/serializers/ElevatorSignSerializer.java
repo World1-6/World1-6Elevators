@@ -1,11 +1,11 @@
 package com.andrew121410.mc.world16elevators.storage.serializers;
 
 import com.andrew121410.mc.world16elevators.ElevatorSign;
-import com.andrew121410.mc.world16utils.config.UnlinkedWorldLocation;
 import com.andrew121410.mc.world16utils.config.serializers.SerializerUtils;
 import com.andrew121410.mc.world16utils.utils.spongepowered.configurate.ConfigurationNode;
 import com.andrew121410.mc.world16utils.utils.spongepowered.configurate.serialize.SerializationException;
 import com.andrew121410.mc.world16utils.utils.spongepowered.configurate.serialize.TypeSerializer;
+import org.bukkit.Location;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.lang.reflect.Type;
@@ -16,9 +16,10 @@ public class ElevatorSignSerializer implements TypeSerializer<ElevatorSign> {
         if (node.raw() == null) {
             return null;
         }
-        UnlinkedWorldLocation unlinkedWorldLocation = SerializerUtils.nonVirtualNode(node, "Location").get(UnlinkedWorldLocation.class);
 
-        return new ElevatorSign(unlinkedWorldLocation);
+        Location location = SerializerUtils.nonVirtualNode(node, "Location").get(Location.class);
+
+        return new ElevatorSign(location);
     }
 
     @Override
