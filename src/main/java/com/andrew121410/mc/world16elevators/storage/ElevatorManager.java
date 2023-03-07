@@ -69,9 +69,9 @@ public class ElevatorManager {
 
     @SneakyThrows
     public ElevatorController loadElevatorController(String key) {
-        CommentedConfigurationNode node = this.elevatorsYml.load().node("ElevatorControllers");
+        CommentedConfigurationNode node = this.elevatorsYml.load();
 
-        ElevatorController elevatorController = node.node(key).get(ElevatorController.class);
+        ElevatorController elevatorController = node.node("ElevatorControllers", key).get(ElevatorController.class);
         this.elevatorControllerMap.put(key, elevatorController);
 
         return elevatorController;
@@ -79,9 +79,9 @@ public class ElevatorManager {
 
     @SneakyThrows
     public void saveAndUnloadElevatorController(ElevatorController elevatorController) {
-        CommentedConfigurationNode node = this.elevatorsYml.load().node("ElevatorControllers");
+        CommentedConfigurationNode node = this.elevatorsYml.load();
 
-        node.node(elevatorController.getControllerName()).set(elevatorController);
+        node.node("ElevatorControllers", elevatorController.getControllerName()).set(elevatorController);
         this.elevatorsYml.save(node);
 
         this.elevatorControllerMap.remove(elevatorController.getControllerName());
@@ -90,10 +90,16 @@ public class ElevatorManager {
     @SneakyThrows
     public void deleteElevatorController(String name) {
         ElevatorController elevatorController = this.elevatorControllerMap.get(name.toLowerCase());
+
+        // Remove from the chunk smart management map.
         if (elevatorController.getMainChunk() != null) {
             this.chunksToControllerNameMap.remove(elevatorController.getMainChunk());
         }
+
+        // Remove from the elevator controller map.
         this.elevatorControllerMap.remove(name.toLowerCase());
+
+        // Remove from the config.
         CommentedConfigurationNode node = this.elevatorsYml.load().node("ElevatorControllers");
         node.removeChild(name.toLowerCase());
         this.elevatorsYml.save(node);
