@@ -7,20 +7,9 @@ import com.andrew121410.mc.world16elevators.storage.ElevatorManager;
 import com.andrew121410.mc.world16elevators.utils.OtherPlugins;
 import com.andrew121410.mc.world16elevators.utils.SetListMap;
 import com.andrew121410.mc.world16utils.updater.UpdateManager;
-import org.bukkit.configuration.serialization.ConfigurationSerialization;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public final class World16Elevators extends JavaPlugin {
-
-    static {
-        ConfigurationSerialization.registerClass(SignObject.class, "SignObject");
-        ConfigurationSerialization.registerClass(ElevatorMovement.class, "ElevatorMovement");
-        ConfigurationSerialization.registerClass(ElevatorSettings.class, "ElevatorSettings");
-        ConfigurationSerialization.registerClass(ElevatorSound.class, "ElevatorSound");
-        ConfigurationSerialization.registerClass(FloorObject.class, "FloorObject");
-        ConfigurationSerialization.registerClass(ElevatorObject.class, "ElevatorObject");
-        ConfigurationSerialization.registerClass(ElevatorController.class, "ElevatorController");
-    }
 
     private static World16Elevators instance;
 
@@ -44,7 +33,7 @@ public final class World16Elevators extends JavaPlugin {
         this.chunkSmartManagement = this.getConfig().getBoolean("ChunkSmartManagement");
 
         this.elevatorManager = new ElevatorManager(this);
-        this.elevatorManager.loadAllElevators();
+        this.elevatorManager.loadAllElevatorControllers();
 
         if (chunkSmartManagement) {
             this.getServer().getScheduler().scheduleSyncRepeatingTask(this, new ElevatorChunkSmartManager(this), 200L, 200L);

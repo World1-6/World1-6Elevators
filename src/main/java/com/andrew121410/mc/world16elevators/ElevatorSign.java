@@ -9,22 +9,16 @@ import lombok.Getter;
 import lombok.ToString;
 import org.bukkit.Location;
 import org.bukkit.block.Sign;
-import org.bukkit.configuration.serialization.ConfigurationSerializable;
-import org.bukkit.configuration.serialization.SerializableAs;
-
-import java.util.HashMap;
-import java.util.Map;
 
 @EqualsAndHashCode
 @ToString
 @Getter
-@SerializableAs("SignObject")
-public class SignObject implements ConfigurationSerializable {
+public class ElevatorSign {
 
     private Location location;
     private SignCache signCache;
 
-    public SignObject(Location location) {
+    public ElevatorSign(Location location) {
         this.location = location;
         this.signCache = new SignCache();
     }
@@ -62,16 +56,5 @@ public class SignObject implements ConfigurationSerializable {
         if (sign == null) return false;
         this.signCache.updateFancy(sign);
         return true;
-    }
-
-    @Override
-    public Map<String, Object> serialize() {
-        Map<String, Object> map = new HashMap<>();
-        map.put("Location", location);
-        return map;
-    }
-
-    public static SignObject deserialize(Map<String, Object> map) {
-        return new SignObject((Location) map.get("Location"));
     }
 }

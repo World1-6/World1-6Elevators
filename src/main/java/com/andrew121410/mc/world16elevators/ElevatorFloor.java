@@ -15,8 +15,6 @@ import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.Openable;
 import org.bukkit.block.data.type.Door;
 import org.bukkit.block.data.type.GlassPane;
-import org.bukkit.configuration.serialization.ConfigurationSerializable;
-import org.bukkit.configuration.serialization.SerializableAs;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -27,20 +25,19 @@ import java.util.Map;
 @ToString
 @Getter
 @Setter
-@SerializableAs("FloorObject")
-public class FloorObject implements ConfigurationSerializable {
+public class ElevatorFloor {
 
     private int floor;
     private String name;
     private Location blockUnderMainDoor;
     private List<Location> doorList;
-    private List<SignObject> signList;
+    private List<ElevatorSign> signList;
     private String permission;
 
     //Do not save
     private Map<Location, SavedBlock> oldBlocks = new HashMap<>();
 
-    public FloorObject(int floor, String name, Location blockUnderMainDoor, List<Location> doorList, List<SignObject> signList, String permission) {
+    public ElevatorFloor(int floor, String name, Location blockUnderMainDoor, List<Location> doorList, List<ElevatorSign> signList, String permission) {
         this.floor = floor;
         this.name = name;
         this.blockUnderMainDoor = ifIronDoorThenGetBlockUnderTheDoorIfNotThanReturn(blockUnderMainDoor).getLocation();
@@ -49,25 +46,25 @@ public class FloorObject implements ConfigurationSerializable {
         this.permission = permission;
     }
 
-    public FloorObject(int floor, String name, Location blockUnderMainDoor) {
+    public ElevatorFloor(int floor, String name, Location blockUnderMainDoor) {
         this(floor, name, blockUnderMainDoor, new ArrayList<>(), new ArrayList<>(), null);
     }
 
-    public FloorObject(int floor, Location blockUnderMainDoor) {
+    public ElevatorFloor(int floor, Location blockUnderMainDoor) {
         this(floor, null, blockUnderMainDoor, new ArrayList<>(), new ArrayList<>(), null);
     }
 
-    public FloorObject(String name, Location blockUnderMainDoor) {
+    public ElevatorFloor(String name, Location blockUnderMainDoor) {
         this(Integer.MIN_VALUE, name, blockUnderMainDoor, new ArrayList<>(), new ArrayList<>(), null);
     }
 
     //Do not remove unnecessary bounding and .clone().
-    public static FloorObject from(ElevatorMovement elevatorMovement) {
-        return new FloorObject(elevatorMovement.getFloor().intValue(), elevatorMovement.getAtDoor().clone());
+    public static ElevatorFloor from(ElevatorMovement elevatorMovement) {
+        return new ElevatorFloor(elevatorMovement.getFloor().intValue(), elevatorMovement.getAtDoor().clone());
     }
 
-    public void doSigns(ElevatorObject elevatorObject, ElevatorStatus elevatorStatus, boolean revert) {
-        if ((this.signList.isEmpty() && !revert) && elevatorObject.getElevatorSettings().isSignFinderSystem()) {
+    public void doSigns(Elevator elevator, ElevatorStatus elevatorStatus, boolean revert) {
+        if ((this.signList.isEmpty() && !revert) && elevator.getElevatorSettings().isSignFinderSystem()) {
             List<Sign> signs = new ArrayList<>();
 
             //Find signs
@@ -82,17 +79,17 @@ public class FloorObject implements ConfigurationSerializable {
             //Couldn't find any signs
             if (signs.isEmpty()) return;
 
-            this.signList.add(new SignObject(signs.stream().findAny().get().getLocation()));
+            this.signList.add(new ElevatorSign(signs.stream().findAny().get().getLocation()));
         }
 
         if (revert) {
-            this.signList.removeIf(signObject -> !signObject.revert());
+            this.signList.removeIf(elevatorSign -> !elevatorSign.revert());
             return;
         }
 
         switch (elevatorStatus) {
-            case UP -> this.signList.removeIf(signObject -> !signObject.doUpArrow());
-            case DOWN -> this.signList.removeIf(signObject -> !signObject.doDownArrow());
+            case UP -> this.signList.removeIf(elevatorSign -> !elevatorSign.doUpArrow());
+            case DOWN -> this.signList.removeIf(elevatorSign -> !elevatorSign.doDownArrow());
         }
     }
 
@@ -191,22 +188,6 @@ public class FloorObject implements ConfigurationSerializable {
 
     public String getName() {
         return name != null ? name : String.valueOf(floor);
-    }
-
-    @Override
-    public Map<String, Object> serialize() {
-        Map<String, Object> map = new HashMap<>();
-        map.put("Floor", this.floor);
-        map.put("Name", this.name);
-        map.put("MainDoor", this.blockUnderMainDoor);
-        map.put("DoorList", this.doorList);
-        map.put("SignList", this.signList);
-        map.put("Permission", this.permission);
-        return map;
-    }
-
-    public static FloorObject deserialize(Map<String, Object> map) {
-        return new FloorObject((int) map.get("Floor"), (String) map.get("Name"), (Location) map.get("MainDoor"), (List<Location>) map.get("DoorList"), (List<SignObject>) map.get("SignList"), (String) map.get("Permission"));
     }
 }
 

@@ -71,17 +71,17 @@ public class ElevatorCMD implements CommandExecutor {
                         return true;
                     }
 
-                    if (eleArgs.getElevatorObject() != null) {
-                        ElevatorObject elevatorObject = eleArgs.getElevatorObject();
-                        if (elevatorObject == null) {
+                    if (eleArgs.getElevator() != null) {
+                        Elevator elevator = eleArgs.getElevator();
+                        if (elevator == null) {
                             commandBlockSender.sendMessage("elevatorObject == null");
                             return true;
                         }
-                        if (elevatorObject.getFloor(stringFloor) == null) {
+                        if (elevator.getFloor(stringFloor) == null) {
                             commandBlockSender.sendMessage("getFloor == null");
                             return true;
                         }
-                        elevatorObject.goToFloor(stringFloor, isGoingUp != null ? ElevatorStatus.upOrDown(isGoingUp) : ElevatorStatus.DONT_KNOW, ElevatorWho.COMMAND_BLOCK);
+                        elevator.goToFloor(stringFloor, isGoingUp != null ? ElevatorStatus.upOrDown(isGoingUp) : ElevatorStatus.DONT_KNOW, ElevatorWho.COMMAND_BLOCK);
                     } else {
                         elevatorController.callElevatorClosest(stringFloor, isGoingUp != null ? ElevatorStatus.upOrDown(isGoingUp) : ElevatorStatus.DONT_KNOW, ElevatorWho.COMMAND_BLOCK);
                     }
@@ -179,18 +179,18 @@ public class ElevatorCMD implements CommandExecutor {
                     return true;
                 }
 
-                if (eleArgs.getElevatorObject() != null) {
+                if (eleArgs.getElevator() != null) {
                     p.sendMessage("Elevator with that name looks to already exist on that elevator controller.");
                     return true;
                 }
                 String elevatorName = eleArgs.getOtherArgumentsAt(0);
 
                 ElevatorMovement elevatorMovement = new ElevatorMovement(1, blockPlayerIsLookingAt.getLocation().clone(), region);
-                ElevatorObject elevatorObject = new ElevatorObject(this.plugin, elevatorName, p.getWorld().getName(), elevatorMovement);
-                FloorObject floorObject = new FloorObject(1, floorName, blockPlayerIsLookingAt.getLocation().clone());
-                elevatorObject.addFloor(floorObject);
+                Elevator elevator = new Elevator(this.plugin, elevatorName, p.getWorld().getName(), elevatorMovement);
+                ElevatorFloor elevatorFloor = new ElevatorFloor(1, floorName, blockPlayerIsLookingAt.getLocation().clone());
+                elevator.addFloor(elevatorFloor);
 
-                elevatorController.registerElevator(elevatorName, elevatorObject);
+                elevatorController.registerElevator(elevatorName, elevator);
                 p.sendMessage(Translate.chat("The elevator: " + elevatorName + " has been registered to " + elevatorController.getControllerName()));
                 return true;
             }
@@ -198,14 +198,14 @@ public class ElevatorCMD implements CommandExecutor {
             if (args.length >= 5) {
                 ElevatorArguments elevatorArguments = getElevatorArguments(args, 3);
                 ElevatorController elevatorController = elevatorArguments.getElevatorController();
-                ElevatorObject elevatorObject = elevatorArguments.getElevatorObject();
+                Elevator elevator = elevatorArguments.getElevator();
                 String floorName = elevatorArguments.getOtherArgumentsAt(0);
 
                 if (elevatorController == null) {
                     p.sendMessage("Elevator controller was not found.");
                     return true;
                 }
-                if (elevatorObject == null) {
+                if (elevator == null) {
                     p.sendMessage(Translate.chat("That elevator doesn't exist in the controller."));
                     return true;
                 }
@@ -216,8 +216,8 @@ public class ElevatorCMD implements CommandExecutor {
                         return true;
                     }
 
-                    elevatorObject.addFloor(new FloorObject(floorName, PlayerUtils.getBlockPlayerIsLookingAt(p).getLocation()));
-                    p.sendMessage(Translate.color("&e[&9Elevator&e] &6Floor:" + floorName + " has been added to elevator: " + elevatorObject.getElevatorName()));
+                    elevator.addFloor(new ElevatorFloor(floorName, PlayerUtils.getBlockPlayerIsLookingAt(p).getLocation()));
+                    p.sendMessage(Translate.color("&e[&9Elevator&e] &6Floor:" + floorName + " has been added to elevator: " + elevator.getElevatorName()));
                     return true;
                 } else if (args[1].equalsIgnoreCase("delete")) {
                     if (!p.hasPermission("world16elevators.floor.delete")) {
@@ -225,14 +225,14 @@ public class ElevatorCMD implements CommandExecutor {
                         return true;
                     }
 
-                    FloorObject floorObject = elevatorObject.getFloor(floorName);
-                    if (floorObject == null) {
+                    ElevatorFloor elevatorFloor = elevator.getFloor(floorName);
+                    if (elevatorFloor == null) {
                         p.sendMessage(Translate.chat("This floor doesn't exist."));
                         return true;
                     }
 
-                    elevatorObject.deleteFloor(floorName);
-                    p.sendMessage(Translate.chat("The floor: " + floorName + " has been removed from the elevator: " + elevatorObject.getElevatorName()));
+                    elevator.deleteFloor(floorName);
+                    p.sendMessage(Translate.chat("The floor: " + floorName + " has been removed from the elevator: " + elevator.getElevatorName()));
                     return true;
                 } else if (args[1].equalsIgnoreCase("setname") && args.length == 6) {
                     if (!p.hasPermission("world16elevators.floor.setname")) {
@@ -240,14 +240,14 @@ public class ElevatorCMD implements CommandExecutor {
                         return true;
                     }
 
-                    FloorObject floorObject = elevatorObject.getFloor(floorName);
-                    if (floorObject == null) {
+                    ElevatorFloor elevatorFloor = elevator.getFloor(floorName);
+                    if (elevatorFloor == null) {
                         p.sendMessage(Translate.chat("This floor doesn't exist."));
                         return true;
                     }
 
                     String toFloorName = elevatorArguments.getOtherArgumentsAt(1);
-                    floorObject.setName(toFloorName);
+                    elevatorFloor.setName(toFloorName);
                     p.sendMessage(Translate.color("&6Elevator floor name has been set to: " + toFloorName));
                     return true;
                 } else if (args[1].equalsIgnoreCase("sign")) {
@@ -256,35 +256,35 @@ public class ElevatorCMD implements CommandExecutor {
                         return true;
                     }
 
-                    FloorObject floorObject = elevatorObject.getFloor(floorName);
-                    if (floorObject == null) {
+                    ElevatorFloor elevatorFloor = elevator.getFloor(floorName);
+                    if (elevatorFloor == null) {
                         p.sendMessage(Translate.chat("This floor doesn't exist."));
                         return true;
                     }
 
-                    floorObject.getSignList().add(new SignObject(PlayerUtils.getBlockPlayerIsLookingAt(p).getLocation()));
-                    p.sendMessage(Translate.color("&e[&9Elevator&e] &6Floor: " + floorObject.getName() + " has been set."));
+                    elevatorFloor.getSignList().add(new ElevatorSign(PlayerUtils.getBlockPlayerIsLookingAt(p).getLocation()));
+                    p.sendMessage(Translate.color("&e[&9Elevator&e] &6Floor: " + elevatorFloor.getName() + " has been set."));
                     return true;
                 } else if (args[1].equalsIgnoreCase("door") && args.length == 6) {
                     if (!p.hasPermission("world16elevators.floor.door")) {
                         p.sendMessage(Translate.color("&bYou don't have permission to use this command."));
                         return true;
                     }
-                    Location location = FloorObject.ifIronDoorThenGetBlockUnderTheDoorIfNotThanReturn(PlayerUtils.getBlockPlayerIsLookingAt(p).getLocation()).getLocation();
+                    Location location = ElevatorFloor.ifIronDoorThenGetBlockUnderTheDoorIfNotThanReturn(PlayerUtils.getBlockPlayerIsLookingAt(p).getLocation()).getLocation();
                     String addOrRemove = elevatorArguments.getOtherArgumentsAt(1);
 
-                    FloorObject floorObject = elevatorObject.getFloor(floorName);
-                    if (floorObject == null) {
+                    ElevatorFloor elevatorFloor = elevator.getFloor(floorName);
+                    if (elevatorFloor == null) {
                         p.sendMessage(Translate.chat("This floor doesn't exist."));
                         return true;
                     }
 
                     if (addOrRemove.equalsIgnoreCase("add")) {
-                        floorObject.getDoorList().add(location);
-                        p.sendMessage(Translate.chat("The door for the floor: " + floorObject.getFloor() + " has been added to the elevator: " + elevatorObject.getElevatorName()));
+                        elevatorFloor.getDoorList().add(location);
+                        p.sendMessage(Translate.chat("The door for the floor: " + elevatorFloor.getFloor() + " has been added to the elevator: " + elevator.getElevatorName()));
                     } else if (addOrRemove.equalsIgnoreCase("remove") || addOrRemove.equalsIgnoreCase("delete")) {
-                        floorObject.getDoorList().remove(location);
-                        p.sendMessage(Translate.chat("The door for the floor: " + floorObject.getFloor() + " has been deleted for the elevator: " + elevatorObject.getElevatorName()));
+                        elevatorFloor.getDoorList().remove(location);
+                        p.sendMessage(Translate.chat("The door for the floor: " + elevatorFloor.getFloor() + " has been deleted for the elevator: " + elevator.getElevatorName()));
                     }
                     return true;
                 } else if (args[1].equalsIgnoreCase("permission") && args.length == 6) {
@@ -296,17 +296,17 @@ public class ElevatorCMD implements CommandExecutor {
 
                     if (permission.equalsIgnoreCase("null")) permission = null;
 
-                    FloorObject floorObject = elevatorObject.getFloor(floorName);
-                    if (floorObject == null) {
+                    ElevatorFloor elevatorFloor = elevator.getFloor(floorName);
+                    if (elevatorFloor == null) {
                         p.sendMessage(Translate.chat("This floor doesn't exist."));
                         return true;
                     }
 
-                    floorObject.setPermission(permission);
+                    elevatorFloor.setPermission(permission);
                     if (permission != null) {
-                        p.sendMessage("Changed permission for floor " + floorObject.getName() + " to " + permission);
+                        p.sendMessage("Changed permission for floor " + elevatorFloor.getName() + " to " + permission);
                     } else {
-                        p.sendMessage("Removed permission on floor " + floorObject.getName());
+                        p.sendMessage("Removed permission on floor " + elevatorFloor.getName());
                     }
                     return true;
                 } else if (args[1].equalsIgnoreCase("smartCreateFloors") && args.length == 6) {
@@ -315,8 +315,8 @@ public class ElevatorCMD implements CommandExecutor {
                         return true;
                     }
 
-                    FloorObject floorObject = elevatorObject.getFloor(elevatorArguments.getOtherArgumentsAt(0));
-                    if (floorObject == null) {
+                    ElevatorFloor elevatorFloor = elevator.getFloor(elevatorArguments.getOtherArgumentsAt(0));
+                    if (elevatorFloor == null) {
                         p.sendMessage(Translate.color("&cCouldn't find floor"));
                         return true;
                     }
@@ -327,7 +327,7 @@ public class ElevatorCMD implements CommandExecutor {
                         return true;
                     }
 
-                    elevatorObject.smartCreateFloors(floorObject, bool);
+                    elevator.smartCreateFloors(elevatorFloor, bool);
                     p.sendMessage(Translate.color("&esmartCreateFloors has started."));
                     return true;
                 }
@@ -353,12 +353,12 @@ public class ElevatorCMD implements CommandExecutor {
                 p.sendMessage("Elevator controller was not found.");
                 return true;
             }
-            if (elevatorArguments.getElevatorObject() == null) {
+            if (elevatorArguments.getElevator() == null) {
                 p.sendMessage(Translate.chat("That elevator doesn't exist."));
                 return true;
             }
             String controllerName = elevatorArguments.getElevatorController().getControllerName();
-            String elevatorName = elevatorArguments.getElevatorObject().getElevatorName();
+            String elevatorName = elevatorArguments.getElevator().getElevatorName();
 
             this.plugin.getElevatorManager().deleteElevator(controllerName, elevatorName);
             p.sendMessage(Translate.chat("Elevator: " + elevatorName + " has been deleted from controller: " + controllerName));
@@ -370,7 +370,7 @@ public class ElevatorCMD implements CommandExecutor {
             return true;
         } else if (args.length == 1 && args[0].equalsIgnoreCase("load")) {
             if (!p.hasPermission("world16elevators.admin")) return true;
-            this.plugin.getElevatorManager().loadAllElevators();
+            this.plugin.getElevatorManager().loadAllElevatorControllers();
             p.sendMessage(Translate.chat("All elevators have been loaded in memory."));
             return true;
         } else if (args.length == 1 && args[0].equalsIgnoreCase("clear")) {
@@ -411,13 +411,13 @@ public class ElevatorCMD implements CommandExecutor {
                 return true;
             }
 
-            ElevatorObject elevatorObject = elevatorController.getElevator(elevatorName);
-            if (elevatorObject == null) {
+            Elevator elevator = elevatorController.getElevator(elevatorName);
+            if (elevator == null) {
                 p.sendMessage(Translate.chat("That elevator doesn't exist in the controller."));
                 return true;
             }
 
-            elevatorObject.emergencyStop();
+            elevator.emergencyStop();
             p.sendMessage(Translate.chat("emergency stop has been activated."));
             return true;
         } else if (args[0].equalsIgnoreCase("call")) {
@@ -434,7 +434,7 @@ public class ElevatorCMD implements CommandExecutor {
             } else {
                 ElevatorArguments eleArgs = getElevatorArguments(args, 2);
                 ElevatorController elevatorController = eleArgs.getElevatorController();
-                ElevatorObject elevatorObject = eleArgs.getElevatorObject();
+                Elevator elevator = eleArgs.getElevator();
                 String floorName = eleArgs.getOtherArgumentsAt(0);
                 Boolean goUp = eleArgs.getOtherArgumentsAt(1) != null ? Boolean.parseBoolean(eleArgs.getOtherArgumentsAt(1)) : null;
                 if (elevatorController == null) {
@@ -446,8 +446,8 @@ public class ElevatorCMD implements CommandExecutor {
                     return true;
                 }
 
-                if (elevatorObject != null) {
-                    elevatorObject.goToFloor(p, floorName, goUp != null ? ElevatorStatus.upOrDown(goUp) : ElevatorStatus.DONT_KNOW, ElevatorWho.PLAYER_COMMAND);
+                if (elevator != null) {
+                    elevator.goToFloor(p, floorName, goUp != null ? ElevatorStatus.upOrDown(goUp) : ElevatorStatus.DONT_KNOW, ElevatorWho.PLAYER_COMMAND);
                     return true;
                 } else {
                     elevatorController.callElevatorClosest(floorName, goUp != null ? ElevatorStatus.upOrDown(goUp) : ElevatorStatus.DONT_KNOW, ElevatorWho.PLAYER_COMMAND);
@@ -470,15 +470,15 @@ public class ElevatorCMD implements CommandExecutor {
                 return true;
             }
 
-            ElevatorObject elevatorObject = elevatorController.getElevator(elevatorName);
-            if (elevatorObject == null) {
+            Elevator elevator = elevatorController.getElevator(elevatorName);
+            if (elevator == null) {
                 p.sendMessage(Translate.chat("That elevator doesn't exist in the controller."));
                 return true;
             }
 
             elevatorManager.deleteElevator(controllerName, elevatorName);
-            elevatorObject.setElevatorName(toElevatorName);
-            elevatorController.registerElevator(toElevatorName, elevatorObject);
+            elevator.setElevatorName(toElevatorName);
+            elevatorController.registerElevator(toElevatorName, elevator);
             p.sendMessage(Translate.chat("Old Name: " + elevatorName + " new Name: " + toElevatorName));
             return true;
         } else if (args[0].equalsIgnoreCase("settings")) {
@@ -502,13 +502,13 @@ public class ElevatorCMD implements CommandExecutor {
             } else if (args.length > 2) {
                 ElevatorArguments eleArgs = getElevatorArguments(args, 2);
                 ElevatorController elevatorController = eleArgs.getElevatorController();
-                ElevatorObject elevatorObject = eleArgs.getElevatorObject();
+                Elevator elevator = eleArgs.getElevator();
                 String setting = eleArgs.getOtherArgumentsAt(0);
                 if (elevatorController == null) {
                     p.sendMessage("Elevator controller was not found.");
                     return true;
                 }
-                if (elevatorObject == null) {
+                if (elevator == null) {
                     p.sendMessage(Translate.chat("That elevator doesn't exist in the controller."));
                     return true;
                 }
@@ -519,27 +519,27 @@ public class ElevatorCMD implements CommandExecutor {
 
                 if (setting.equalsIgnoreCase("ticksPerSecond")) {
                     long valueLong = Utils.asLongOrElse(eleArgs.getOtherArgumentsAt(1), ElevatorSettings.DEFAULT_TICKS_PER_SECOND);
-                    elevatorObject.getElevatorSettings().setTicksPerSecond(valueLong);
+                    elevator.getElevatorSettings().setTicksPerSecond(valueLong);
                     p.sendMessage(Translate.chat("The ticks per second has been updated to: " + valueLong));
                     return true;
                 } else if (setting.equalsIgnoreCase("doorHolderTicksPerSecond")) {
                     long valueLong = Utils.asLongOrElse(eleArgs.getOtherArgumentsAt(1), ElevatorSettings.DEFAULT_DOOR_HOLDER_TICKS_PER_SECOND);
-                    elevatorObject.getElevatorSettings().setDoorHolderTicksPerSecond(valueLong);
+                    elevator.getElevatorSettings().setDoorHolderTicksPerSecond(valueLong);
                     p.sendMessage(Translate.chat("The door holder ticks per second has been updated to: " + valueLong));
                     return true;
                 } else if (setting.equalsIgnoreCase("elevatorWaiterTicksPerSecond")) {
                     long valueLong = Utils.asLongOrElse(eleArgs.getOtherArgumentsAt(1), ElevatorSettings.DEFAULT_ELEVATOR_WAITER_TICKS_PER_SECOND);
-                    elevatorObject.getElevatorSettings().setElevatorWaiterTicksPerSecond(valueLong);
+                    elevator.getElevatorSettings().setElevatorWaiterTicksPerSecond(valueLong);
                     p.sendMessage(Translate.chat("The elevator waiter ticks per second has been updated to: " + valueLong));
                     return true;
                 } else if (setting.equalsIgnoreCase("doElevatorLeveling")) {
                     boolean bool = Utils.asBooleanOrElse(eleArgs.getOtherArgumentsAt(1), true);
-                    elevatorObject.getElevatorSettings().setDoElevatorLeveling(bool);
+                    elevator.getElevatorSettings().setDoElevatorLeveling(bool);
                     p.sendMessage(Translate.chat("The doLevelingSystem has been set to: " + bool));
                     return true;
                 } else if (setting.equalsIgnoreCase("onlyTwoFloors")) {
                     boolean bool = Utils.asBooleanOrElse(eleArgs.getOtherArgumentsAt(1), false);
-                    elevatorObject.getElevatorSettings().setOnlyTwoFloors(bool);
+                    elevator.getElevatorSettings().setOnlyTwoFloors(bool);
                     p.sendMessage(Translate.chat("onlyTwoFloors has been set to: " + bool));
                     return true;
                 } else if (setting.equalsIgnoreCase("arrivalSound") || setting.equalsIgnoreCase("passingByFloorSound")) {
@@ -561,20 +561,20 @@ public class ElevatorCMD implements CommandExecutor {
                         }
                         ElevatorSound elevatorSound = new ElevatorSound(sound, volume, pitch);
                         if (setting.equalsIgnoreCase("arrivalSound")) {
-                            elevatorObject.getElevatorSettings().setArrivalSound(elevatorSound);
+                            elevator.getElevatorSettings().setArrivalSound(elevatorSound);
                             p.sendMessage("Sound was set to: " + elevatorSound);
                         } else if (setting.equalsIgnoreCase("passingByFloorSound")) {
-                            elevatorObject.getElevatorSettings().setPassingByFloorSound(elevatorSound);
+                            elevator.getElevatorSettings().setPassingByFloorSound(elevatorSound);
                             p.sendMessage("Sound was set to: " + elevatorSound);
                         }
 
                         return true;
                     } else if (args.length == 4) {
                         if (setting.equalsIgnoreCase("arrivalSound")) {
-                            elevatorObject.getElevatorSettings().setArrivalSound(null);
+                            elevator.getElevatorSettings().setArrivalSound(null);
                             p.sendMessage(Translate.chat("Removed arrival sound."));
                         } else {
-                            elevatorObject.getElevatorSettings().setPassingByFloorSound(null);
+                            elevator.getElevatorSettings().setPassingByFloorSound(null);
                             p.sendMessage(Translate.chat("Removed passing by floor sound."));
                         }
                         return true;
@@ -588,7 +588,7 @@ public class ElevatorCMD implements CommandExecutor {
                         p.sendMessage(Translate.color("&cThat's not a valid ElevatorFloorSelectorType"));
                         return true;
                     }
-                    elevatorObject.getElevatorSettings().setFloorSelectorType(elevatorFloorSelectorType);
+                    elevator.getElevatorSettings().setFloorSelectorType(elevatorFloorSelectorType);
                     p.sendMessage(Translate.color("floorSelectorType has been set to " + elevatorFloorSelectorType.name()));
                     return true;
                 } else if (setting.equalsIgnoreCase("callButtonType")) {
@@ -599,17 +599,17 @@ public class ElevatorCMD implements CommandExecutor {
                         p.sendMessage(Translate.color("&cThat's not a valid ElevatorCallButtonType"));
                         return true;
                     }
-                    elevatorObject.getElevatorSettings().setCallButtonType(elevatorCallButtonType);
+                    elevator.getElevatorSettings().setCallButtonType(elevatorCallButtonType);
                     p.sendMessage(Translate.color("callButtonType has been set to " + elevatorCallButtonType.name()));
                     return true;
                 } else if (setting.equalsIgnoreCase("signFinderSystem")) {
                     boolean bool = Utils.asBooleanOrElse(eleArgs.getOtherArgumentsAt(1), true);
-                    elevatorObject.getElevatorSettings().setSignFinderSystem(bool);
+                    elevator.getElevatorSettings().setSignFinderSystem(bool);
                     p.sendMessage(Translate.chat("The signFinderSystem has been set to: " + bool));
                     return true;
                 }else if (setting.equalsIgnoreCase("teleportElevatorOnEmpty")) {
                     boolean bool = Utils.asBooleanOrElse(eleArgs.getOtherArgumentsAt(1), false);
-                    elevatorObject.getElevatorSettings().setTeleportElevatorOnEmpty(bool);
+                    elevator.getElevatorSettings().setTeleportElevatorOnEmpty(bool);
                     p.sendMessage(Translate.chat("The teleportElevatorOnEmpty has been set to: " + bool));
                     return true;
                 }
@@ -628,7 +628,7 @@ public class ElevatorCMD implements CommandExecutor {
                     p.sendMessage("Elevator controller was not found.");
                     return true;
                 }
-                ElevatorObject elevatorObject = eleArgs.getElevatorObject();
+                Elevator elevator = eleArgs.getElevator();
                 String whatToRemove = eleArgs.getOtherArgumentsAt(0);
                 if (whatToRemove == null) {
                     p.sendMessage("whatToBeRemoved cannot be null.");
@@ -646,18 +646,18 @@ public class ElevatorCMD implements CommandExecutor {
                         mainText.setColor(ChatColor.GOLD);
                         mainText.setBold(true);
                         mainComponentBuilder.append(mainText).append("\n");
-                        if (elevatorObject == null) {
+                        if (elevator == null) {
                             elevatorController.getElevatorsMap().forEach((eleName, eleObject) -> mainComponentBuilder.append(makeQueueChatComponent(eleObject).create()));
-                        } else mainComponentBuilder.append(makeQueueChatComponent(elevatorObject).create());
+                        } else mainComponentBuilder.append(makeQueueChatComponent(elevator).create());
                         p.spigot().sendMessage(mainComponentBuilder.create());
                         return true;
                     } else if (setting.equalsIgnoreCase("clear")) {
-                        if (elevatorObject == null) {
+                        if (elevator == null) {
                             elevatorController.getElevatorsMap().forEach((eleName, eleObject) -> eleObject.getFloorQueueBuffer().clear());
                             p.sendMessage(Translate.chat("FloorQueueBuffer has been cleared on all elevators on the controller."));
                         } else {
-                            elevatorObject.getFloorQueueBuffer().clear();
-                            p.sendMessage(Translate.chat("FloorQueueBuffer has been cleared for " + elevatorObject.getElevatorName() + " elevator."));
+                            elevator.getFloorQueueBuffer().clear();
+                            p.sendMessage(Translate.chat("FloorQueueBuffer has been cleared for " + elevator.getElevatorName() + " elevator."));
                         }
                         return true;
                     }
@@ -678,8 +678,8 @@ public class ElevatorCMD implements CommandExecutor {
                 return true;
             }
 
-            ElevatorObject elevatorObject = eleArgs.getElevatorObject();
-            if (elevatorObject == null) {
+            Elevator elevator = eleArgs.getElevator();
+            if (elevator == null) {
                 p.sendMessage(Translate.color("Elevator wasn't found on that controller."));
                 return true;
             }
@@ -695,18 +695,18 @@ public class ElevatorCMD implements CommandExecutor {
                 return true;
             }
 
-            Integer currentFloor = elevatorObject.getElevatorMovement().getFloor();
+            Integer currentFloor = elevator.getElevatorMovement().getFloor();
             if (currentFloor == null) {
                 p.sendMessage("It seems that the elevator isn't on a floor the elevator must not be running for this to work.");
                 return true;
             }
-            FloorObject floorObject = elevatorObject.getFloor(currentFloor);
-            floorObject.doDoor(true, true);
+            ElevatorFloor elevatorFloor = elevator.getFloor(currentFloor);
+            elevatorFloor.doDoor(true, true);
             p.sendMessage("Opened all doors for that floor.");
             new BukkitRunnable() {
                 @Override
                 public void run() {
-                    floorObject.doDoor(false, true);
+                    elevatorFloor.doDoor(false, true);
                 }
             }.runTaskLater(plugin, 20L * seconds);
         } else if (args[0].equalsIgnoreCase("copysettingsfrom")) {
@@ -722,8 +722,8 @@ public class ElevatorCMD implements CommandExecutor {
                     p.sendMessage("from: That's not a valid elevator controller");
                     return true;
                 }
-                ElevatorObject elevatorObjectFrom = elevatorArguments.getElevatorObject();
-                if (elevatorObjectFrom == null) {
+                Elevator elevatorFrom = elevatorArguments.getElevator();
+                if (elevatorFrom == null) {
                     p.sendMessage("from: That's not a valid elevator");
                     return true;
                 }
@@ -732,15 +732,15 @@ public class ElevatorCMD implements CommandExecutor {
                     p.sendMessage("to: That's not a valid elevator controller");
                     return true;
                 }
-                ElevatorObject elevatorObjectTo = elevatorControllerTo.getElevator(elevatorArguments.getOtherArgumentsAt(1));
-                if (elevatorObjectTo == null) {
+                Elevator elevatorTo = elevatorControllerTo.getElevator(elevatorArguments.getOtherArgumentsAt(1));
+                if (elevatorTo == null) {
                     p.sendMessage("to: That's not a valid elevator");
                     return true;
                 }
 
-                ElevatorSettings clone = elevatorObjectFrom.getElevatorSettings().clone();
-                elevatorObjectTo.setElevatorSettings(clone);
-                p.sendMessage("Successfully cloned to " + elevatorObjectTo.getElevatorName());
+                ElevatorSettings clone = elevatorFrom.getElevatorSettings().clone();
+                elevatorTo.setElevatorSettings(clone);
+                p.sendMessage("Successfully cloned to " + elevatorTo.getElevatorName());
                 return true;
             } else {
                 p.sendMessage(Translate.chat("&6/elevator copysettingsfrom &e<Controller> &9<Elevator> &e<Controller> &9<Elevator>"));
@@ -757,14 +757,14 @@ public class ElevatorCMD implements CommandExecutor {
             if (i == 0) {
                 elevatorArguments.setElevatorController(this.elevatorControllerMap.get(newStringArray[0]));
             } else if (i == 1 && elevatorArguments.getElevatorController() != null && elevatorArguments.getElevatorController().getElevatorsMap().containsKey((newStringArray[1]))) {
-                elevatorArguments.setElevatorObject(elevatorArguments.getElevatorController().getElevatorsMap().get(newStringArray[1]));
+                elevatorArguments.setElevator(elevatorArguments.getElevatorController().getElevatorsMap().get(newStringArray[1]));
             } else otherArgs.add(newStringArray[i]);
         }
         elevatorArguments.setOtherArgs(otherArgs);
         return elevatorArguments;
     }
 
-    private ComponentBuilder makeQueueChatComponent(ElevatorObject eleObject) {
+    private ComponentBuilder makeQueueChatComponent(Elevator eleObject) {
         ComponentBuilder floorQueueObjectStringBuilder = new ComponentBuilder();
         floorQueueObjectStringBuilder.color(ChatColor.BLUE).bold(false);
         floorQueueObjectStringBuilder.append("Elevator: " + eleObject.getElevatorName()).append("\n").color(ChatColor.YELLOW).bold(false);
@@ -783,7 +783,7 @@ class ElevatorArguments {
     private ElevatorController elevatorController = null;
     @Getter
     @Setter
-    private ElevatorObject elevatorObject = null;
+    private Elevator elevator = null;
     @Setter
     private ArrayList<String> otherArgs = null;
 

@@ -1,107 +1,117 @@
 package com.andrew121410.mc.world16elevators.storage;
 
-import com.andrew121410.mc.world16elevators.World16Elevators;
-import com.andrew121410.mc.world16elevators.ElevatorController;
-import com.andrew121410.mc.world16utils.chat.Translate;
-import com.andrew121410.mc.world16utils.config.CustomYmlManager;
+import com.andrew121410.mc.world16elevators.*;
+import com.andrew121410.mc.world16elevators.storage.serializers.*;
+import com.andrew121410.mc.world16utils.config.World16ConfigurateManager;
+import com.andrew121410.mc.world16utils.utils.spongepowered.configurate.CommentedConfigurationNode;
+import com.andrew121410.mc.world16utils.utils.spongepowered.configurate.serialize.TypeSerializerCollection;
+import com.andrew121410.mc.world16utils.utils.spongepowered.configurate.yaml.YamlConfigurationLoader;
+import lombok.SneakyThrows;
 import org.bukkit.Location;
-import org.bukkit.configuration.ConfigurationSection;
 
 import java.util.Map;
 
 public class ElevatorManager {
 
-    private Map<Location, String> chunksToControllerNameMap;
-    private Map<String, ElevatorController> elevatorControllerMap;
+    private final Map<Location, String> chunksToControllerNameMap;
+    private final Map<String, ElevatorController> elevatorControllerMap;
 
-    private World16Elevators plugin;
-    private CustomYmlManager elevatorsYml;
+    private final World16Elevators plugin;
+    private final YamlConfigurationLoader elevatorsYml;
 
     public ElevatorManager(World16Elevators plugin) {
         this.plugin = plugin;
         this.chunksToControllerNameMap = this.plugin.getSetListMap().getChunksToControllerNameMap();
         this.elevatorControllerMap = this.plugin.getSetListMap().getElevatorControllerMap();
-        //elevators.yml
-        this.elevatorsYml = new CustomYmlManager(this.plugin, false);
-        this.elevatorsYml.setup("elevators.yml");
-        this.elevatorsYml.saveConfig();
-        this.elevatorsYml.reloadConfig();
-        //...
+
+        World16ConfigurateManager world16ConfigurateManager = new World16ConfigurateManager(this.plugin);
+        world16ConfigurateManager.registerTypeSerializerCollection(getOurSerializers());
+        this.elevatorsYml = world16ConfigurateManager.getYamlConfigurationLoader("elevators.yml");
     }
 
-    public void loadAllElevators() {
-        //This runs when elevator.yml is first created.
-        ConfigurationSection elevatorControllersSection = this.elevatorsYml.getConfig().getConfigurationSection("ElevatorControllers");
-        if (elevatorControllersSection == null) {
-            this.elevatorsYml.getConfig().createSection("ElevatorControllers");
-            this.elevatorsYml.saveConfig();
-            this.plugin.getServer().getConsoleSender().sendMessage(Translate.chat("&c[ElevatorManager]&r&6 ElevatorControllers section has been created."));
-            return; //Return because don't try to load nothing.
-        }
-        for (String elevatorControllerName : elevatorControllersSection.getKeys(false)) {
-            ElevatorController elevatorController = (ElevatorController) elevatorControllersSection.get(elevatorControllerName);
+    private TypeSerializerCollection getOurSerializers() {
+        TypeSerializerCollection.Builder ourSerializers = TypeSerializerCollection.builder();
+
+        ourSerializers.registerExact(ElevatorController.class, new ElevatorControllerSerializer());
+        ourSerializers.registerExact(ElevatorFloor.class, new ElevatorFloorSerializer());
+        ourSerializers.registerExact(ElevatorMovement.class, new ElevatorMovementSerializer());
+        ourSerializers.registerExact(Elevator.class, new ElevatorSerializer());
+        ourSerializers.registerExact(ElevatorSign.class, new ElevatorSignSerializer());
+
+        return ourSerializers.build();
+    }
+
+    @SneakyThrows
+    public void loadAllElevatorControllers() {
+        CommentedConfigurationNode node = this.elevatorsYml.load().node("ElevatorControllers");
+
+        for (Map.Entry<Object, CommentedConfigurationNode> objectCommentedConfigurationNodeEntry : node.childrenMap().entrySet()) {
+            String key = (String) objectCommentedConfigurationNodeEntry.getKey();
+            ElevatorController elevatorController = objectCommentedConfigurationNodeEntry.getValue().get(ElevatorController.class);
+
             if (this.plugin.isChunkSmartManagement())
-                this.chunksToControllerNameMap.put(elevatorController.getMainChunk(), elevatorControllerName);
-            else this.elevatorControllerMap.put(elevatorControllerName.toLowerCase(), elevatorController);
+                this.chunksToControllerNameMap.put(elevatorController.getMainChunk(), key);
+            else this.elevatorControllerMap.put(key, elevatorController);
         }
     }
 
+    @SneakyThrows
     public void saveAllElevators() {
-        ConfigurationSection elevatorControllersSection = this.elevatorsYml.getConfig().getConfigurationSection("ElevatorControllers");
-        if (elevatorControllersSection == null) {
-            elevatorControllersSection = this.elevatorsYml.getConfig().createSection("ElevatorControllers");
-            this.elevatorsYml.saveConfig();
-        }
-        //For each elevator controller.
+        CommentedConfigurationNode node = this.elevatorsYml.load();
+
         for (Map.Entry<String, ElevatorController> mapEntry : this.elevatorControllerMap.entrySet()) {
-            String controllerName = mapEntry.getKey();
+            String key = mapEntry.getKey();
             ElevatorController elevatorController = mapEntry.getValue();
-            elevatorControllersSection.set(controllerName, elevatorController);
-            this.elevatorsYml.saveConfig();
+            node.node("ElevatorControllers", key).set(elevatorController);
+            this.elevatorsYml.save(node);
         }
     }
 
+    @SneakyThrows
     public ElevatorController loadElevatorController(String key) {
-        ConfigurationSection elevatorControllersSection = this.elevatorsYml.getConfig().getConfigurationSection("ElevatorControllers");
-        if (elevatorControllersSection == null) {
-            elevatorControllersSection = this.elevatorsYml.getConfig().createSection("ElevatorControllers");
-            this.elevatorsYml.saveConfig();
-        }
-        ElevatorController elevatorController = (ElevatorController) elevatorControllersSection.get(key);
-        this.elevatorControllerMap.putIfAbsent(key, elevatorController);
+        CommentedConfigurationNode node = this.elevatorsYml.load();
+
+        ElevatorController elevatorController = node.node("ElevatorControllers", key).get(ElevatorController.class);
+        this.elevatorControllerMap.put(key, elevatorController);
+
         return elevatorController;
     }
 
+    @SneakyThrows
     public void saveAndUnloadElevatorController(ElevatorController elevatorController) {
-        ConfigurationSection elevatorControllersSection = this.elevatorsYml.getConfig().getConfigurationSection("ElevatorControllers");
-        if (elevatorControllersSection == null) {
-            elevatorControllersSection = this.elevatorsYml.getConfig().createSection("ElevatorControllers");
-            this.elevatorsYml.saveConfig();
-        }
-        elevatorControllersSection.set(elevatorController.getControllerName(), elevatorController);
+        CommentedConfigurationNode node = this.elevatorsYml.load();
+
+        node.node("ElevatorControllers", elevatorController.getControllerName()).set(elevatorController);
+        this.elevatorsYml.save(node);
+
         this.elevatorControllerMap.remove(elevatorController.getControllerName());
-        this.elevatorsYml.saveConfig();
     }
 
+    @SneakyThrows
     public void deleteElevatorController(String name) {
         ElevatorController elevatorController = this.elevatorControllerMap.get(name.toLowerCase());
+
+        // Remove from the chunk smart management map.
         if (elevatorController.getMainChunk() != null) {
             this.chunksToControllerNameMap.remove(elevatorController.getMainChunk());
         }
+
+        // Remove from the elevator controller map.
         this.elevatorControllerMap.remove(name.toLowerCase());
-        ConfigurationSection elevatorControllersSection = this.elevatorsYml.getConfig().getConfigurationSection("ElevatorControllers");
-        if (elevatorControllersSection == null) return;
-        elevatorControllersSection.set(name.toLowerCase(), null);
-        this.elevatorsYml.saveConfig();
+
+        // Remove from the config.
+        CommentedConfigurationNode node = this.elevatorsYml.load().node("ElevatorControllers");
+        node.removeChild(name.toLowerCase());
+        this.elevatorsYml.save(node);
     }
 
+    @SneakyThrows
     public void deleteElevator(String elevatorControllerName, String elevatorName) {
         ElevatorController elevatorController = this.elevatorControllerMap.get(elevatorControllerName);
         if (elevatorController == null) return;
         elevatorController.getElevatorsMap().remove(elevatorName);
-        ConfigurationSection elevatorsSection = this.elevatorsYml.getConfig().getConfigurationSection("ElevatorControllers." + elevatorControllerName.toLowerCase() + ".ElevatorMap");
-        if (elevatorsSection == null) return;
-        elevatorsSection.set(elevatorName, null);
-        this.elevatorsYml.saveConfig();
+        CommentedConfigurationNode node = this.elevatorsYml.load().node("ElevatorControllers", elevatorControllerName.toLowerCase(), "ElevatorMap");
+        node.removeChild(elevatorName);
+        this.elevatorsYml.save(node);
     }
 }
