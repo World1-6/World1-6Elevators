@@ -49,8 +49,8 @@ repositories {
 }
 
 dependencies {
-    compileOnly("io.papermc.paper:paper-api:1.19.3-R0.1-SNAPSHOT")
-    compileOnly("com.github.World1-6.World1-6Utils:World1-6Utils-Plugin:4e7ce542ea")
+    compileOnly("io.papermc.paper:paper-api:1.19.4-R0.1-SNAPSHOT")
+    compileOnly("com.github.World1-6.World1-6Utils:World1-6Utils-Plugin:a018bd5be3")
     compileOnly("org.projectlombok:lombok:1.18.24")
     compileOnly("org.geysermc.floodgate:api:2.2.0-SNAPSHOT")
 }

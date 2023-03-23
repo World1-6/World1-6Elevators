@@ -54,7 +54,7 @@ public class ElevatorSign {
     public boolean revert() {
         Sign sign = UniversalBlockUtils.isSign(location.getBlock());
         if (sign == null) return false;
-        this.signCache.updateFancy(sign);
+        this.signCache.update(sign);
         return true;
     }
 }
