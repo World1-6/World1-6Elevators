@@ -21,8 +21,8 @@ public class ElevatorManager {
 
     public ElevatorManager(World16Elevators plugin) {
         this.plugin = plugin;
-        this.chunksToControllerNameMap = this.plugin.getSetListMap().getChunksToControllerNameMap();
-        this.elevatorControllerMap = this.plugin.getSetListMap().getElevatorControllerMap();
+        this.chunksToControllerNameMap = this.plugin.getMemoryHolder().getChunksToControllerNameMap();
+        this.elevatorControllerMap = this.plugin.getMemoryHolder().getElevatorControllerMap();
 
         World16ConfigurateManager world16ConfigurateManager = new World16ConfigurateManager(this.plugin);
         world16ConfigurateManager.registerTypeSerializerCollection(getOurSerializers());

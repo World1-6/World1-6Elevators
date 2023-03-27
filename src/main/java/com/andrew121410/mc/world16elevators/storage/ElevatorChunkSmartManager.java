@@ -17,8 +17,8 @@ public class ElevatorChunkSmartManager implements Runnable {
 
     public ElevatorChunkSmartManager(World16Elevators plugin) {
         this.plugin = plugin;
-        this.chunksToControllerNameMap = this.plugin.getSetListMap().getChunksToControllerNameMap();
-        this.elevatorControllerMap = this.plugin.getSetListMap().getElevatorControllerMap();
+        this.chunksToControllerNameMap = this.plugin.getMemoryHolder().getChunksToControllerNameMap();
+        this.elevatorControllerMap = this.plugin.getMemoryHolder().getElevatorControllerMap();
     }
 
     @Override

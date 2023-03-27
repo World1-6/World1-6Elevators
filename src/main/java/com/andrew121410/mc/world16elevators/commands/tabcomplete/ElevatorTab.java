@@ -43,7 +43,7 @@ public class ElevatorTab implements TabCompleter {
         tabCompleteList.add("opendoor");
         tabCompleteList.add("copysettingsfrom");
         tabCompleteList.add("tostring");
-        this.elevatorControllerMap = this.plugin.getSetListMap().getElevatorControllerMap();
+        this.elevatorControllerMap = this.plugin.getMemoryHolder().getElevatorControllerMap();
         this.soundList = new ArrayList<>();
         for (Sound value : Sound.values()) {
             this.soundList.add(value.name());

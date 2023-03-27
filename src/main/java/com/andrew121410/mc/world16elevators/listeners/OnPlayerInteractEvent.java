@@ -69,7 +69,7 @@ public class OnPlayerInteractEvent implements Listener {
     }
 
     private ElevatorKey findElevatorKey(Location blockUnderTheDoor) {
-        for (ElevatorController elevatorController : this.plugin.getSetListMap().getElevatorControllerMap().values()) {
+        for (ElevatorController elevatorController : this.plugin.getMemoryHolder().getElevatorControllerMap().values()) {
             for (Elevator elevator : elevatorController.getElevatorsMap().values()) {
                 if (elevator.getElevatorSettings().getCallButtonType() == ElevatorCallButtonType.OFF) continue;
                 for (ElevatorFloor elevatorFloor : elevator.getFloorsMap().values()) {

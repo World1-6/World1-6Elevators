@@ -4,8 +4,8 @@ import com.andrew121410.mc.world16elevators.commands.ElevatorCMD;
 import com.andrew121410.mc.world16elevators.listeners.OnPlayerInteractEvent;
 import com.andrew121410.mc.world16elevators.storage.ElevatorChunkSmartManager;
 import com.andrew121410.mc.world16elevators.storage.ElevatorManager;
-import com.andrew121410.mc.world16elevators.utils.OtherPlugins;
 import com.andrew121410.mc.world16elevators.utils.MemoryHolder;
+import com.andrew121410.mc.world16elevators.utils.OtherPlugins;
 import com.andrew121410.mc.world16utils.updater.UpdateManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -66,7 +66,7 @@ public final class World16Elevators extends JavaPlugin {
         return otherPlugins;
     }
 
-    public MemoryHolder getSetListMap() {
+    public MemoryHolder getMemoryHolder() {
         return memoryHolder;
     }
 

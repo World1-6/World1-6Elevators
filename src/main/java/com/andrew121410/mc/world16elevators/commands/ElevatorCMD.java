@@ -43,7 +43,7 @@ public class ElevatorCMD implements CommandExecutor {
     public ElevatorCMD(World16Elevators plugin) {
         this.plugin = plugin;
 
-        this.elevatorControllerMap = this.plugin.getSetListMap().getElevatorControllerMap();
+        this.elevatorControllerMap = this.plugin.getMemoryHolder().getElevatorControllerMap();
         this.elevatorManager = this.plugin.getElevatorManager();
 
         this.plugin.getCommand("elevator").setExecutor(this);
