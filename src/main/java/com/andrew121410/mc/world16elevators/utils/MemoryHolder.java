@@ -6,12 +6,12 @@ import org.bukkit.Location;
 import java.util.HashMap;
 import java.util.Map;
 
-public class SetListMap {
+public class MemoryHolder {
 
     private Map<Location, String> chunksToControllerNameMap;
     private Map<String, ElevatorController> elevatorControllerMap;
 
-    public SetListMap() {
+    public MemoryHolder() {
         this.chunksToControllerNameMap = new HashMap<>();
         this.elevatorControllerMap = new HashMap<>();
     }
