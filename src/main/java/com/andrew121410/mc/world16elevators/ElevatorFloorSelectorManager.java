@@ -181,7 +181,7 @@ public class ElevatorFloorSelectorManager {
                     })));
                     slot++;
                 }
-                this.update(guiButtons, "Elevator Floors!", guiSlots);
+                this.update(guiButtons, Component.text("Elevator Floors!"), guiSlots);
             }
 
             @Override
