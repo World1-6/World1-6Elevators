@@ -1,12 +1,12 @@
 plugins {
-    id("io.freefair.lombok") version "6.6.3"
+    id("io.freefair.lombok") version "8.4"
     `java-library`
     `maven-publish`
 }
 
+description = "World1-6Elevators"
 group = "com.andrew121410.mc"
 version = "1.0-SNAPSHOT"
-description = "World1-6Elevators"
 java.sourceCompatibility = JavaVersion.VERSION_17
 
 tasks {
@@ -49,9 +49,8 @@ repositories {
 }
 
 dependencies {
-    compileOnly("io.papermc.paper:paper-api:1.20-R0.1-SNAPSHOT")
-    compileOnly("com.github.World1-6.World1-6Utils:World1-6Utils-Plugin:0b9d0dc6ba")
-    compileOnly("org.projectlombok:lombok:1.18.24")
+    compileOnly("io.papermc.paper:paper-api:1.20.2-R0.1-SNAPSHOT")
+    compileOnly("com.github.World1-6.World1-6Utils:World1-6Utils-Plugin:a1c6ad2df7")
     compileOnly("org.geysermc.floodgate:api:2.2.0-SNAPSHOT")
 }
 
