@@ -236,7 +236,7 @@ public class Elevator {
         } catch (Exception e) {
             Bukkit.broadcast(Translate.miniMessage("<red>Error while trying to move the elevator: " + this.elevatorName + " on controller: " + this.elevatorControllerName));
             e.printStackTrace();
-            this.plugin.getPluginLoader().disablePlugin(this.plugin);
+            this.plugin.getServer().getPluginManager().disablePlugin(this.plugin);
             return;
         }
 

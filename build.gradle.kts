@@ -1,5 +1,5 @@
 plugins {
-    id("io.freefair.lombok") version "8.4"
+    id("io.freefair.lombok") version "8.6" // https://plugins.gradle.org/plugin/io.freefair.lombok
     `java-library`
     `maven-publish`
 }
@@ -7,7 +7,9 @@ plugins {
 description = "World1-6Elevators"
 group = "com.andrew121410.mc"
 version = "1.0-SNAPSHOT"
-java.sourceCompatibility = JavaVersion.VERSION_17
+
+java.sourceCompatibility = JavaVersion.VERSION_21
+java.targetCompatibility = JavaVersion.VERSION_21
 
 tasks {
     compileJava {
@@ -32,6 +34,10 @@ repositories {
     }
 
     maven {
+        url = uri("https://s01.oss.sonatype.org/content/repositories/snapshots/")
+    }
+
+    maven {
         url = uri("https://oss.sonatype.org/content/groups/public/")
     }
 
@@ -49,9 +55,9 @@ repositories {
 }
 
 dependencies {
-    compileOnly("io.papermc.paper:paper-api:1.20.2-R0.1-SNAPSHOT")
-    compileOnly("com.github.World1-6.World1-6Utils:World1-6Utils-Plugin:a1c6ad2df7")
-    compileOnly("org.geysermc.floodgate:api:2.2.0-SNAPSHOT")
+    compileOnly("io.papermc.paper:paper-api:1.20.6-R0.1-SNAPSHOT")
+    compileOnly("com.github.World1-6.World1-6Utils:World1-6Utils-Plugin:b50561b638")
+    compileOnly("org.geysermc.floodgate:api:2.2.3-SNAPSHOT")
 }
 
 publishing {
