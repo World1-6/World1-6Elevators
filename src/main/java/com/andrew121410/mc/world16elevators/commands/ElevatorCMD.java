@@ -607,7 +607,7 @@ public class ElevatorCMD implements CommandExecutor {
                     elevator.getElevatorSettings().setSignFinderSystem(bool);
                     p.sendMessage(Translate.chat("The signFinderSystem has been set to: " + bool));
                     return true;
-                }else if (setting.equalsIgnoreCase("teleportElevatorOnEmpty")) {
+                } else if (setting.equalsIgnoreCase("teleportElevatorOnEmpty")) {
                     boolean bool = Utils.asBooleanOrElse(eleArgs.getOtherArgumentsAt(1), false);
                     elevator.getElevatorSettings().setTeleportElevatorOnEmpty(bool);
                     p.sendMessage(Translate.chat("The teleportElevatorOnEmpty has been set to: " + bool));
@@ -744,6 +744,31 @@ public class ElevatorCMD implements CommandExecutor {
                 return true;
             } else {
                 p.sendMessage(Translate.chat("&6/elevator copysettingsfrom &e<Controller> &9<Elevator> &e<Controller> &9<Elevator>"));
+            }
+        } else if (args[0].equalsIgnoreCase("teleport")) { // /elevator teleport <controller> <elevator>
+            if (!p.hasPermission("world16elevators.teleport")) {
+                p.sendMessage(Translate.color("&bYou don't have permission to use this command."));
+                return true;
+            }
+            if (args.length == 3) {
+                ElevatorArguments elevatorArguments = getElevatorArguments(args, 2);
+                ElevatorController elevatorController = elevatorArguments.getElevatorController();
+                if (elevatorController == null) {
+                    p.sendMessage("Elevator controller was not found.");
+                    return true;
+                }
+                Elevator elevator = elevatorArguments.getElevator();
+                if (elevator == null) {
+                    p.sendMessage("Elevator was not found.");
+                    return true;
+                }
+
+                Location location = elevator.getElevatorMovement().getAtDoor();
+                p.teleport(location);
+                p.sendMessage(Translate.miniMessage("<gold>You have been teleported to the elevator."));
+                return true;
+            } else {
+                p.sendMessage(Translate.chat("&6/elevator teleport &e<Controller> &9<Elevator>"));
             }
         }
         return true;

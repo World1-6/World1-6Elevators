@@ -1,7 +1,7 @@
 package com.andrew121410.mc.world16elevators.commands.tabcomplete;
 
-import com.andrew121410.mc.world16elevators.ElevatorController;
 import com.andrew121410.mc.world16elevators.Elevator;
+import com.andrew121410.mc.world16elevators.ElevatorController;
 import com.andrew121410.mc.world16elevators.ElevatorFloor;
 import com.andrew121410.mc.world16elevators.World16Elevators;
 import com.andrew121410.mc.world16elevators.enums.ElevatorCallButtonType;
@@ -43,6 +43,7 @@ public class ElevatorTab implements TabCompleter {
         tabCompleteList.add("opendoor");
         tabCompleteList.add("copysettingsfrom");
         tabCompleteList.add("tostring");
+        tabCompleteList.add("teleport");
         this.elevatorControllerMap = this.plugin.getMemoryHolder().getElevatorControllerMap();
         this.soundList = new ArrayList<>();
         for (Sound value : Sound.values()) {
@@ -175,6 +176,13 @@ public class ElevatorTab implements TabCompleter {
             }
             return null;
         } else if (args[0].equalsIgnoreCase("tostring")) {
+            if (args.length == 2) {
+                return getContainsString(args[1], controllerList);
+            } else if (args.length == 3) {
+                return this.elevatorControllerMap.containsKey(args[1]) ? new ArrayList<>(this.elevatorControllerMap.get(args[1]).getElevatorsMap().keySet()) : null;
+            }
+            return null;
+        } else if (args[0].equalsIgnoreCase("teleport")) {
             if (args.length == 2) {
                 return getContainsString(args[1], controllerList);
             } else if (args.length == 3) {
