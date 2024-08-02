@@ -82,7 +82,8 @@ public class Elevator {
         this.elevatorMovement = elevatorMovement;
         this.elevatorSettings = elevatorSettings;
 
-        this.boundingBoxExpanded = this.elevatorMovement.getBoundingBox().clone().expand(1);
+        // Expand the bounding box by -1 on the Y axis for minY and +1 on the Y axis for maxY
+        this.boundingBoxExpanded = this.elevatorMovement.getBoundingBox().clone().expand(0, 1, 0);
 
         this.isGoing = false;
         this.isIdling = false;
@@ -230,6 +231,10 @@ public class Elevator {
     }
 
     protected void move(int howManyY, boolean goUP) {
+        moveWithWorldEdit(howManyY, goUP);
+    }
+
+    private void moveWithWorldEdit(int howManyY, boolean goUP) {
         try {
             WorldEdit worldEdit = this.plugin.getOtherPlugins().getWorld16Utils().getClassWrappers().getWorldEdit();
             worldEdit.moveCuboidRegion(getBukkitWorld(), elevatorMovement.getBoundingBox(), new Location(getBukkitWorld(), 0, goUP ? 1 : -1, 0), howManyY);
