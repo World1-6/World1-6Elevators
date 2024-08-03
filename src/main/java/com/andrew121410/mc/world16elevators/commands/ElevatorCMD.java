@@ -764,6 +764,27 @@ public class ElevatorCMD implements CommandExecutor {
                 }
 
                 Location location = elevator.getElevatorMovement().getAtDoor();
+
+                // Find a spot to teleport the player. 3x3 area.
+                for (int x = -1; x <= 1; x++) {
+                    for (int z = -1; z <= 1; z++) {
+                        Location newLocation = location.clone().add(x, 0, z);
+
+                        Location newLocation1 = newLocation.clone().add(0, 1, 0);
+                        Location newLocation2 = newLocation1.clone().add(0, 1, 0);
+
+                        if (!newLocation.getBlock().getType().isAir()) {
+                            if (newLocation1.getBlock().getType().isAir() && newLocation2.getBlock().getType().isAir()) {
+                                location = newLocation1;
+                                break;
+                            }
+                        } else {
+                            break;
+                        }
+
+                    }
+                }
+
                 p.teleport(location);
                 p.sendMessage(Translate.miniMessage("<gold>You have been teleported to the elevator."));
                 return true;
