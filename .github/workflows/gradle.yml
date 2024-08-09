@@ -1,4 +1,4 @@
-name: Java CI with Gradle
+name: Build and Release
 
 on:
   push:
@@ -8,9 +8,14 @@ jobs:
   build:
 
     runs-on: ubuntu-latest
+    env:
+      MY_JAR: "build/libs/World1-6Elevators.jar"
 
     steps:
       - uses: actions/checkout@v4 # https://github.com/actions/checkout
+
+      - name: Setup Gradle # https://github.com/gradle/actions
+        uses: gradle/actions/setup-gradle@v4
 
       - name: Chmod Gradlew
         run: chmod +x ./gradlew
@@ -22,13 +27,11 @@ jobs:
           distribution: 'temurin'
           cache: gradle
 
-      - name: Build with Gradle # https://github.com/gradle/gradle-build-action -> https://github.com/gradle/actions
-        uses: gradle/actions/setup-gradle@v3
-        with:
-          arguments: build
+      - name: Build with Gradle
+        run: ./gradlew build
 
       - name: Generate sha256sum
-        run: sha256sum build/libs/World1-6Elevators.jar >> hash.txt
+        run: sha256sum "$MY_JAR" >> hash.txt
 
       - name: Deploy Release With Artifact
         uses: "marvinpinto/action-automatic-releases@latest"
@@ -37,5 +40,5 @@ jobs:
           automatic_release_tag: "latest"
           prerelease: false
           files: |
-            build/libs/World1-6Elevators.jar
+            ${{ env.MY_JAR }}
             hash.txt
