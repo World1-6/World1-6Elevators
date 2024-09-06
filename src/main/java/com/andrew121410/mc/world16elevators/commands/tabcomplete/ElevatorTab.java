@@ -44,6 +44,8 @@ public class ElevatorTab implements TabCompleter {
         tabCompleteList.add("copysettingsfrom");
         tabCompleteList.add("tostring");
         tabCompleteList.add("teleport");
+        tabCompleteList.add("realign");
+        tabCompleteList.add("show-boundingbox");
         this.elevatorControllerMap = this.plugin.getMemoryHolder().getElevatorControllerMap();
         this.soundList = new ArrayList<>();
         for (Sound value : Sound.values()) {
@@ -183,6 +185,13 @@ public class ElevatorTab implements TabCompleter {
             }
             return null;
         } else if (args[0].equalsIgnoreCase("teleport")) {
+            if (args.length == 2) {
+                return getContainsString(args[1], controllerList);
+            } else if (args.length == 3) {
+                return this.elevatorControllerMap.containsKey(args[1]) ? new ArrayList<>(this.elevatorControllerMap.get(args[1]).getElevatorsMap().keySet()) : null;
+            }
+            return null;
+        } else if (args[0].equalsIgnoreCase("realign") || args[0].equalsIgnoreCase("show-boundingbox")) {
             if (args.length == 2) {
                 return getContainsString(args[1], controllerList);
             } else if (args.length == 3) {

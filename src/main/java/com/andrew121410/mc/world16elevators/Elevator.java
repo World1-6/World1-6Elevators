@@ -359,6 +359,106 @@ public class Elevator {
     }
 
     /**
+     * This function will fix the elevator if it becomes unaligned.
+     * Meaning if the elevator thinks it's on a floor, but it's not.
+     * Like sometimes If I call the elevator to go to my floor 1 and then when the elevator comes to my floor the door opens to nothing.
+     * Because the elevator bounding box is not aligned with the elevator anymore?
+     * I still don't know why this happens.
+     *
+     * @param player        the player who is trying to fix the elevator
+     * @param confirmChange if true, the elevator will be re-aligned to the floor it's on. If false, the function will show where the elevator thinks it's at.
+     * @return a map of the blocks that were changed to diamond blocks to show where this function thinks the elevator is at.
+     */
+
+    // So extremely cursed
+    public Map<Location, Material> fixUnalignedElevator(Player player, boolean confirmChange) {
+        if (this.floorsMap == null || this.floorsMap.isEmpty()) {
+            Bukkit.broadcastMessage("No floors found in elevator: " + this.elevatorName);
+            return null;
+        }
+
+        ElevatorFloor lowestFloor = this.floorsMap.values().stream().min(Comparator.comparingInt(ElevatorFloor::getFloor)).orElse(null);
+        ElevatorFloor topFloor = this.floorsMap.values().stream().max(Comparator.comparingInt(ElevatorFloor::getFloor)).orElse(null);
+
+        int startY = lowestFloor.getBlockUnderMainDoor().getBlockY();
+        int endY = topFloor.getBlockUnderMainDoor().getBlockY();
+
+        // Iterate from the lowest possible floor to the highest possible floor
+        for (int y = startY; y <= endY; y++) {
+            // Create a bounding box for the current floor level
+            BoundingBox floorBoundingBox = new BoundingBox(
+                    this.elevatorMovement.getBoundingBox().getMinX(),
+                    y,
+                    this.elevatorMovement.getBoundingBox().getMinZ(),
+                    this.elevatorMovement.getBoundingBox().getMaxX(),
+                    y,
+                    this.elevatorMovement.getBoundingBox().getMaxZ()
+            );
+
+            // Check if the bounding box contains any non-air blocks
+            boolean foundNonAirBlock = false;
+            for (int x = (int) floorBoundingBox.getMinX(); x <= floorBoundingBox.getMaxX(); x++) {
+                for (int z = (int) floorBoundingBox.getMinZ(); z <= floorBoundingBox.getMaxZ(); z++) {
+                    Block block = getBukkitWorld().getBlockAt(x, y, z);
+                    if (block.getType() != Material.AIR) {
+                        foundNonAirBlock = true;
+                        break;
+                    }
+                }
+                if (foundNonAirBlock) break;
+            }
+
+            // If a non-air block is found, re-align the elevator's bounding box and set the elevator to that floor
+            if (foundNonAirBlock) {
+                if (confirmChange) {
+                    // Calculate the shift amount
+                    double shiftAmount = y - this.elevatorMovement.getAtDoor().getY();
+
+                    // Shift the elevator bounding box to where the function thinks the elevator is at
+                    this.elevatorMovement.getBoundingBox().shift(0, shiftAmount, 0);
+                    this.boundingBoxExpanded.shift(0, shiftAmount, 0);
+
+                    // Update the Y position of the door
+                    this.elevatorMovement.getAtDoor().setY(y);
+
+                    // What floor number are we on?
+                    for (ElevatorFloor elevatorFloor : this.floorsMap.values()) {
+                        if (elevatorFloor.getBlockUnderMainDoor().getBlockY() == y) {
+                            this.elevatorMovement.setFloor(elevatorFloor.getFloor());
+                            break;
+                        }
+                    }
+
+                    player.sendMessage(Translate.miniMessage("<green>Fixed elevator alignment to floor: <yellow>" + this.elevatorMovement.getFloor()));
+                    break;
+                } else { // Show where the elevator is at.
+                    BoundingBox finalFloorBoundingBox = this.elevatorMovement.getBoundingBox().clone().shift(0, y - this.elevatorMovement.getAtDoor().getY(), 0);
+
+                    Location atDoor = this.elevatorMovement.getAtDoor().clone();
+                    atDoor.setY(y);
+                    Location minX = new Location(getBukkitWorld(), finalFloorBoundingBox.getMinX(), finalFloorBoundingBox.getMinY(), finalFloorBoundingBox.getMinZ());
+                    Location maxX = new Location(getBukkitWorld(), finalFloorBoundingBox.getMaxX(), finalFloorBoundingBox.getMaxY(), finalFloorBoundingBox.getMaxZ());
+
+                    Map<Location, Material> blocksToChangeBack = new HashMap<>();
+
+                    blocksToChangeBack.put(atDoor, atDoor.getBlock().getType());
+                    blocksToChangeBack.put(minX, minX.getBlock().getType());
+                    blocksToChangeBack.put(maxX, maxX.getBlock().getType());
+
+                    // Set the blocks to diamond blocks
+                    minX.getBlock().setType(Material.DIAMOND_BLOCK);
+                    maxX.getBlock().setType(Material.DIAMOND_BLOCK);
+                    atDoor.getBlock().setType(Material.OBSIDIAN);
+
+                    return blocksToChangeBack;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /**
      * Finds floors, and adds them to the elevator
      *
      * @param beginningFloor the floor where to start at

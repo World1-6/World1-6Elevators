@@ -7,6 +7,7 @@ import com.andrew121410.mc.world16elevators.enums.ElevatorFloorSelectorType;
 import com.andrew121410.mc.world16elevators.enums.ElevatorStatus;
 import com.andrew121410.mc.world16elevators.enums.ElevatorWho;
 import com.andrew121410.mc.world16elevators.storage.ElevatorManager;
+import com.andrew121410.mc.world16utils.chat.ChatClickCallbackManager;
 import com.andrew121410.mc.world16utils.chat.Translate;
 import com.andrew121410.mc.world16utils.player.PlayerUtils;
 import com.andrew121410.mc.world16utils.utils.Utils;
@@ -17,6 +18,7 @@ import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.block.CommandBlock;
@@ -30,6 +32,7 @@ import org.bukkit.util.BoundingBox;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
 
 public class ElevatorCMD implements CommandExecutor {
@@ -153,8 +156,7 @@ public class ElevatorCMD implements CommandExecutor {
                 return true;
             }
             return true;
-            //Create elevator
-        } else if (args[0].equalsIgnoreCase("create")) {
+        } else if (args[0].equalsIgnoreCase("create")) { // /elevator create <Controller> <ElevatorName> <FloorName>
             if (!p.hasPermission("world16elevators.create")) {
                 p.sendMessage(Translate.color("&bYou don't have permission to use this command."));
                 return true;
@@ -790,6 +792,96 @@ public class ElevatorCMD implements CommandExecutor {
                 return true;
             } else {
                 p.sendMessage(Translate.chat("&6/elevator teleport &e<Controller> &9<Elevator>"));
+            }
+        } else if (args[0].equalsIgnoreCase("realign")) { // /elevator realign <controller> <elevator>
+            if (!p.hasPermission("world16elevators.realign")) {
+                p.sendMessage(Translate.color("&bYou don't have permission to use this command."));
+                return true;
+            }
+            if (args.length == 3) {
+                ElevatorArguments elevatorArguments = getElevatorArguments(args, 2);
+                ElevatorController elevatorController = elevatorArguments.getElevatorController();
+                if (elevatorController == null) {
+                    p.sendMessage("Elevator controller was not found.");
+                    return true;
+                }
+                Elevator elevator = elevatorArguments.getElevator();
+                if (elevator == null) {
+                    p.sendMessage("Elevator was not found.");
+                    return true;
+                }
+
+                ChatClickCallbackManager chatClickCallbackManager = this.plugin.getOtherPlugins().getWorld16Utils().getChatClickCallbackManager();
+                Map<Location, Material> blockMap = elevator.fixUnalignedElevator(p, false);
+
+                p.sendMessage(Translate.miniMessage("<rainbow>PLEASE go check to see if the elevator is aligned correctly. Look for diamond blocks."));
+                p.sendMessage(Translate.miniMessage("<yellow><u>Click here to undo the diamond block changes.").clickEvent(chatClickCallbackManager.create(p, p1 -> {
+                    blockMap.forEach((location, material) -> location.getBlock().setType(material));
+                    p1.sendMessage(Translate.miniMessage("<green>The original blocks have been restored."));
+                })));
+                p.sendMessage(Translate.miniMessage("<red><bold><u>CLICK HERE TO CONFIRM THE CHANGES.").clickEvent(chatClickCallbackManager.create(p, p1 -> {
+                    elevator.fixUnalignedElevator(p, true);
+                    blockMap.forEach((location, material) -> location.getBlock().setType(material));
+                    p1.sendMessage(Translate.miniMessage("<green>The changes have been confirmed."));
+                })));
+                return true;
+            } else {
+                p.sendMessage(Translate.chat("&6/elevator realign &e<Controller> &9<Elevator>"));
+            }
+        } else if (args[0].equalsIgnoreCase("show-boundingbox")) { // /elevator show-boundingbox <controller> <elevator>
+            if (!p.hasPermission("world16elevators.show-boundingbox")) {
+                p.sendMessage(Translate.color("&bYou don't have permission to use this command."));
+                return true;
+            }
+            if (args.length == 3) {
+                ElevatorArguments elevatorArguments = getElevatorArguments(args, 2);
+                ElevatorController elevatorController = elevatorArguments.getElevatorController();
+                if (elevatorController == null) {
+                    p.sendMessage("Elevator controller was not found.");
+                    return true;
+                }
+                Elevator elevator = elevatorArguments.getElevator();
+                if (elevator == null) {
+                    p.sendMessage("Elevator was not found.");
+                    return true;
+                }
+
+                ChatClickCallbackManager chatClickCallbackManager = this.plugin.getOtherPlugins().getWorld16Utils().getChatClickCallbackManager();
+
+                Location atDoor = elevator.getElevatorMovement().getAtDoor().clone();
+                BoundingBox boundingBox = elevator.getElevatorMovement().getBoundingBox().clone();
+                BoundingBox expandedBoundingBox = elevator.getBoundingBoxExpanded().clone();
+
+                Map<Location, Material> blockMap = new HashMap<>();
+
+                Location minX = new Location(p.getWorld(), boundingBox.getMinX(), boundingBox.getMinY(), boundingBox.getMinZ());
+                Location maxX = new Location(p.getWorld(), boundingBox.getMaxX(), boundingBox.getMaxY(), boundingBox.getMaxZ());
+
+                Location expandedMinX = new Location(p.getWorld(), expandedBoundingBox.getMinX(), expandedBoundingBox.getMinY(), expandedBoundingBox.getMinZ());
+                Location expandedMaxX = new Location(p.getWorld(), expandedBoundingBox.getMaxX(), expandedBoundingBox.getMaxY(), expandedBoundingBox.getMaxZ());
+
+                // Save the blocks.
+                blockMap.put(atDoor, atDoor.getBlock().getType());
+                blockMap.put(minX, minX.getBlock().getType());
+                blockMap.put(maxX, maxX.getBlock().getType());
+                blockMap.put(expandedMinX, expandedMinX.getBlock().getType());
+                blockMap.put(expandedMaxX, expandedMaxX.getBlock().getType());
+
+                minX.getBlock().setType(Material.DIAMOND_BLOCK);
+                maxX.getBlock().setType(Material.DIAMOND_BLOCK);
+                expandedMinX.getBlock().setType(Material.REDSTONE_BLOCK);
+                expandedMaxX.getBlock().setType(Material.REDSTONE_BLOCK);
+                atDoor.getBlock().setType(Material.OBSIDIAN);
+
+                p.sendMessage(Translate.miniMessage("<yellow><u>Click here to undo the block changes").clickEvent(chatClickCallbackManager.create(p, p1 -> {
+                    blockMap.forEach((location, material) -> location.getBlock().setType(material));
+                    p1.sendMessage(Translate.miniMessage("<green>The original blocks have been restored."));
+                })));
+
+                p.sendMessage(Translate.miniMessage("<green>The normal bounding box is the diamond blocks, and the expanded bounding box is the redstone blocks."));
+                return true;
+            } else {
+                p.sendMessage(Translate.chat("&6/elevator realign &e<Controller> &9<Elevator>"));
             }
         }
         return true;
