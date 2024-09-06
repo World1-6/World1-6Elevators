@@ -55,12 +55,11 @@ public class ElevatorTab implements TabCompleter {
 
     @Override
     public List<String> onTabComplete(CommandSender sender, Command cmd, String ailes, String[] args) {
-        if (!(sender instanceof Player)) {
+        if (!(sender instanceof Player player)) {
             return null;
         }
-        Player p = (Player) sender;
 
-        if (!cmd.getName().equalsIgnoreCase("elevator") || !p.hasPermission("world16.elevator")) {
+        if (!cmd.getName().equalsIgnoreCase("elevator") || !player.hasPermission("world16.elevator")) {
             return null;
         }
 
@@ -107,6 +106,8 @@ public class ElevatorTab implements TabCompleter {
                 Elevator elevator = elevatorController.getElevatorsMap().get(args[3]);
                 if (elevator == null) return null;
                 return elevator.getFloorsMap().values().stream().map(ElevatorFloor::getName).collect(Collectors.toList());
+            } else if (args.length == 6 && args[1].equalsIgnoreCase("smartCreateFloors")) {
+                return getContainsString(args[5], Arrays.asList("true", "false"));
             }
             return null;
         } else if (args[0].equalsIgnoreCase("call")) {
