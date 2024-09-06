@@ -818,6 +818,8 @@ public class ElevatorCMD implements CommandExecutor {
                     blockMap.forEach((location, material) -> location.getBlock().setType(material));
                     p1.sendMessage(Translate.miniMessage("<green>The original blocks have been restored."));
                 })));
+                player.sendMessage("");
+                player.sendMessage("");
                 player.sendMessage(Translate.miniMessage("<red><bold><u>CLICK HERE TO CONFIRM THE CHANGES.").clickEvent(chatClickCallbackManager.create(player, p1 -> {
                     elevator.fixUnalignedElevator(player, true);
                     blockMap.forEach((location, material) -> location.getBlock().setType(material));
