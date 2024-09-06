@@ -827,12 +827,12 @@ public class ElevatorCMD implements CommandExecutor {
             } else {
                 player.sendMessage(Translate.chat("&6/elevator realign &e<Controller> &9<Elevator>"));
             }
-        } else if (args[0].equalsIgnoreCase("show-boundingbox")) { // /elevator show-boundingbox <controller> <elevator>
-            if (!player.hasPermission("world16elevators.show-boundingbox")) {
+        } else if (args[0].equalsIgnoreCase("boundingbox")) { // elevator boundingbox <controller> <elevator> <show/shift> <y>
+            if (!player.hasPermission("world16elevators.boundingbox")) {
                 player.sendMessage(Translate.color("&bYou don't have permission to use this command."));
                 return true;
             }
-            if (args.length == 3) {
+            if (args.length >= 4) {
                 ElevatorArguments elevatorArguments = getElevatorArguments(args, 2);
                 ElevatorController elevatorController = elevatorArguments.getElevatorController();
                 if (elevatorController == null) {
@@ -845,18 +845,67 @@ public class ElevatorCMD implements CommandExecutor {
                     return true;
                 }
 
+                String setting = elevatorArguments.getOtherArgumentsAt(0);
+                if (setting == null) {
+                    player.sendMessage(Translate.miniMessage("<red>Setting cannot be null."));
+                    return true;
+                }
+
                 ChatClickCallbackManager chatClickCallbackManager = this.plugin.getOtherPlugins().getWorld16Utils().getChatClickCallbackManager();
-                Map<Location, Material> blockMap = elevator.showLocationOfElevator(null);
+                if (setting.equalsIgnoreCase("show")) {
+                    Map<Location, Material> blockMap = elevator.showLocationOfElevator(null, null, null, null);
 
-                player.sendMessage(Translate.miniMessage("<yellow><u>Click here to undo the block changes").clickEvent(chatClickCallbackManager.create(player, p1 -> {
-                    elevator.showLocationOfElevator(blockMap); // Undo the changes.
-                    p1.sendMessage(Translate.miniMessage("<green>The original blocks have been restored."));
-                })));
+                    player.sendMessage(Translate.miniMessage("<yellow><u>Click here to undo the block changes").clickEvent(chatClickCallbackManager.create(player, p1 -> {
+                        elevator.showLocationOfElevator(blockMap, null, null, null); // Undo the changes.
+                        p1.sendMessage(Translate.miniMessage("<green>The original blocks have been restored."));
+                    })));
 
-                player.sendMessage(Translate.miniMessage("<green>The normal bounding box is the diamond blocks, and the expanded bounding box is the redstone blocks."));
+                    player.sendMessage(Translate.miniMessage("<green>The normal bounding box is the diamond blocks, and the expanded bounding box is the redstone blocks."));
+                } else if (setting.equalsIgnoreCase("shift")) {
+                    Integer y = Utils.asIntegerOrElse(elevatorArguments.getOtherArgumentsAt(1), null);
+                    if (y == null) {
+                        player.sendMessage("Y cannot be null.");
+                        return true;
+                    }
+
+                    player.sendMessage(Translate.miniMessage("<gray>You are about to shift the elevator by " + y + " blocks."));
+
+                    // Copy the stuff
+                    BoundingBox copyBoundingBox = elevator.getElevatorMovement().getBoundingBox().clone();
+                    BoundingBox copyExpandedBoundingBox = elevator.getBoundingBoxExpanded().clone();
+                    Location copyAtDoor = elevator.getElevatorMovement().getAtDoor().clone();
+
+                    // Shift the stuff
+                    copyBoundingBox.shift(0, y, 0);
+                    copyExpandedBoundingBox.shift(0, y, 0);
+                    copyAtDoor.add(0, y, 0);
+
+                    // Show the blocks.
+                    Map<Location, Material> blockMap = elevator.showLocationOfElevator(null, copyAtDoor, copyBoundingBox, copyExpandedBoundingBox);
+
+                    // Click here to confirm the changes.
+                    player.sendMessage(Translate.miniMessage("<red><bold><u>CLICK HERE TO CONFIRM THE CHANGES.").clickEvent(chatClickCallbackManager.create(player, p1 -> {
+                        // Remove the blocks.
+                        elevator.showLocationOfElevator(blockMap, copyAtDoor, copyBoundingBox, copyExpandedBoundingBox);
+
+                        // Set the new values.
+                        elevator.getElevatorMovement().setBoundingBox(copyBoundingBox);
+                        elevator.setBoundingBoxExpanded(copyExpandedBoundingBox);
+                        elevator.getElevatorMovement().setAtDoor(copyAtDoor);
+
+                        p1.sendMessage(Translate.miniMessage("<green>The changes have been confirmed."));
+                    })));
+
+                    // Click here to undo the block changes if you don't want to confirm the changes.
+                    player.sendMessage(Translate.miniMessage("<yellow><u>Click here to undo the block changes").clickEvent(chatClickCallbackManager.create(player, p1 -> {
+                        // Undo the changes.
+                        elevator.showLocationOfElevator(blockMap, copyAtDoor, copyBoundingBox, copyExpandedBoundingBox);
+                        p1.sendMessage(Translate.miniMessage("<green>The original blocks have been restored."));
+                    })));
+                }
                 return true;
             } else {
-                player.sendMessage(Translate.chat("&6/elevator realign &e<Controller> &9<Elevator>"));
+                player.sendMessage(Translate.color("&6/elevator boundingbox &e<Controller> &9<Elevator> &eshow/shift &3<y>"));
             }
         }
         return true;

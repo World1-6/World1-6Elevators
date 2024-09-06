@@ -369,15 +369,21 @@ public class Elevator {
      *            If null or empty, new block modifications will be made.
      * @return A map of the blocks that were changed, with their original materials, to allow reverting the changes later.
      */
-    public Map<Location, Material> showLocationOfElevator(Map<Location, Material> map) {
+    public Map<Location, Material> showLocationOfElevator(Map<Location, Material> map, Location atDoor, BoundingBox boundingBox, BoundingBox boundingBoxExpanded) {
         if (map != null && !map.isEmpty()) {
             map.forEach((location, material) -> location.getBlock().setType(material));
             return map;
         }
 
-        Location atDoor = elevatorMovement.getAtDoor().clone();
-        BoundingBox boundingBox = elevatorMovement.getBoundingBox().clone();
-        BoundingBox expandedBoundingBox = this.boundingBoxExpanded.clone();
+        if (atDoor == null) {
+            atDoor = elevatorMovement.getAtDoor().clone();
+        }
+        if (boundingBox == null) {
+            boundingBox = elevatorMovement.getBoundingBox().clone();
+        }
+        if (boundingBoxExpanded == null) {
+            boundingBoxExpanded = this.boundingBoxExpanded.clone();
+        }
 
         Map<Location, Material> blockMap = new HashMap<>();
 
@@ -385,8 +391,8 @@ public class Elevator {
         Location minX = new Location(world, boundingBox.getMinX(), boundingBox.getMinY(), boundingBox.getMinZ());
         Location maxX = new Location(world, boundingBox.getMaxX(), boundingBox.getMaxY(), boundingBox.getMaxZ());
 
-        Location expandedMinX = new Location(world, expandedBoundingBox.getMinX(), expandedBoundingBox.getMinY(), expandedBoundingBox.getMinZ());
-        Location expandedMaxX = new Location(world, expandedBoundingBox.getMaxX(), expandedBoundingBox.getMaxY(), expandedBoundingBox.getMaxZ());
+        Location expandedMinX = new Location(world, boundingBoxExpanded.getMinX(), boundingBoxExpanded.getMinY(), boundingBoxExpanded.getMinZ());
+        Location expandedMaxX = new Location(world, boundingBoxExpanded.getMaxX(), boundingBoxExpanded.getMaxY(), boundingBoxExpanded.getMaxZ());
 
         // Save the blocks.
         blockMap.put(atDoor, atDoor.getBlock().getType());
@@ -399,7 +405,7 @@ public class Elevator {
         maxX.getBlock().setType(Material.DIAMOND_BLOCK);
         expandedMinX.getBlock().setType(Material.REDSTONE_BLOCK);
         expandedMaxX.getBlock().setType(Material.REDSTONE_BLOCK);
-        atDoor.getBlock().setType(Material.OBSIDIAN);
+        atDoor.getBlock().setType(Material.EMERALD_BLOCK);
 
         return blockMap;
     }

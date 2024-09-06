@@ -45,7 +45,7 @@ public class ElevatorTab implements TabCompleter {
         tabCompleteList.add("tostring");
         tabCompleteList.add("teleport");
         tabCompleteList.add("realign");
-        tabCompleteList.add("show-boundingbox");
+        tabCompleteList.add("boundingbox");
         this.elevatorControllerMap = this.plugin.getMemoryHolder().getElevatorControllerMap();
         this.soundList = new ArrayList<>();
         for (Sound value : Sound.values()) {
@@ -192,11 +192,20 @@ public class ElevatorTab implements TabCompleter {
                 return this.elevatorControllerMap.containsKey(args[1]) ? new ArrayList<>(this.elevatorControllerMap.get(args[1]).getElevatorsMap().keySet()) : null;
             }
             return null;
-        } else if (args[0].equalsIgnoreCase("realign") || args[0].equalsIgnoreCase("show-boundingbox")) {
+        } else if (args[0].equalsIgnoreCase("realign")) {
             if (args.length == 2) {
                 return getContainsString(args[1], controllerList);
             } else if (args.length == 3) {
                 return this.elevatorControllerMap.containsKey(args[1]) ? new ArrayList<>(this.elevatorControllerMap.get(args[1]).getElevatorsMap().keySet()) : null;
+            }
+            return null;
+        } else if (args[0].equalsIgnoreCase("boundingbox")) {
+            if (args.length == 2) {
+                return getContainsString(args[1], controllerList);
+            } else if (args.length == 3) {
+                return this.elevatorControllerMap.containsKey(args[1]) ? new ArrayList<>(this.elevatorControllerMap.get(args[1]).getElevatorsMap().keySet()) : null;
+            } else if (args.length == 4) {
+                return getContainsString(args[3], Arrays.asList("show", "shift"));
             }
             return null;
         }
