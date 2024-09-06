@@ -8,10 +8,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.Sound;
+import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
@@ -358,6 +355,41 @@ public class Elevator {
         }.runTaskTimer(plugin, 40L, 40L);
     }
 
+    public Map<Location, Material> showLocationOfElevator(Map<Location, Material> map) {
+        if (map != null && !map.isEmpty()) {
+            map.forEach((location, material) -> location.getBlock().setType(material));
+            return map;
+        }
+
+        Location atDoor = elevatorMovement.getAtDoor().clone();
+        BoundingBox boundingBox = elevatorMovement.getBoundingBox().clone();
+        BoundingBox expandedBoundingBox = this.boundingBoxExpanded.clone();
+
+        Map<Location, Material> blockMap = new HashMap<>();
+
+        World world = getBukkitWorld();
+        Location minX = new Location(world, boundingBox.getMinX(), boundingBox.getMinY(), boundingBox.getMinZ());
+        Location maxX = new Location(world, boundingBox.getMaxX(), boundingBox.getMaxY(), boundingBox.getMaxZ());
+
+        Location expandedMinX = new Location(world, expandedBoundingBox.getMinX(), expandedBoundingBox.getMinY(), expandedBoundingBox.getMinZ());
+        Location expandedMaxX = new Location(world, expandedBoundingBox.getMaxX(), expandedBoundingBox.getMaxY(), expandedBoundingBox.getMaxZ());
+
+        // Save the blocks.
+        blockMap.put(atDoor, atDoor.getBlock().getType());
+        blockMap.put(minX, minX.getBlock().getType());
+        blockMap.put(maxX, maxX.getBlock().getType());
+        blockMap.put(expandedMinX, expandedMinX.getBlock().getType());
+        blockMap.put(expandedMaxX, expandedMaxX.getBlock().getType());
+
+        minX.getBlock().setType(Material.DIAMOND_BLOCK);
+        maxX.getBlock().setType(Material.DIAMOND_BLOCK);
+        expandedMinX.getBlock().setType(Material.REDSTONE_BLOCK);
+        expandedMaxX.getBlock().setType(Material.REDSTONE_BLOCK);
+        atDoor.getBlock().setType(Material.OBSIDIAN);
+
+        return blockMap;
+    }
+
     /**
      * This function will fix the elevator if it becomes unaligned.
      * Meaning if the elevator thinks it's on a floor, but it's not.
@@ -627,7 +659,6 @@ public class Elevator {
     private void passingChime(Location location) {
         getBukkitWorld().playSound(location, Sound.BLOCK_NOTE_BLOCK_PLING, 10F, 1.3F);
     }
-
 
     public org.bukkit.World getBukkitWorld() {
         return Bukkit.getServer().getWorld(this.world);

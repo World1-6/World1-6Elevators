@@ -32,7 +32,6 @@ import org.bukkit.util.BoundingBox;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Map;
 
 public class ElevatorCMD implements CommandExecutor {
@@ -847,34 +846,10 @@ public class ElevatorCMD implements CommandExecutor {
                 }
 
                 ChatClickCallbackManager chatClickCallbackManager = this.plugin.getOtherPlugins().getWorld16Utils().getChatClickCallbackManager();
-
-                Location atDoor = elevator.getElevatorMovement().getAtDoor().clone();
-                BoundingBox boundingBox = elevator.getElevatorMovement().getBoundingBox().clone();
-                BoundingBox expandedBoundingBox = elevator.getBoundingBoxExpanded().clone();
-
-                Map<Location, Material> blockMap = new HashMap<>();
-
-                Location minX = new Location(p.getWorld(), boundingBox.getMinX(), boundingBox.getMinY(), boundingBox.getMinZ());
-                Location maxX = new Location(p.getWorld(), boundingBox.getMaxX(), boundingBox.getMaxY(), boundingBox.getMaxZ());
-
-                Location expandedMinX = new Location(p.getWorld(), expandedBoundingBox.getMinX(), expandedBoundingBox.getMinY(), expandedBoundingBox.getMinZ());
-                Location expandedMaxX = new Location(p.getWorld(), expandedBoundingBox.getMaxX(), expandedBoundingBox.getMaxY(), expandedBoundingBox.getMaxZ());
-
-                // Save the blocks.
-                blockMap.put(atDoor, atDoor.getBlock().getType());
-                blockMap.put(minX, minX.getBlock().getType());
-                blockMap.put(maxX, maxX.getBlock().getType());
-                blockMap.put(expandedMinX, expandedMinX.getBlock().getType());
-                blockMap.put(expandedMaxX, expandedMaxX.getBlock().getType());
-
-                minX.getBlock().setType(Material.DIAMOND_BLOCK);
-                maxX.getBlock().setType(Material.DIAMOND_BLOCK);
-                expandedMinX.getBlock().setType(Material.REDSTONE_BLOCK);
-                expandedMaxX.getBlock().setType(Material.REDSTONE_BLOCK);
-                atDoor.getBlock().setType(Material.OBSIDIAN);
+                Map<Location, Material> blockMap = elevator.showLocationOfElevator(null);
 
                 p.sendMessage(Translate.miniMessage("<yellow><u>Click here to undo the block changes").clickEvent(chatClickCallbackManager.create(p, p1 -> {
-                    blockMap.forEach((location, material) -> location.getBlock().setType(material));
+                    elevator.showLocationOfElevator(blockMap); // Undo the changes.
                     p1.sendMessage(Translate.miniMessage("<green>The original blocks have been restored."));
                 })));
 
