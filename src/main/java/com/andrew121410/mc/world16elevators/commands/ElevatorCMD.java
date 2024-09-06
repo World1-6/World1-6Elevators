@@ -116,13 +116,12 @@ public class ElevatorCMD implements CommandExecutor {
             player.sendMessage(Translate.color("&6/elevator call &d<Shows help to call the elevator.>"));
             player.sendMessage(Translate.color("&6/elevator settings &d<Shows help to change the settings.>"));
             return true;
-            //Create controller
         } else if (args[0].equalsIgnoreCase("controller")) {
             if (args.length == 1) {
                 player.sendMessage(Translate.chat("&6/elevator controller create &e<Controller>"));
                 player.sendMessage(Translate.chat("&6/elevator controller delete &e<Controller>"));
                 return true;
-            } else if (args.length == 3 && args[1].equalsIgnoreCase("create")) {
+            } else if (args.length == 3 && args[1].equalsIgnoreCase("create")) { // /elevator controller create <Controller>
                 if (!player.hasPermission("world16elevators.controller.create")) {
                     player.sendMessage(Translate.color("&bYou don't have permission to use this command."));
                     return true;
@@ -135,9 +134,9 @@ public class ElevatorCMD implements CommandExecutor {
                 }
 
                 this.elevatorControllerMap.putIfAbsent(controllerName, new ElevatorController(plugin, controllerName));
-                player.sendMessage(Translate.chat("ElevatorController has been registered with the name of " + controllerName));
+                player.sendMessage(Translate.miniMessage("<green>ElevatorController has been registered with the name of <white>" + controllerName));
                 return true;
-            } else if (args.length == 3 && args[1].equalsIgnoreCase("delete")) {
+            } else if (args.length == 3 && args[1].equalsIgnoreCase("delete")) { // /elevator controller delete <Controller>
                 if (!player.hasPermission("world16elevators.controller.delete")) {
                     player.sendMessage(Translate.color("&bYou don't have permission to use this command."));
                     return true;
@@ -151,7 +150,7 @@ public class ElevatorCMD implements CommandExecutor {
                 }
 
                 this.elevatorManager.deleteElevatorController(controllerName);
-                player.sendMessage(Translate.chat("Controller has been deleted."));
+                player.sendMessage(Translate.miniMessage("<red>ElevatorController has been deleted with the name of <white>" + controllerName));
                 return true;
             }
             return true;
@@ -160,28 +159,26 @@ public class ElevatorCMD implements CommandExecutor {
                 player.sendMessage(Translate.color("&bYou don't have permission to use this command."));
                 return true;
             }
-            if (args.length == 1) {
-                player.sendMessage(Translate.chat("&6/elevator create &e<Controller> &9<ElevatorName> &a<FloorName>"));
-                return true;
-            } else if (args.length == 4) {
+
+            if (args.length == 4) {
                 Block blockPlayerIsLookingAt = PlayerUtils.getBlockPlayerIsLookingAt(player);
                 ElevatorArguments eleArgs = getElevatorArguments(args, 2);
                 String floorName = eleArgs.getOtherArgumentsAt(1);
                 BoundingBox region = this.plugin.getOtherPlugins().getWorld16Utils().getClassWrappers().getWorldEdit().getRegion(player);
 
                 if (region == null) {
-                    player.sendMessage(Translate.chat("&cYou didn't make a WorldEdit selection... [FAILED]"));
+                    player.sendMessage(Translate.miniMessage("<red>You need to select a region with WorldEdit."));
                     return true;
                 }
 
                 ElevatorController elevatorController = eleArgs.getElevatorController();
                 if (elevatorController == null) {
-                    player.sendMessage("Elevator controller was not found.");
+                    player.sendMessage(Translate.miniMessage("<red>Elevator controller was not found."));
                     return true;
                 }
 
                 if (eleArgs.getElevator() != null) {
-                    player.sendMessage("Elevator with that name looks to already exist on that elevator controller.");
+                    player.sendMessage(Translate.miniMessage("<red>That elevator already exists in the controller."));
                     return true;
                 }
                 String elevatorName = eleArgs.getOtherArgumentsAt(0);
@@ -192,7 +189,10 @@ public class ElevatorCMD implements CommandExecutor {
                 elevator.addFloor(elevatorFloor);
 
                 elevatorController.registerElevator(elevatorName, elevator);
-                player.sendMessage(Translate.chat("The elevator: " + elevatorName + " has been registered to " + elevatorController.getControllerName()));
+                player.sendMessage(Translate.miniMessage("<green>The elevator: <white>" + elevatorName + " <green>has been registered to <white>" + elevatorController.getControllerName()));
+                return true;
+            } else {
+                player.sendMessage(Translate.chat("&6/elevator create &e<Controller> &9<ElevatorName> &a<FloorName>"));
                 return true;
             }
         } else if (args[0].equalsIgnoreCase("floor")) {
