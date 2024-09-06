@@ -355,6 +355,20 @@ public class Elevator {
         }.runTaskTimer(plugin, 40L, 40L);
     }
 
+    /**
+     * Highlights the current position of the elevator by changing specific blocks to visible markers.
+     * This includes displaying the elevator's bounding box, the expanded bounding box, and the location at the door.
+     * <p>
+     * If a map of previously changed blocks is provided, the function will revert those blocks back to their original materials.
+     * Otherwise, it will modify the current locations with the following changes:
+     * - The door location is marked with an Obsidian block.
+     * - The bounding box corners are marked with Diamond blocks.
+     * - The expanded bounding box corners are marked with Redstone blocks.
+     *
+     * @param map A map of previously modified block locations and their original materials, used to revert changes.
+     *            If null or empty, new block modifications will be made.
+     * @return A map of the blocks that were changed, with their original materials, to allow reverting the changes later.
+     */
     public Map<Location, Material> showLocationOfElevator(Map<Location, Material> map) {
         if (map != null && !map.isEmpty()) {
             map.forEach((location, material) -> location.getBlock().setType(material));
@@ -391,18 +405,20 @@ public class Elevator {
     }
 
     /**
-     * This function will fix the elevator if it becomes unaligned.
-     * Meaning if the elevator thinks it's on a floor, but it's not.
-     * Like sometimes If I call the elevator to go to my floor 1 and then when the elevator comes to my floor the door opens to nothing.
-     * Because the elevator bounding box is not aligned with the elevator anymore?
-     * I still don't know why this happens.
+     * Attempts to fix the elevator's alignment if it has become unaligned from its expected floor.
+     * This may occur when the elevator "thinks" it's at a specific floor, but its bounding box is not correctly positioned,
+     * potentially causing issues like the door opening to an empty space.
+     * <p>
+     * If the elevator's alignment needs to be corrected, this function will either re-align the elevator or
+     * display where the elevator currently "thinks" it is located, depending on the confirmation flag.
+     * <p>
+     * - If `confirmChange` is true, the elevator will be shifted to align with the nearest valid floor.
+     * - If `confirmChange` is false, the function will mark the elevator's perceived position with diamond blocks and obsidian to indicate its current location.
      *
-     * @param player        the player who is trying to fix the elevator
-     * @param confirmChange if true, the elevator will be re-aligned to the floor it's on. If false, the function will show where the elevator thinks it's at.
-     * @return a map of the blocks that were changed to diamond blocks to show where this function thinks the elevator is at.
+     * @param player        The player attempting to fix the elevator.
+     * @param confirmChange If true, the elevator will be re-aligned to the nearest valid floor. If false, the function will visually mark the elevator's current perceived position.
+     * @return A map of the blocks that were changed to diamond or obsidian to show where the function believes the elevator is. Can be used to revert changes.
      */
-
-    // So extremely cursed
     public Map<Location, Material> fixUnalignedElevator(Player player, boolean confirmChange) {
         if (this.floorsMap == null || this.floorsMap.isEmpty()) {
             Bukkit.broadcastMessage("No floors found in elevator: " + this.elevatorName);
@@ -491,10 +507,17 @@ public class Elevator {
     }
 
     /**
-     * Finds floors, and adds them to the elevator
+     * Automatically detects and adds floors to the elevator, starting from a given floor and moving either up or down.
+     * The function scans for valid floor locations by checking for solid blocks and doors in the vertical direction,
+     * and adds new floors if they meet the criteria. Floors with additional doors at the same Y-level are grouped together.
+     * <p>
+     * - If going up, the function checks above the current floor for new floors.
+     * - If going down, it checks below the current floor.
+     * <p>
+     * The floor numbering skips 0, as floor 0 is not used.
      *
-     * @param beginningFloor the floor where to start at
-     * @param goingUp        true if going up, false if going down
+     * @param beginningFloor The starting floor from which the search begins.
+     * @param goingUp        If true, floors are searched in the upward direction. If false, floors are searched downward.
      */
     public void smartCreateFloors(ElevatorFloor beginningFloor, boolean goingUp) {
         long startTime = Instant.now().toEpochMilli();
