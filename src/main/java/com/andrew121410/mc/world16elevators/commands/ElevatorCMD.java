@@ -518,30 +518,56 @@ public class ElevatorCMD implements CommandExecutor {
                     return true;
                 }
 
+                String value = eleArgs.getOtherArgumentsAt(1);
                 if (setting.equalsIgnoreCase("ticksPerSecond")) {
-                    long valueLong = Utils.asLongOrElse(eleArgs.getOtherArgumentsAt(1), ElevatorSettings.DEFAULT_TICKS_PER_SECOND);
+                    player.sendMessage(Translate.miniMessage("<gray>The default ticks per second is: <white>" + ElevatorSettings.DEFAULT_TICKS_PER_SECOND));
+                    Long valueLong = Utils.asLongOrElse(value, null);
+                    if (valueLong == null) {
+                        player.sendMessage(Translate.miniMessage("<gold>The current ticks per second is: <white>" + elevator.getElevatorSettings().getTicksPerSecond()));
+                        return true;
+                    }
                     elevator.getElevatorSettings().setTicksPerSecond(valueLong);
-                    player.sendMessage(Translate.chat("The ticks per second has been updated to: " + valueLong));
+                    player.sendMessage(Translate.miniMessage("<green>The ticks per second has been updated to: <white>" + valueLong));
                     return true;
                 } else if (setting.equalsIgnoreCase("doorHolderTicksPerSecond")) {
-                    long valueLong = Utils.asLongOrElse(eleArgs.getOtherArgumentsAt(1), ElevatorSettings.DEFAULT_DOOR_HOLDER_TICKS_PER_SECOND);
+                    player.sendMessage(Translate.miniMessage("<gray>The default door holder ticks per second is: <white>" + ElevatorSettings.DEFAULT_DOOR_HOLDER_TICKS_PER_SECOND));
+                    Long valueLong = Utils.asLongOrElse(value, null);
+                    if (valueLong == null) {
+                        player.sendMessage(Translate.miniMessage("<gold>The current door holder ticks per second is: <white>" + elevator.getElevatorSettings().getDoorHolderTicksPerSecond()));
+                        return true;
+                    }
                     elevator.getElevatorSettings().setDoorHolderTicksPerSecond(valueLong);
-                    player.sendMessage(Translate.chat("The door holder ticks per second has been updated to: " + valueLong));
+                    player.sendMessage(Translate.miniMessage("<green>The door holder ticks per second has been updated to: <white>" + valueLong));
                     return true;
                 } else if (setting.equalsIgnoreCase("elevatorWaiterTicksPerSecond")) {
-                    long valueLong = Utils.asLongOrElse(eleArgs.getOtherArgumentsAt(1), ElevatorSettings.DEFAULT_ELEVATOR_WAITER_TICKS_PER_SECOND);
+                    player.sendMessage(Translate.miniMessage("<gray>The default elevator waiter ticks per second is: <white>" + ElevatorSettings.DEFAULT_ELEVATOR_WAITER_TICKS_PER_SECOND));
+                    Long valueLong = Utils.asLongOrElse(value, null);
+                    if (valueLong == null) {
+                        player.sendMessage(Translate.miniMessage("<gold>The current elevator waiter ticks per second is: <white>" + elevator.getElevatorSettings().getElevatorWaiterTicksPerSecond()));
+                        return true;
+                    }
                     elevator.getElevatorSettings().setElevatorWaiterTicksPerSecond(valueLong);
-                    player.sendMessage(Translate.chat("The elevator waiter ticks per second has been updated to: " + valueLong));
+                    player.sendMessage(Translate.miniMessage("<green>The elevator waiter ticks per second has been updated to: <white>" + valueLong));
                     return true;
                 } else if (setting.equalsIgnoreCase("doElevatorLeveling")) {
-                    boolean bool = Utils.asBooleanOrElse(eleArgs.getOtherArgumentsAt(1), true);
+                    player.sendMessage(Translate.miniMessage("<gray>The default do elevator leveling is: <white>true"));
+                    Boolean bool = Utils.asBooleanOrElse(value, null);
+                    if (bool == null) {
+                        player.sendMessage(Translate.miniMessage("<gold>The current do elevator leveling is: <white>" + elevator.getElevatorSettings().isDoElevatorLeveling()));
+                        return true;
+                    }
                     elevator.getElevatorSettings().setDoElevatorLeveling(bool);
-                    player.sendMessage(Translate.chat("The doLevelingSystem has been set to: " + bool));
+                    player.sendMessage(Translate.miniMessage("<green>The do elevator leveling has been updated to: <white>" + bool));
                     return true;
                 } else if (setting.equalsIgnoreCase("onlyTwoFloors")) {
-                    boolean bool = Utils.asBooleanOrElse(eleArgs.getOtherArgumentsAt(1), false);
+                    player.sendMessage(Translate.miniMessage("<gray>The default only two floors is: <white>false"));
+                    Boolean bool = Utils.asBooleanOrElse(value, null);
+                    if (bool == null) {
+                        player.sendMessage(Translate.miniMessage("<gold>The current only two floors is: <white>" + elevator.getElevatorSettings().isOnlyTwoFloors()));
+                        return true;
+                    }
                     elevator.getElevatorSettings().setOnlyTwoFloors(bool);
-                    player.sendMessage(Translate.chat("onlyTwoFloors has been set to: " + bool));
+                    player.sendMessage(Translate.miniMessage("<green>The only two floors has been updated to: <white>" + bool));
                     return true;
                 } else if (setting.equalsIgnoreCase("arrivalSound") || setting.equalsIgnoreCase("passingByFloorSound")) {
                     if (args.length == 7) {
@@ -549,69 +575,77 @@ public class ElevatorCMD implements CommandExecutor {
                         String fakeVolume = eleArgs.getOtherArgumentsAt(2);
                         String fakePitch = eleArgs.getOtherArgumentsAt(3);
                         if (fakeSound == null || fakeVolume == null || fakePitch == null) {
-                            player.sendMessage(Translate.chat("sound is null, or volume is null, or pitch is null."));
+                            player.sendMessage(Translate.miniMessage("<red>Invalid sound, volume, or pitch."));
                             return true;
                         }
                         Sound sound = Sound.valueOf(fakeSound);
                         float volume = Utils.asFloatOrElse(fakeVolume, 99.1F);
                         float pitch = Utils.asFloatOrElse(fakePitch, 99.1F);
-
-                        if (volume == 91.1F || pitch == 91.1F) {
-                            player.sendMessage(Translate.chat("Volume or pitch is messed up."));
+                        if (volume == 99.1F || pitch == 99.1F) {
+                            player.sendMessage(Translate.miniMessage("<red>Invalid volume or pitch."));
                             return true;
                         }
                         ElevatorSound elevatorSound = new ElevatorSound(sound, volume, pitch);
                         if (setting.equalsIgnoreCase("arrivalSound")) {
                             elevator.getElevatorSettings().setArrivalSound(elevatorSound);
-                            player.sendMessage("Sound was set to: " + elevatorSound);
-                        } else if (setting.equalsIgnoreCase("passingByFloorSound")) {
+                            player.sendMessage(Translate.miniMessage("<green>The arrival sound has been updated."));
+                        } else {
                             elevator.getElevatorSettings().setPassingByFloorSound(elevatorSound);
-                            player.sendMessage("Sound was set to: " + elevatorSound);
+                            player.sendMessage(Translate.miniMessage("<green>The passing by floor sound has been updated."));
                         }
-
                         return true;
                     } else if (args.length == 4) {
                         if (setting.equalsIgnoreCase("arrivalSound")) {
-                            elevator.getElevatorSettings().setArrivalSound(null);
-                            player.sendMessage(Translate.chat("Removed arrival sound."));
+                            player.sendMessage(Translate.miniMessage("<gold>The current arrival sound is: <white>" + elevator.getElevatorSettings().getArrivalSound()));
                         } else {
-                            elevator.getElevatorSettings().setPassingByFloorSound(null);
-                            player.sendMessage(Translate.chat("Removed passing by floor sound."));
+                            player.sendMessage(Translate.miniMessage("<gold>The current passing by floor sound is: <white>" + elevator.getElevatorSettings().getPassingByFloorSound()));
                         }
                         return true;
                     }
                     return true;
                 } else if (setting.equalsIgnoreCase("floorSelectorType")) {
+                    player.sendMessage(Translate.miniMessage("<gray>The default floor selector type is: <white>" + ElevatorFloorSelectorType.CLICK_CHAT));
                     ElevatorFloorSelectorType elevatorFloorSelectorType;
                     try {
-                        elevatorFloorSelectorType = ElevatorFloorSelectorType.valueOf(eleArgs.getOtherArgumentsAt(1));
+                        elevatorFloorSelectorType = ElevatorFloorSelectorType.valueOf(value);
                     } catch (Exception ignored) {
-                        player.sendMessage(Translate.color("&cThat's not a valid ElevatorFloorSelectorType"));
+                        player.sendMessage(Translate.miniMessage("<red>That's not a valid ElevatorFloorSelectorType."));
                         return true;
                     }
                     elevator.getElevatorSettings().setFloorSelectorType(elevatorFloorSelectorType);
-                    player.sendMessage(Translate.color("floorSelectorType has been set to " + elevatorFloorSelectorType.name()));
+                    player.sendMessage(Translate.miniMessage("<green>The floor selector type has been updated to: <white>" + elevatorFloorSelectorType.name()));
                     return true;
                 } else if (setting.equalsIgnoreCase("callButtonType")) {
+                    player.sendMessage(Translate.miniMessage("<gray>The default call button type is: <white>" + ElevatorCallButtonType.CALL_THE_ELEVATOR));
                     ElevatorCallButtonType elevatorCallButtonType;
                     try {
-                        elevatorCallButtonType = ElevatorCallButtonType.valueOf(eleArgs.getOtherArgumentsAt(1));
+                        elevatorCallButtonType = ElevatorCallButtonType.valueOf(value);
                     } catch (Exception ignored) {
-                        player.sendMessage(Translate.color("&cThat's not a valid ElevatorCallButtonType"));
+                        player.sendMessage(Translate.miniMessage("<red>That's not a valid ElevatorCallButtonType."));
                         return true;
                     }
                     elevator.getElevatorSettings().setCallButtonType(elevatorCallButtonType);
-                    player.sendMessage(Translate.color("callButtonType has been set to " + elevatorCallButtonType.name()));
+                    player.sendMessage(Translate.miniMessage("<green>The call button type has been updated to: <white>" + elevatorCallButtonType.name()));
                     return true;
                 } else if (setting.equalsIgnoreCase("signFinderSystem")) {
-                    boolean bool = Utils.asBooleanOrElse(eleArgs.getOtherArgumentsAt(1), true);
+                    player.sendMessage(Translate.miniMessage("<gray>The default sign finder system is: <white>true"));
+                    Boolean bool = Utils.asBooleanOrElse(value, null);
+                    if (bool == null) {
+                        player.sendMessage(Translate.miniMessage("<gold>The current sign finder system is: <white>" + elevator.getElevatorSettings().isSignFinderSystem()));
+                        return true;
+                    }
                     elevator.getElevatorSettings().setSignFinderSystem(bool);
-                    player.sendMessage(Translate.chat("The signFinderSystem has been set to: " + bool));
+                    player.sendMessage(Translate.miniMessage("<green>The sign finder system has been updated to: <white>" + bool));
                     return true;
                 } else if (setting.equalsIgnoreCase("teleportElevatorOnEmpty")) {
-                    boolean bool = Utils.asBooleanOrElse(eleArgs.getOtherArgumentsAt(1), false);
+                    player.sendMessage(Translate.miniMessage("<gray>The default teleport elevator on empty is: <white>false"));
+                    Boolean bool = Utils.asBooleanOrElse(value, null);
+                    if (bool == null) {
+                        player.sendMessage(Translate.miniMessage("<gold>The current teleport elevator on empty is: <white>" + elevator.getElevatorSettings().isTeleportElevatorOnEmpty()));
+                        return true;
+                    }
                     elevator.getElevatorSettings().setTeleportElevatorOnEmpty(bool);
-                    player.sendMessage(Translate.chat("The teleportElevatorOnEmpty has been set to: " + bool));
+                    player.sendMessage(Translate.miniMessage("<green>The teleport elevator on empty has been updated to: <white>" + bool));
                     return true;
                 }
                 return true;
