@@ -674,9 +674,7 @@ public class ElevatorCMD implements CommandExecutor {
                 }
                 return true;
             }
-        } else if (args[0].
-
-                equalsIgnoreCase("queue")) {
+        } else if (args[0].equalsIgnoreCase("queue")) {
             if (!player.hasPermission("world16elevators.admin")) return true;
             if (args.length == 1) {
                 player.sendMessage(Translate.chat("&6/elevator queue &e<Controller> floorQueueBuffer list/clear"));
@@ -726,9 +724,7 @@ public class ElevatorCMD implements CommandExecutor {
                 }
                 return true;
             }
-        } else if (args[0].
-
-                equalsIgnoreCase("opendoor") && args.length == 4) {
+        } else if (args[0].equalsIgnoreCase("opendoor") && args.length == 4) {
             if (!player.hasPermission("world16elevators.opendoor")) {
                 player.sendMessage(Translate.color("&bYou don't have permission to use this command."));
                 return true;
@@ -772,9 +768,7 @@ public class ElevatorCMD implements CommandExecutor {
                     elevatorFloor.doDoor(false, true);
                 }
             }.runTaskLater(plugin, 20L * seconds);
-        } else if (args[0].
-
-                equalsIgnoreCase("copysettingsfrom")) {
+        } else if (args[0].equalsIgnoreCase("copysettingsfrom")) {
             if (!player.hasPermission("world16elevators.copysettingsfrom")) {
                 player.sendMessage(Translate.color("&bYou don't have permission to use this command."));
                 return true;
@@ -810,9 +804,7 @@ public class ElevatorCMD implements CommandExecutor {
             } else {
                 player.sendMessage(Translate.chat("&6/elevator copysettingsfrom &e<Controller> &9<Elevator> &e<Controller> &9<Elevator>"));
             }
-        } else if (args[0].
-
-                equalsIgnoreCase("teleport")) { // /elevator teleport <controller> <elevator>
+        } else if (args[0].equalsIgnoreCase("teleport")) { // /elevator teleport <controller> <elevator>
             if (!player.hasPermission("world16elevators.teleport")) {
                 player.sendMessage(Translate.color("&bYou don't have permission to use this command."));
                 return true;
@@ -858,9 +850,7 @@ public class ElevatorCMD implements CommandExecutor {
             } else {
                 player.sendMessage(Translate.chat("&6/elevator teleport &e<Controller> &9<Elevator>"));
             }
-        } else if (args[0].
-
-                equalsIgnoreCase("realign")) { // /elevator realign <controller> <elevator>
+        } else if (args[0].equalsIgnoreCase("realign")) { // /elevator realign <controller> <elevator>
             if (!player.hasPermission("world16elevators.realign")) {
                 player.sendMessage(Translate.color("&bYou don't have permission to use this command."));
                 return true;
@@ -897,9 +887,7 @@ public class ElevatorCMD implements CommandExecutor {
             } else {
                 player.sendMessage(Translate.chat("&6/elevator realign &e<Controller> &9<Elevator>"));
             }
-        } else if (args[0].
-
-                equalsIgnoreCase("boundingbox")) { // elevator boundingbox <controller> <elevator> <show/shift> <y>
+        } else if (args[0].equalsIgnoreCase("boundingbox")) { // elevator boundingbox <controller> <elevator> <show/shift> <y>
             if (!player.hasPermission("world16elevators.boundingbox")) {
                 player.sendMessage(Translate.color("&bYou don't have permission to use this command."));
                 return true;
