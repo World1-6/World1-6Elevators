@@ -416,23 +416,25 @@ public class Elevator {
     }
 
     /**
-     * Attempts to fix the elevator's alignment if it has become unaligned from its expected floor.
-     * This may occur when the elevator "thinks" it's at a specific floor, but its bounding box is not correctly positioned,
-     * potentially causing issues like the door opening to an empty space.
+     * Attempts to correct the elevator's alignment if it has become unaligned from its expected floor.
+     * This situation may occur if the elevator "thinks" it is at a certain floor, but its bounding box is not properly positioned,
+     * which can cause issues such as the door opening into empty space.
      * <p>
-     * If the elevator's alignment needs to be corrected, this function will either re-align the elevator or
-     * display where the elevator currently "thinks" it is located, depending on the confirmation flag.
-     * <p>
-     * - If `confirmChange` is true, the elevator will be shifted to align with the nearest valid floor.
-     * - If `confirmChange` is false, the function will mark the elevator's perceived position with diamond blocks and obsidian to indicate its current location.
+     * If the elevator's alignment needs to be fixed, this function will either realign the elevator or
+     * visually display its current perceived position based on the `confirmChange` flag.
+     * <ul>
+     *   <li>If {@code confirmChange} is true, the elevator will be shifted to align with the nearest valid floor.</li>
+     *   <li>If {@code confirmChange} is false, the function will mark the elevator's current perceived position
+     *       with Diamond blocks and Emerald blocks to indicate where it thinks the elevator is located.</li>
+     * </ul>
      *
      * @param player        The player attempting to fix the elevator.
-     * @param confirmChange If true, the elevator will be re-aligned to the nearest valid floor. If false, the function will visually mark the elevator's current perceived position.
-     * @return A map of the blocks that were changed to diamond or obsidian to show where the function believes the elevator is. Can be used to revert changes.
+     * @param confirmChange If true, the elevator will be realigned to the nearest valid floor. If false, the function will visually mark the elevator's perceived current position.
+     * @return A map of the blocks that were changed to Diamond or Emerald to indicate where the elevator is believed to be located. This map can be used to revert changes later.
      */
     public Map<Location, Material> fixUnalignedElevator(Player player, boolean confirmChange) {
         if (this.floorsMap == null || this.floorsMap.isEmpty()) {
-            Bukkit.broadcastMessage("No floors found in elevator: " + this.elevatorName);
+            player.sendMessage(Translate.miniMessage("<red>No floors found in elevator: <yellow>" + this.elevatorName));
             return null;
         }
 
