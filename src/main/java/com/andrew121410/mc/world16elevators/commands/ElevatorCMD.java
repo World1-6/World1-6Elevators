@@ -570,21 +570,31 @@ public class ElevatorCMD implements CommandExecutor {
                     player.sendMessage(Translate.miniMessage("<green>The only two floors has been updated to: <white>" + bool));
                     return true;
                 } else if (setting.equalsIgnoreCase("arrivalSound") || setting.equalsIgnoreCase("passingByFloorSound")) {
-                    if (args.length == 7) {
+                    if (args.length == 7) { // /elevator settings <Controller> <Elevator> <Setting> <Sound> <Volume> <Pitch>
                         String fakeSound = eleArgs.getOtherArgumentsAt(1);
                         String fakeVolume = eleArgs.getOtherArgumentsAt(2);
                         String fakePitch = eleArgs.getOtherArgumentsAt(3);
-                        if (fakeSound == null || fakeVolume == null || fakePitch == null) {
-                            player.sendMessage(Translate.miniMessage("<red>Invalid sound, volume, or pitch."));
+
+                        Sound sound;
+                        try {
+                            sound = Sound.valueOf(fakeSound);
+                        } catch (Exception e) {
+                            player.sendMessage(Translate.miniMessage("<red>Invalid sound."));
                             return true;
                         }
-                        Sound sound = Sound.valueOf(fakeSound);
-                        float volume = Utils.asFloatOrElse(fakeVolume, 99.1F);
-                        float pitch = Utils.asFloatOrElse(fakePitch, 99.1F);
-                        if (volume == 99.1F || pitch == 99.1F) {
-                            player.sendMessage(Translate.miniMessage("<red>Invalid volume or pitch."));
+
+                        Float volume = Utils.asFloatOrElse(fakeVolume, null);
+                        if (volume == null) {
+                            player.sendMessage(Translate.miniMessage("<red>Invalid volume."));
                             return true;
                         }
+
+                        Float pitch = Utils.asFloatOrElse(fakePitch, null);
+                        if (pitch == null) {
+                            player.sendMessage(Translate.miniMessage("<red>Invalid pitch."));
+                            return true;
+                        }
+
                         ElevatorSound elevatorSound = new ElevatorSound(sound, volume, pitch);
                         if (setting.equalsIgnoreCase("arrivalSound")) {
                             elevator.getElevatorSettings().setArrivalSound(elevatorSound);
@@ -594,15 +604,29 @@ public class ElevatorCMD implements CommandExecutor {
                             player.sendMessage(Translate.miniMessage("<green>The passing by floor sound has been updated."));
                         }
                         return true;
-                    } else if (args.length == 4) {
+                    } else if (args.length == 4) { // /elevator settings <Controller> <Elevator> <Setting>
+                        // Display the current sound
                         if (setting.equalsIgnoreCase("arrivalSound")) {
                             player.sendMessage(Translate.miniMessage("<gold>The current arrival sound is: <white>" + elevator.getElevatorSettings().getArrivalSound()));
                         } else {
                             player.sendMessage(Translate.miniMessage("<gold>The current passing by floor sound is: <white>" + elevator.getElevatorSettings().getPassingByFloorSound()));
                         }
+                        player.sendMessage(Translate.miniMessage("<gray>Btw... Use null keyword for the sound to have no sound, also don't provide the volume and pitch when using null."));
+
+                        // Usage: /elevator settings <Controller> <Elevator> <Setting> <Sound> <Volume> <Pitch>
+                        player.sendMessage(Translate.miniMessage("<yellow>Usage: /elevator settings <Controller> <Elevator> <Setting> <Sound> <Volume> <Pitch>"));
                         return true;
+                    } else if (args.length == 5) { // /elevator settings <Controller> <Elevator> <Setting> <null>
+                        if (value.equalsIgnoreCase("null")) {
+                            if (setting.equalsIgnoreCase("arrivalSound")) {
+                                elevator.getElevatorSettings().setArrivalSound(null);
+                                player.sendMessage(Translate.miniMessage("<green>Removed the arrival sound."));
+                            } else {
+                                elevator.getElevatorSettings().setPassingByFloorSound(null);
+                                player.sendMessage(Translate.miniMessage("<green>Removed the passing by floor sound."));
+                            }
+                        }
                     }
-                    return true;
                 } else if (setting.equalsIgnoreCase("floorSelectorType")) {
                     player.sendMessage(Translate.miniMessage("<gray>The default floor selector type is: <white>" + ElevatorFloorSelectorType.CLICK_CHAT));
                     ElevatorFloorSelectorType elevatorFloorSelectorType;
@@ -650,7 +674,9 @@ public class ElevatorCMD implements CommandExecutor {
                 }
                 return true;
             }
-        } else if (args[0].equalsIgnoreCase("queue")) {
+        } else if (args[0].
+
+                equalsIgnoreCase("queue")) {
             if (!player.hasPermission("world16elevators.admin")) return true;
             if (args.length == 1) {
                 player.sendMessage(Translate.chat("&6/elevator queue &e<Controller> floorQueueBuffer list/clear"));
@@ -700,7 +726,9 @@ public class ElevatorCMD implements CommandExecutor {
                 }
                 return true;
             }
-        } else if (args[0].equalsIgnoreCase("opendoor") && args.length == 4) {
+        } else if (args[0].
+
+                equalsIgnoreCase("opendoor") && args.length == 4) {
             if (!player.hasPermission("world16elevators.opendoor")) {
                 player.sendMessage(Translate.color("&bYou don't have permission to use this command."));
                 return true;
@@ -744,7 +772,9 @@ public class ElevatorCMD implements CommandExecutor {
                     elevatorFloor.doDoor(false, true);
                 }
             }.runTaskLater(plugin, 20L * seconds);
-        } else if (args[0].equalsIgnoreCase("copysettingsfrom")) {
+        } else if (args[0].
+
+                equalsIgnoreCase("copysettingsfrom")) {
             if (!player.hasPermission("world16elevators.copysettingsfrom")) {
                 player.sendMessage(Translate.color("&bYou don't have permission to use this command."));
                 return true;
@@ -780,7 +810,9 @@ public class ElevatorCMD implements CommandExecutor {
             } else {
                 player.sendMessage(Translate.chat("&6/elevator copysettingsfrom &e<Controller> &9<Elevator> &e<Controller> &9<Elevator>"));
             }
-        } else if (args[0].equalsIgnoreCase("teleport")) { // /elevator teleport <controller> <elevator>
+        } else if (args[0].
+
+                equalsIgnoreCase("teleport")) { // /elevator teleport <controller> <elevator>
             if (!player.hasPermission("world16elevators.teleport")) {
                 player.sendMessage(Translate.color("&bYou don't have permission to use this command."));
                 return true;
@@ -826,7 +858,9 @@ public class ElevatorCMD implements CommandExecutor {
             } else {
                 player.sendMessage(Translate.chat("&6/elevator teleport &e<Controller> &9<Elevator>"));
             }
-        } else if (args[0].equalsIgnoreCase("realign")) { // /elevator realign <controller> <elevator>
+        } else if (args[0].
+
+                equalsIgnoreCase("realign")) { // /elevator realign <controller> <elevator>
             if (!player.hasPermission("world16elevators.realign")) {
                 player.sendMessage(Translate.color("&bYou don't have permission to use this command."));
                 return true;
@@ -863,7 +897,9 @@ public class ElevatorCMD implements CommandExecutor {
             } else {
                 player.sendMessage(Translate.chat("&6/elevator realign &e<Controller> &9<Elevator>"));
             }
-        } else if (args[0].equalsIgnoreCase("boundingbox")) { // elevator boundingbox <controller> <elevator> <show/shift> <y>
+        } else if (args[0].
+
+                equalsIgnoreCase("boundingbox")) { // elevator boundingbox <controller> <elevator> <show/shift> <y>
             if (!player.hasPermission("world16elevators.boundingbox")) {
                 player.sendMessage(Translate.color("&bYou don't have permission to use this command."));
                 return true;
