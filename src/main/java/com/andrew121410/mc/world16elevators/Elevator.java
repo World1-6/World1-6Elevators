@@ -356,17 +356,22 @@ public class Elevator {
     }
 
     /**
-     * Highlights the current position of the elevator by changing specific blocks to visible markers.
-     * This includes displaying the elevator's bounding box, the expanded bounding box, and the location at the door.
+     * Highlights the current position of the elevator by modifying specific blocks to serve as visible markers.
+     * This includes marking the door location, the elevator's bounding box, and the expanded bounding box.
      * <p>
-     * If a map of previously changed blocks is provided, the function will revert those blocks back to their original materials.
-     * Otherwise, it will modify the current locations with the following changes:
-     * - The door location is marked with an Obsidian block.
-     * - The bounding box corners are marked with Diamond blocks.
-     * - The expanded bounding box corners are marked with Redstone blocks.
+     * If a map of previously changed blocks is provided, the function will revert those blocks to their original materials.
+     * Otherwise, it will modify the blocks at the current locations with the following changes:
+     * <ul>
+     *   <li>The door location is marked with an Emerald block.</li>
+     *   <li>The corners of the bounding box are marked with Diamond blocks.</li>
+     *   <li>The corners of the expanded bounding box are marked with Redstone blocks.</li>
+     * </ul>
      *
-     * @param map A map of previously modified block locations and their original materials, used to revert changes.
-     *            If null or empty, new block modifications will be made.
+     * @param map                 A map of previously modified block locations and their original materials, used to revert changes.
+     *                            If null or empty, new block modifications will be made.
+     * @param atDoor              The location of the elevator door to be marked. If null, it will default to the current door location.
+     * @param boundingBox         The bounding box of the elevator. If null, it will default to the elevator's current bounding box.
+     * @param boundingBoxExpanded The expanded bounding box around the elevator. If null, it will default to the current expanded bounding box.
      * @return A map of the blocks that were changed, with their original materials, to allow reverting the changes later.
      */
     public Map<Location, Material> showLocationOfElevator(Map<Location, Material> map, Location atDoor, BoundingBox boundingBox, BoundingBox boundingBoxExpanded) {
