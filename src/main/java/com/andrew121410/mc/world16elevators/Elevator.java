@@ -464,10 +464,10 @@ public class Elevator {
 
             // If a non-air block is found, re-align the elevator's bounding box and set the elevator to that floor
             if (foundNonAirBlock) {
-                if (confirmChange) {
-                    // Calculate the shift amount
-                    double shiftAmount = y - this.elevatorMovement.getAtDoor().getY();
+                // Calculate the shift amount
+                double shiftAmount = y - this.elevatorMovement.getAtDoor().getY();
 
+                if (confirmChange) {
                     // Shift the elevator bounding box to where the function thinks the elevator is at
                     this.elevatorMovement.getBoundingBox().shift(0, shiftAmount, 0);
                     this.boundingBoxExpanded.shift(0, shiftAmount, 0);
@@ -486,25 +486,12 @@ public class Elevator {
                     player.sendMessage(Translate.miniMessage("<green>Fixed elevator alignment to floor: <yellow>" + this.elevatorMovement.getFloor()));
                     break;
                 } else { // Show where the elevator is at.
-                    BoundingBox finalFloorBoundingBox = this.elevatorMovement.getBoundingBox().clone().shift(0, y - this.elevatorMovement.getAtDoor().getY(), 0);
+                    BoundingBox clonedBoundingBox = this.elevatorMovement.getBoundingBox().clone().shift(0, shiftAmount, 0);
+                    BoundingBox clonedExpandedBoundingBox = this.boundingBoxExpanded.clone().shift(0, shiftAmount, 0);
+                    Location clonedAtDoor = this.elevatorMovement.getAtDoor().clone();
+                    clonedAtDoor.setY(y);
 
-                    Location atDoor = this.elevatorMovement.getAtDoor().clone();
-                    atDoor.setY(y);
-                    Location minX = new Location(getBukkitWorld(), finalFloorBoundingBox.getMinX(), finalFloorBoundingBox.getMinY(), finalFloorBoundingBox.getMinZ());
-                    Location maxX = new Location(getBukkitWorld(), finalFloorBoundingBox.getMaxX(), finalFloorBoundingBox.getMaxY(), finalFloorBoundingBox.getMaxZ());
-
-                    Map<Location, Material> blocksToChangeBack = new HashMap<>();
-
-                    blocksToChangeBack.put(atDoor, atDoor.getBlock().getType());
-                    blocksToChangeBack.put(minX, minX.getBlock().getType());
-                    blocksToChangeBack.put(maxX, maxX.getBlock().getType());
-
-                    // Set the blocks to diamond blocks
-                    minX.getBlock().setType(Material.DIAMOND_BLOCK);
-                    maxX.getBlock().setType(Material.DIAMOND_BLOCK);
-                    atDoor.getBlock().setType(Material.OBSIDIAN);
-
-                    return blocksToChangeBack;
+                    return showLocationOfElevator(null, clonedAtDoor, clonedBoundingBox, clonedExpandedBoundingBox);
                 }
             }
         }
