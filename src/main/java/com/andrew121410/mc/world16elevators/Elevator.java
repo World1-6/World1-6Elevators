@@ -99,12 +99,10 @@ public class Elevator {
         }
     }
 
-    // This should be used for like teleporting entities up and down.
     public Collection<Entity> getEntities() {
         return getBukkitWorld().getNearbyEntities(this.getElevatorMovement().getTeleportingBoundingBox());
     }
 
-    // This should be used for like teleporting entities up and down.
     public Collection<Player> getPlayers() {
         return getEntities().stream().filter(entity -> entity instanceof Player).map(entity -> (Player) entity).collect(Collectors.toList());
     }
@@ -220,8 +218,12 @@ public class Elevator {
             }
         }
 
+        // Safety
+        int minFloorY = getFloor(topBottomFloor).getBlockUnderMainDoor().getBlockY() - 1;
+        int maxFloorY = getFloor(topFloor).getBlockUnderMainDoor().getBlockY() + 1;
+
         //Start ticking the elevator.
-        new ElevatorRunnable(plugin, this, goUp, elevatorFloor, elevatorStatus).runTask(plugin);
+        new ElevatorRunnable(plugin, this, goUp, elevatorFloor, elevatorStatus, minFloorY, maxFloorY).runTask(plugin);
     }
 
     protected void move(int howManyY, boolean goUP) {

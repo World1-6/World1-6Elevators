@@ -19,7 +19,18 @@ public class ElevatorRunnable extends BukkitRunnable {
 
     private ElevatorFloor floorThatWeAreGoingToPass;
 
-    public ElevatorRunnable(World16Elevators plugin, Elevator elevator, boolean goingUp, ElevatorFloor elevatorFloor, ElevatorStatus elevatorStatus, int counter, ElevatorFloor floorThatWeAreGoingToPass) {
+    private int maxFloorY;
+    private int minFloorY;
+
+    public ElevatorRunnable(World16Elevators plugin,
+                            Elevator elevator,
+                            boolean goingUp,
+                            ElevatorFloor elevatorFloor,
+                            ElevatorStatus elevatorStatus,
+                            int counter,
+                            ElevatorFloor floorThatWeAreGoingToPass,
+                            int minFloorY,
+                            int maxFloorY) {
         this.plugin = plugin;
         this.elevator = elevator;
         this.goingUp = goingUp;
@@ -27,10 +38,26 @@ public class ElevatorRunnable extends BukkitRunnable {
         this.elevatorStatus = elevatorStatus;
         this.counter = counter;
         this.floorThatWeAreGoingToPass = floorThatWeAreGoingToPass;
+        this.minFloorY = minFloorY;
+        this.maxFloorY = maxFloorY;
     }
 
-    public ElevatorRunnable(World16Elevators plugin, Elevator elevator, boolean goingUp, ElevatorFloor elevatorFloor, ElevatorStatus elevatorStatus) {
-        this(plugin, elevator, goingUp, elevatorFloor, elevatorStatus, (int) elevator.getElevatorSettings().getTicksPerSecond(), null);
+    public ElevatorRunnable(World16Elevators plugin,
+                            Elevator elevator,
+                            boolean goingUp,
+                            ElevatorFloor elevatorFloor,
+                            ElevatorStatus elevatorStatus,
+                            int minFloorY,
+                            int maxFloorY) {
+        this(plugin,
+                elevator,
+                goingUp,
+                elevatorFloor,
+                elevatorStatus,
+                (int) elevator.getElevatorSettings().getTicksPerSecond(),
+                null,
+                minFloorY,
+                maxFloorY);
     }
 
     @Override
@@ -59,6 +86,11 @@ public class ElevatorRunnable extends BukkitRunnable {
         } else if (stopByFloor != null && elevator.getElevatorMovement().getAtDoor().getY() == stopByFloor.getBlockUnderMainDoor().getY()) {
             elevator.floorStop(elevatorFloor, elevatorStatus, elevator.getStopBy(), stopByFloor);
             return;
+        }
+
+        // Safety Check
+        if (elevator.getElevatorMovement().getAtDoor().getY() > maxFloorY || elevator.getElevatorMovement().getAtDoor().getY() < minFloorY) {
+            this.elevator.setEmergencyStop(true);
         }
 
         // Stop's the elevator if emergencyStop is on.
@@ -93,6 +125,6 @@ public class ElevatorRunnable extends BukkitRunnable {
         // Don't try to register another task if the plugin is disabled.
         if (!this.plugin.isEnabled()) return;
 
-        new ElevatorRunnable(plugin, elevator, goingUp, elevatorFloor, elevatorStatus, counter, floorThatWeAreGoingToPass).runTaskLater(plugin, counter);
+        new ElevatorRunnable(plugin, elevator, goingUp, elevatorFloor, elevatorStatus, counter, floorThatWeAreGoingToPass, minFloorY, maxFloorY).runTaskLater(plugin, counter);
     }
 }
