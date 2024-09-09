@@ -932,7 +932,7 @@ public class ElevatorCMD implements CommandExecutor {
 
                     // Copy the stuff
                     BoundingBox copyBoundingBox = elevator.getElevatorMovement().getBoundingBox().clone();
-                    BoundingBox copyExpandedBoundingBox = elevator.getBoundingBoxExpanded().clone();
+                    BoundingBox copyExpandedBoundingBox = elevator.getElevatorMovement().getTeleportingBoundingBox().clone();
                     Location copyAtDoor = elevator.getElevatorMovement().getAtDoor().clone();
 
                     // Shift the stuff
@@ -950,7 +950,7 @@ public class ElevatorCMD implements CommandExecutor {
 
                         // Set the new values.
                         elevator.getElevatorMovement().setBoundingBox(copyBoundingBox);
-                        elevator.setBoundingBoxExpanded(copyExpandedBoundingBox);
+                        elevator.getElevatorMovement().setTeleportingBoundingBox(copyExpandedBoundingBox);
                         elevator.getElevatorMovement().setAtDoor(copyAtDoor);
 
                         p1.sendMessage(Translate.miniMessage("<green>The changes have been confirmed."));

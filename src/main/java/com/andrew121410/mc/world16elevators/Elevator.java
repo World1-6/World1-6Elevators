@@ -33,8 +33,6 @@ public class Elevator {
     private ElevatorMovement elevatorMovement;
     private ElevatorSettings elevatorSettings;
 
-    private BoundingBox boundingBoxExpanded;
-
     private Map<Integer, ElevatorFloor> floorsMap;
 
     //TEMP DON'T SAVE
@@ -79,9 +77,6 @@ public class Elevator {
         this.elevatorMovement = elevatorMovement;
         this.elevatorSettings = elevatorSettings;
 
-        // Expand the bounding box by -1 on the Y axis for minY and +1 on the Y axis for maxY
-        this.boundingBoxExpanded = this.elevatorMovement.getBoundingBox().clone().expand(0, 1, 0);
-
         this.isGoing = false;
         this.isIdling = false;
         this.isFloorQueueGoing = false;
@@ -104,10 +99,12 @@ public class Elevator {
         }
     }
 
+    // This should be used for like teleporting entities up and down.
     public Collection<Entity> getEntities() {
-        return getBukkitWorld().getNearbyEntities(boundingBoxExpanded);
+        return getBukkitWorld().getNearbyEntities(this.getElevatorMovement().getTeleportingBoundingBox());
     }
 
+    // This should be used for like teleporting entities up and down.
     public Collection<Player> getPlayers() {
         return getEntities().stream().filter(entity -> entity instanceof Player).map(entity -> (Player) entity).collect(Collectors.toList());
     }
@@ -242,15 +239,7 @@ public class Elevator {
             return;
         }
 
-        if (goUP) {
-            this.elevatorMovement.getAtDoor().add(0, howManyY, 0);
-            this.elevatorMovement.getBoundingBox().shift(0, howManyY, 0);
-            this.boundingBoxExpanded.shift(0, howManyY, 0);
-        } else {
-            this.elevatorMovement.getAtDoor().subtract(0, howManyY, 0);
-            this.elevatorMovement.getBoundingBox().shift(0, -howManyY, 0);
-            this.boundingBoxExpanded.shift(0, -howManyY, 0);
-        }
+        this.elevatorMovement.shiftY(goUP ? howManyY : -howManyY);
     }
 
     // Ran when it actually reaches a floor.
@@ -381,13 +370,13 @@ public class Elevator {
         }
 
         if (atDoor == null) {
-            atDoor = elevatorMovement.getAtDoor().clone();
+            atDoor = this.elevatorMovement.getAtDoor().clone();
         }
         if (boundingBox == null) {
-            boundingBox = elevatorMovement.getBoundingBox().clone();
+            boundingBox = this.elevatorMovement.getBoundingBox().clone();
         }
         if (boundingBoxExpanded == null) {
-            boundingBoxExpanded = this.boundingBoxExpanded.clone();
+            boundingBoxExpanded = this.elevatorMovement.getTeleportingBoundingBox().clone();
         }
 
         Map<Location, Material> blockMap = new HashMap<>();
@@ -477,7 +466,7 @@ public class Elevator {
                 if (confirmChange) {
                     // Shift the elevator bounding box to where the function thinks the elevator is at
                     this.elevatorMovement.getBoundingBox().shift(0, shiftAmount, 0);
-                    this.boundingBoxExpanded.shift(0, shiftAmount, 0);
+                    this.elevatorMovement.getTeleportingBoundingBox().shift(0, shiftAmount, 0);
 
                     // Update the Y position of the door
                     this.elevatorMovement.getAtDoor().setY(y);
@@ -494,7 +483,7 @@ public class Elevator {
                     break;
                 } else { // Show where the elevator is at.
                     BoundingBox clonedBoundingBox = this.elevatorMovement.getBoundingBox().clone().shift(0, shiftAmount, 0);
-                    BoundingBox clonedExpandedBoundingBox = this.boundingBoxExpanded.clone().shift(0, shiftAmount, 0);
+                    BoundingBox clonedExpandedBoundingBox = this.elevatorMovement.getTeleportingBoundingBox().clone().shift(0, shiftAmount, 0);
                     Location clonedAtDoor = this.elevatorMovement.getAtDoor().clone();
                     clonedAtDoor.setY(y);
 
