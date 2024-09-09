@@ -126,6 +126,15 @@ public class ElevatorCMD implements CommandExecutor {
                     player.sendMessage(Translate.color("&bYou don't have permission to use this command."));
                     return true;
                 }
+
+                // Elevator Creation Whitelist
+                if (this.plugin.getElevatorCreationWhitelist() != null) {
+                    if (!this.plugin.getElevatorCreationWhitelist().contains(player.getName())) {
+                        player.sendMessage(Translate.miniMessage("<red>You are not whitelisted to create an elevator controller."));
+                        return true;
+                    }
+                }
+
                 String controllerName = args[2].toLowerCase();
 
                 if (elevatorControllerMap.get(controllerName) != null) {
@@ -160,6 +169,14 @@ public class ElevatorCMD implements CommandExecutor {
                 return true;
             }
 
+            // Elevator Creation Whitelist
+            if (this.plugin.getElevatorCreationWhitelist() != null) {
+                if (!this.plugin.getElevatorCreationWhitelist().contains(player.getName())) {
+                    player.sendMessage(Translate.miniMessage("<red>You are not whitelisted to create an elevator."));
+                    return true;
+                }
+            }
+
             if (args.length == 4) {
                 Block blockPlayerIsLookingAt = PlayerUtils.getBlockPlayerIsLookingAt(player);
                 ElevatorArguments eleArgs = getElevatorArguments(args, 2);
@@ -168,6 +185,13 @@ public class ElevatorCMD implements CommandExecutor {
 
                 if (region == null) {
                     player.sendMessage(Translate.miniMessage("<red>You need to select a region with WorldEdit."));
+                    return true;
+                }
+
+                // Check the volume of the region to make sure it's not bigger than maxSizeOfElevator
+                int maxSizeOfElevator = this.plugin.getMaxSizeOfElevator();
+                if (region.getVolume() > maxSizeOfElevator) {
+                    player.sendMessage(Translate.miniMessage("<red>The region you selected is too big. The max size is: <white>" + maxSizeOfElevator));
                     return true;
                 }
 
@@ -967,6 +991,21 @@ public class ElevatorCMD implements CommandExecutor {
             } else {
                 player.sendMessage(Translate.color("&6/elevator boundingbox &e<Controller> &9<Elevator> &eshow/shift &3<y>"));
             }
+        } else if (args[0].equalsIgnoreCase("volume")) { // /elevator volume
+            if (!player.hasPermission("world16elevators.volume")) {
+                player.sendMessage(Translate.color("&bYou don't have permission to use this command."));
+                return true;
+            }
+
+            BoundingBox region = this.plugin.getOtherPlugins().getWorld16Utils().getClassWrappers().getWorldEdit().getRegion(player);
+
+            if (region == null) {
+                player.sendMessage(Translate.miniMessage("<red>You need to select a region with WorldEdit."));
+                return true;
+            }
+
+            double volume = region.getVolume();
+            player.sendMessage(Translate.miniMessage("<green>The volume of the region is: <white>" + volume));
         }
         return true;
     }

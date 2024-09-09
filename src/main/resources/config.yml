@@ -1,1 +1,17 @@
+# When set to true, it will load elevators if the chunk they are in is loaded, and unload them if the chunk is unloaded.
 ChunkSmartManagement: false
+
+# Maximum volume of the elevator bounding box.
+# Change this value to set the max size limit of an elevator.
+# Use /elevator volume with WorldEdit to find the volume of a selected WorldEdit region.
+# Adjust maxSizeOfElevator based on the volume you get from /elevator volume, to fit your needs.
+maxSizeOfElevator: 50
+
+# Only certain players can create elevators.
+# If enabled, only players in the whitelist can create elevators, no matter if they have the permission or even if they are OP.
+whitelist:
+  enabled: false
+  players:
+    - "player1"
+    - "player2"
+    - "player3"

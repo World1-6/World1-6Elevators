@@ -46,6 +46,7 @@ public class ElevatorTab implements TabCompleter {
         tabCompleteList.add("teleport");
         tabCompleteList.add("realign");
         tabCompleteList.add("boundingbox");
+        tabCompleteList.add("volume");
         this.elevatorControllerMap = this.plugin.getMemoryHolder().getElevatorControllerMap();
         this.soundList = new ArrayList<>();
         for (Sound value : Sound.values()) {
