@@ -30,6 +30,15 @@ public class ElevatorMovement {
         this.floor = floor;
         this.atDoor = ElevatorFloor.ifIronDoorThenGetBlockUnderTheDoorIfNotThanReturn(atDoor).getLocation();
         this.boundingBox = boundingBox;
+
+        // See if the bounding box is on the same x or z axis. If so this must be a small elevator.
+        // So in this case we will expand the bounding box by 1 in all directions, for the teleporting bounding box.
+        if (this.boundingBox.getMinX() == this.boundingBox.getMaxX() || this.boundingBox.getMinZ() == this.boundingBox.getMaxZ()) {
+            this.teleportingBoundingBox = this.boundingBox.clone().expand(1);
+        } else { // This must be a large elevator.
+            // Expand the bounding box by -1 on the Y axis for minY and +1 on the Y axis for maxY
+            this.teleportingBoundingBox = this.boundingBox.clone().expand(0, 1, 0);
+        }
     }
 
     /**
