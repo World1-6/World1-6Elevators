@@ -192,6 +192,7 @@ public class ElevatorCMD implements CommandExecutor {
                 int maxSizeOfElevator = this.plugin.getMaxSizeOfElevator();
                 if (region.getVolume() > maxSizeOfElevator) {
                     player.sendMessage(Translate.miniMessage("<red>The region you selected is too big. The max size is: <white>" + maxSizeOfElevator));
+                    player.sendMessage(Translate.miniMessage("<red>The region you selected size is: <white>" + region.getVolume()));
                     return true;
                 }
 
