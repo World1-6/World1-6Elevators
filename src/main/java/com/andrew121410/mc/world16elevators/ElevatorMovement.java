@@ -37,7 +37,7 @@ public class ElevatorMovement {
             this.teleportingBoundingBox = this.boundingBox.clone().expand(1);
         } else { // This must be a large elevator.
             // Expand the bounding box by -1 on the Y axis for minY and +1 on the Y axis for maxY
-            this.teleportingBoundingBox = this.boundingBox.clone().expand(0, 1, 0);
+            this.teleportingBoundingBox = this.boundingBox.clone().expand(0.5, 1, 0.5);
         }
     }
 
