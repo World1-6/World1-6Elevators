@@ -219,7 +219,9 @@ public class ElevatorFloorSelectorManager {
         this.isRunning = false;
     }
 
-    public FloorQueueObject getNextFloor(int floorNumber) {
+    public FloorQueueObject getNextFloor(Integer floorNumber) {
+        if (floorNumber == null) return null;
+
         ElevatorFloor elevatorFloor = null;
         ElevatorStatus elevatorStatus = null;
         if (floorNumber == 1) {
