@@ -222,8 +222,8 @@ public class Elevator {
         int minFloorY = getFloor(topBottomFloor).getBlockUnderMainDoor().getBlockY() - 1;
         int maxFloorY = getFloor(topFloor).getBlockUnderMainDoor().getBlockY() + 1;
 
-        //Start ticking the elevator.
-        new ElevatorRunnable(plugin, this, goUp, elevatorFloor, elevatorStatus, minFloorY, maxFloorY).runTask(plugin);
+        // Start ticking the elevator.
+        new ElevatorRunnable(plugin, this, goUp, elevatorFloor, elevatorStatus, minFloorY, maxFloorY).startElevator();
     }
 
     protected void move(int howManyY, boolean goUP) {

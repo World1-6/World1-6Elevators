@@ -10,59 +10,53 @@ public class ElevatorRunnable extends BukkitRunnable {
 
     private final World16Elevators plugin;
     private final Elevator elevator;
-
     private final boolean goingUp;
-    private final ElevatorFloor elevatorFloor;
+    private final ElevatorFloor targetFloor;
     private final ElevatorStatus elevatorStatus;
 
-    private int counter;
-
     private ElevatorFloor floorThatWeAreGoingToPass;
+    private final int maxFloorY;
+    private final int minFloorY;
 
-    private int maxFloorY;
-    private int minFloorY;
+    private int ticksPerMove;
+    private int tickCounter;
 
-    public ElevatorRunnable(World16Elevators plugin,
-                            Elevator elevator,
-                            boolean goingUp,
-                            ElevatorFloor elevatorFloor,
-                            ElevatorStatus elevatorStatus,
-                            int counter,
-                            ElevatorFloor floorThatWeAreGoingToPass,
-                            int minFloorY,
-                            int maxFloorY) {
+    public ElevatorRunnable(World16Elevators plugin, Elevator elevator, boolean goingUp, ElevatorFloor targetFloor, ElevatorStatus elevatorStatus, int minFloorY, int maxFloorY) {
         this.plugin = plugin;
         this.elevator = elevator;
         this.goingUp = goingUp;
-        this.elevatorFloor = elevatorFloor;
+        this.targetFloor = targetFloor;
         this.elevatorStatus = elevatorStatus;
-        this.counter = counter;
-        this.floorThatWeAreGoingToPass = floorThatWeAreGoingToPass;
         this.minFloorY = minFloorY;
         this.maxFloorY = maxFloorY;
+
+        this.ticksPerMove = (int) elevator.getElevatorSettings().getTicksPerSecond();
+        this.tickCounter = 0;
     }
 
-    public ElevatorRunnable(World16Elevators plugin,
-                            Elevator elevator,
-                            boolean goingUp,
-                            ElevatorFloor elevatorFloor,
-                            ElevatorStatus elevatorStatus,
-                            int minFloorY,
-                            int maxFloorY) {
-        this(plugin,
-                elevator,
-                goingUp,
-                elevatorFloor,
-                elevatorStatus,
-                (int) elevator.getElevatorSettings().getTicksPerSecond(),
-                null,
-                minFloorY,
-                maxFloorY);
+    public void startElevator() {
+        this.runTaskTimer(plugin, 20L, 1L);
     }
 
     @Override
     public void run() {
-        if (elevator.isIdling()) return;
+        if (elevator.isIdling()) {
+            this.cancel();
+            return;
+        }
+
+        // Increment the tick counter
+        tickCounter++;
+
+        // Increment the tick counter and move the elevator only if the counter reaches the ticksPerMove threshold
+        // For example, if ticksPerMove is 6, the elevator will move every 6 ticks
+        if (tickCounter < ticksPerMove) {
+            return; // If it's not time yet, return early and wait for the next tick
+        }
+
+        // Reset the tick counter after a move
+        tickCounter = 0;
+
         elevator.reCalculateFloorBuffer(goingUp);
         ElevatorFloor stopByFloor = !elevator.getStopBy().getPriorityQueue().isEmpty() ? elevator.getFloor(elevator.getStopBy().getPriorityQueue().peek()) : null;
 
@@ -80,11 +74,13 @@ public class ElevatorRunnable extends BukkitRunnable {
         }
 
         // Check's if at the floor if so then stop the elevator.
-        if (elevator.getElevatorMovement().getAtDoor().getBlockY() == elevatorFloor.getBlockUnderMainDoor().getBlockY()) {
-            elevator.floorStop(elevatorFloor, elevatorStatus);
+        if (elevator.getElevatorMovement().getAtDoor().getBlockY() == targetFloor.getBlockUnderMainDoor().getBlockY()) {
+            elevator.floorStop(targetFloor, elevatorStatus);
+            this.cancel();
             return;
         } else if (stopByFloor != null && elevator.getElevatorMovement().getAtDoor().getY() == stopByFloor.getBlockUnderMainDoor().getY()) {
-            elevator.floorStop(elevatorFloor, elevatorStatus, elevator.getStopBy(), stopByFloor);
+            elevator.floorStop(targetFloor, elevatorStatus, elevator.getStopBy(), stopByFloor);
+            this.cancel();
             return;
         }
 
@@ -98,6 +94,7 @@ public class ElevatorRunnable extends BukkitRunnable {
             elevator.setIdling(false);
             elevator.setGoing(false);
             elevator.setEmergencyStop(false);
+            this.cancel();
             return;
         }
 
@@ -109,22 +106,21 @@ public class ElevatorRunnable extends BukkitRunnable {
             PlayerUtils.smoothTeleport(player, player.getLocation().add(0, goingUp ? 1 : -1, 0));
         }
 
-        // Elevator leveling
-        int x = elevator.getElevatorMovement().getAtDoor().getBlockY();
-        int z = elevatorFloor.getBlockUnderMainDoor().getBlockY();
+        // Elevator leveling (slows down the elevator as it approaches the target floor)
+        int currentY = elevator.getElevatorMovement().getAtDoor().getBlockY();
+        int targetY = targetFloor.getBlockUnderMainDoor().getBlockY();
         if (elevator.getElevatorSettings().isDoElevatorLeveling()) {
             if (goingUp) {
-                x += 5;
-                if (x >= z) counter += 1;
+                currentY += 5;
+                if (currentY >= targetY) {
+                    ticksPerMove += 1;
+                }
             } else {
-                x -= 5;
-                if (x <= z) counter += 1;
+                currentY -= 5;
+                if (currentY <= targetY) {
+                    ticksPerMove += 1;
+                }
             }
         }
-
-        // Don't try to register another task if the plugin is disabled.
-        if (!this.plugin.isEnabled()) return;
-
-        new ElevatorRunnable(plugin, elevator, goingUp, elevatorFloor, elevatorStatus, counter, floorThatWeAreGoingToPass, minFloorY, maxFloorY).runTaskLater(plugin, counter);
     }
 }
