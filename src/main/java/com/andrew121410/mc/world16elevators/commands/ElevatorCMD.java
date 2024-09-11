@@ -189,10 +189,7 @@ public class ElevatorCMD implements CommandExecutor {
                 }
 
                 // Check the volume of the region to make sure it's not bigger than maxSizeOfElevator
-                int maxSizeOfElevator = this.plugin.getMaxSizeOfElevator();
-                if (region.getVolume() > maxSizeOfElevator) {
-                    player.sendMessage(Translate.miniMessage("<red>The region you selected is too big. The max size is: <white>" + maxSizeOfElevator));
-                    player.sendMessage(Translate.miniMessage("<red>The region you selected size is: <white>" + region.getVolume()));
+                if (isRegionToBig(region, player)) {
                     return true;
                 }
 
@@ -958,7 +955,7 @@ public class ElevatorCMD implements CommandExecutor {
             } else {
                 player.sendMessage(Translate.chat("&6/elevator realign &e<Controller> &9<Elevator>"));
             }
-        } else if (args[0].equalsIgnoreCase("boundingbox")) { // elevator boundingbox <controller> <elevator> <show/shift> <y>
+        } else if (args[0].equalsIgnoreCase("boundingbox")) { // elevator boundingbox <controller> <elevator> <setting>
             if (!player.hasPermission("world16elevators.boundingbox")) {
                 player.sendMessage(Translate.color("&bYou don't have permission to use this command."));
                 return true;
@@ -1033,6 +1030,34 @@ public class ElevatorCMD implements CommandExecutor {
                         elevator.showLocationOfElevator(blockMap, copyAtDoor, copyBoundingBox, copyExpandedBoundingBox);
                         p1.sendMessage(Translate.miniMessage("<green>The original blocks have been restored."));
                     })));
+                } else if (setting.equalsIgnoreCase("fix-with-worldedit")) { // /elevator boundingbox <controller> <elevator> fix-with-worldedit
+                    BoundingBox boundingBox = this.plugin.getOtherPlugins().getWorld16Utils().getClassWrappers().getWorldEdit().getRegion(player);
+
+                    if (boundingBox == null) {
+                        player.sendMessage(Translate.miniMessage("<red>You need to select a region with WorldEdit."));
+                        return true;
+                    }
+
+                    // Check the volume of the region to make sure it's not bigger than maxSizeOfElevator
+                    if (isRegionToBig(boundingBox, player)) return true;
+
+                    // Current elevator movement stuff.
+                    Location atDoor = elevator.getElevatorMovement().getAtDoor();
+                    Integer floor = elevator.getElevatorMovement().getFloor();
+
+                    ElevatorMovement elevatorMovement = new ElevatorMovement(floor, atDoor, boundingBox);
+                    elevator.setElevatorMovement(elevatorMovement);
+                    player.sendMessage(Translate.miniMessage("<green>The bounding box has been updated."));
+                } else if (setting.equalsIgnoreCase("atdoor")) {
+                    Block block = PlayerUtils.getBlockPlayerIsLookingAt(player);
+
+                    if (block == null) {
+                        player.sendMessage(Translate.miniMessage("<red>You need to look at a block."));
+                        return true;
+                    }
+
+                    elevator.getElevatorMovement().setAtDoor(block.getLocation());
+                    player.sendMessage(Translate.miniMessage("<green>The door atDoor location in elevator movement has been updated."));
                 }
                 return true;
             } else {
@@ -1055,6 +1080,17 @@ public class ElevatorCMD implements CommandExecutor {
             player.sendMessage(Translate.miniMessage("<green>The volume of the region is: <white>" + volume));
         }
         return true;
+    }
+
+    private boolean isRegionToBig(BoundingBox boundingBox, Player player) {
+        // Check the volume of the region to make sure it's not bigger than maxSizeOfElevator
+        int maxSizeOfElevator = this.plugin.getMaxSizeOfElevator();
+        if (boundingBox.getVolume() > maxSizeOfElevator) {
+            player.sendMessage(Translate.miniMessage("<red>The region you selected is too big. The max size is: <white>" + maxSizeOfElevator));
+            player.sendMessage(Translate.miniMessage("<red>The region you selected size is: <white>" + boundingBox.getVolume()));
+            return true;
+        }
+        return false;
     }
 
     private ElevatorArguments getElevatorArguments(String[] args, int start) {
