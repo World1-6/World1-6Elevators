@@ -2,7 +2,9 @@ package com.andrew121410.mc.world16elevators;
 
 
 import com.andrew121410.mc.world16elevators.enums.ElevatorStatus;
+import com.andrew121410.mc.world16utils.chat.Translate;
 import com.andrew121410.mc.world16utils.player.PlayerUtils;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -87,6 +89,8 @@ public class ElevatorRunnable extends BukkitRunnable {
         // Safety Check
         if (elevator.getElevatorMovement().getAtDoor().getY() > maxFloorY || elevator.getElevatorMovement().getAtDoor().getY() < minFloorY) {
             this.elevator.setEmergencyStop(true);
+            Bukkit.broadcast(Translate.miniMessage("<red>Emergency Stop has been activated due to elevator going past its designated floor range"), "world16elevators.admin");
+            Bukkit.broadcast(Translate.miniMessage("<red>Elevator: <white>" + elevator.getElevatorName() + " <red>on the Controller: <white>" + elevator.getElevatorControllerName()), "world16elevators.admin");
         }
 
         // Stop's the elevator if emergencyStop is on.
