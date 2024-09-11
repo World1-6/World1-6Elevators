@@ -18,7 +18,7 @@ public class ElevatorMovementSerializer implements TypeSerializer<ElevatorMoveme
             return null;
         }
 
-        Integer floor = SerializerUtils.nonVirtualNode(node, "Floor").getInt();
+        Integer floor = node.node("Floor").get(Integer.class);
         Location location = SerializerUtils.nonVirtualNode(node, "AtDoor").get(Location.class);
         BoundingBox boundingBox = SerializerUtils.nonVirtualNode(node, "BoundingBox").get(BoundingBox.class);
 
