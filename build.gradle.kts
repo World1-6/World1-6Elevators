@@ -1,5 +1,5 @@
 plugins {
-    id("io.freefair.lombok") version "8.10" // https://plugins.gradle.org/plugin/io.freefair.lombok
+    id("io.freefair.lombok") version "8.11" // https://plugins.gradle.org/plugin/io.freefair.lombok
     `java-library`
     `maven-publish`
 }
@@ -22,13 +22,8 @@ tasks {
 }
 
 repositories {
-    mavenCentral()
     mavenLocal()
-
-    maven {
-        url = uri("https://hub.spigotmc.org/nexus/content/repositories/snapshots/")
-    }
-
+    mavenCentral()
     maven {
         url = uri("https://repo.papermc.io/repository/maven-public/")
     }
@@ -55,8 +50,8 @@ repositories {
 }
 
 dependencies {
-    compileOnly("io.papermc.paper:paper-api:1.20.4-R0.1-SNAPSHOT")
-    compileOnly("com.github.World1-6.World1-6Utils:World1-6Utils-Plugin:0f7f4791dd")
+    compileOnly("io.papermc.paper:paper-api:1.21.4-R0.1-SNAPSHOT")
+    compileOnly("com.github.World1-6.World1-6Utils:World1-6Utils-Plugin:691fb8421a")
     compileOnly("org.geysermc.floodgate:api:2.2.3-SNAPSHOT")
 }
 
