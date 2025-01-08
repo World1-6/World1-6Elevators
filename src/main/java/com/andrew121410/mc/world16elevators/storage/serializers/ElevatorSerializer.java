@@ -2,9 +2,9 @@ package com.andrew121410.mc.world16elevators.storage.serializers;
 
 import com.andrew121410.mc.world16elevators.*;
 import com.andrew121410.mc.world16utils.config.serializers.SerializerUtils;
-import com.andrew121410.mc.world16utils.utils.spongepowered.configurate.ConfigurationNode;
-import com.andrew121410.mc.world16utils.utils.spongepowered.configurate.serialize.SerializationException;
-import com.andrew121410.mc.world16utils.utils.spongepowered.configurate.serialize.TypeSerializer;
+import com.andrew121410.mc.world16utils.dependencies.spongepowered.configurate.ConfigurationNode;
+import com.andrew121410.mc.world16utils.dependencies.spongepowered.configurate.serialize.SerializationException;
+import com.andrew121410.mc.world16utils.dependencies.spongepowered.configurate.serialize.TypeSerializer;
 import io.leangen.geantyref.TypeToken;
 import org.checkerframework.checker.nullness.qual.Nullable;
 

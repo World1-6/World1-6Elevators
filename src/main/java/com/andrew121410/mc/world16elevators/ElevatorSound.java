@@ -1,7 +1,7 @@
 package com.andrew121410.mc.world16elevators;
 
-import com.andrew121410.mc.world16utils.utils.spongepowered.configurate.objectmapping.ConfigSerializable;
-import com.andrew121410.mc.world16utils.utils.spongepowered.configurate.objectmapping.meta.Setting;
+import com.andrew121410.mc.world16utils.dependencies.spongepowered.configurate.objectmapping.ConfigSerializable;
+import com.andrew121410.mc.world16utils.dependencies.spongepowered.configurate.objectmapping.meta.Setting;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;

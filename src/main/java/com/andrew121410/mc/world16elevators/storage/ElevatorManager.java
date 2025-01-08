@@ -3,9 +3,9 @@ package com.andrew121410.mc.world16elevators.storage;
 import com.andrew121410.mc.world16elevators.*;
 import com.andrew121410.mc.world16elevators.storage.serializers.*;
 import com.andrew121410.mc.world16utils.config.World16ConfigurateManager;
-import com.andrew121410.mc.world16utils.utils.spongepowered.configurate.CommentedConfigurationNode;
-import com.andrew121410.mc.world16utils.utils.spongepowered.configurate.serialize.TypeSerializerCollection;
-import com.andrew121410.mc.world16utils.utils.spongepowered.configurate.yaml.YamlConfigurationLoader;
+import com.andrew121410.mc.world16utils.dependencies.spongepowered.configurate.CommentedConfigurationNode;
+import com.andrew121410.mc.world16utils.dependencies.spongepowered.configurate.serialize.TypeSerializerCollection;
+import com.andrew121410.mc.world16utils.dependencies.spongepowered.configurate.yaml.YamlConfigurationLoader;
 import lombok.SneakyThrows;
 import org.bukkit.Location;
 
