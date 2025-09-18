@@ -539,6 +539,11 @@ public class Elevator {
             return;
         }
 
+        // Skip validation if world is not loaded yet
+        if (getBukkitWorld() == null) {
+            return;
+        }
+
         // Check if the current position appears to be valid
         if (this.elevatorMovement.validatePosition(getBukkitWorld())) {
             return; // Position appears correct, no action needed
@@ -554,8 +559,17 @@ public class Elevator {
 
         int startY = lowestFloor.getBlockUnderMainDoor().getBlockY();
         int endY = topFloor.getBlockUnderMainDoor().getBlockY();
+        
+        // Safety check: ensure we don't scan too large a range
+        if (Math.abs(endY - startY) > 256) {
+            Bukkit.broadcast(Translate.miniMessage("<red>Elevator alignment check skipped for elevator: <white>" + this.elevatorName + " <red>- floor range too large"), "world16elevators.admin");
+            return;
+        }
 
         // Search for the actual elevator cabin location
+        int bestY = -1;
+        int maxNonAirBlocks = 0;
+        
         for (int y = startY; y <= endY; y++) {
             BoundingBox floorBoundingBox = new BoundingBox(
                     this.elevatorMovement.getBoundingBox().getMinX(),
@@ -567,37 +581,46 @@ public class Elevator {
             );
 
             // Check if the bounding box contains any non-air blocks
-            boolean foundNonAirBlock = false;
+            int nonAirBlockCount = 0;
             for (int x = (int) floorBoundingBox.getMinX(); x <= floorBoundingBox.getMaxX(); x++) {
                 for (int z = (int) floorBoundingBox.getMinZ(); z <= floorBoundingBox.getMaxZ(); z++) {
                     Block block = getBukkitWorld().getBlockAt(x, y, z);
                     if (block.getType() != Material.AIR) {
-                        foundNonAirBlock = true;
-                        break;
+                        nonAirBlockCount++;
                     }
                 }
-                if (foundNonAirBlock) break;
             }
+            
+            // Track the Y level with the most elevator blocks
+            if (nonAirBlockCount > maxNonAirBlocks) {
+                maxNonAirBlocks = nonAirBlockCount;
+                bestY = y;
+            }
+        }
 
-            if (foundNonAirBlock) {
-                // Found the elevator cabin - auto-correct the position
-                double shiftAmount = y - this.elevatorMovement.getAtDoor().getY();
-                
+        if (bestY != -1 && maxNonAirBlocks > 0) {
+            // Found the elevator cabin - auto-correct the position
+            double shiftAmount = bestY - this.elevatorMovement.getAtDoor().getY();
+            
+            // Only auto-correct if the shift is reasonable (not more than the total floor range)
+            if (Math.abs(shiftAmount) <= Math.abs(endY - startY)) {
                 this.elevatorMovement.getBoundingBox().shift(0, shiftAmount, 0);
                 this.elevatorMovement.getTeleportingBoundingBox().shift(0, shiftAmount, 0);
-                this.elevatorMovement.getAtDoor().setY(y);
+                this.elevatorMovement.getAtDoor().setY(bestY);
 
                 // Update the floor number
                 for (ElevatorFloor elevatorFloor : this.floorsMap.values()) {
-                    if (elevatorFloor.getBlockUnderMainDoor().getBlockY() == y) {
+                    if (elevatorFloor.getBlockUnderMainDoor().getBlockY() == bestY) {
                         this.elevatorMovement.setFloor(elevatorFloor.getFloor());
                         break;
                     }
                 }
 
                 // Log the auto-correction for administrative awareness
-                Bukkit.broadcast(Translate.miniMessage("<yellow>Auto-corrected elevator alignment for elevator: <white>" + this.elevatorName + " <yellow>on controller: <white>" + this.elevatorControllerName + " <yellow>to floor: <white>" + this.elevatorMovement.getFloor()), "world16elevators.admin");
-                break;
+                Bukkit.broadcast(Translate.miniMessage("<yellow>Auto-corrected elevator alignment for elevator: <white>" + this.elevatorName + " <yellow>on controller: <white>" + this.elevatorControllerName + " <yellow>to floor: <white>" + this.elevatorMovement.getFloor() + " <yellow>(shift: " + shiftAmount + " blocks)"), "world16elevators.admin");
+            } else {
+                // Shift amount seems too large - log warning instead of auto-correcting
+                Bukkit.broadcast(Translate.miniMessage("<red>Elevator alignment issue detected for elevator: <white>" + this.elevatorName + " <red>but auto-correction skipped due to large shift (" + shiftAmount + " blocks). Manual realignment recommended."), "world16elevators.admin");
             }
         }
     }

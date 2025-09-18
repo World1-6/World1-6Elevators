@@ -66,14 +66,28 @@ public class ElevatorMovement {
 
         // Check for non-air blocks within the current bounding box position
         int checkY = this.atDoor.getBlockY();
+        
+        // Ensure bounding box has valid dimensions
+        if (this.boundingBox.getVolume() <= 0) {
+            return false;
+        }
+        
+        // Count how many blocks we find vs how many we expect to check
+        int blocksChecked = 0;
+        int nonAirBlocksFound = 0;
+        
         for (int x = (int) this.boundingBox.getMinX(); x <= this.boundingBox.getMaxX(); x++) {
             for (int z = (int) this.boundingBox.getMinZ(); z <= this.boundingBox.getMaxZ(); z++) {
+                blocksChecked++;
                 org.bukkit.block.Block block = world.getBlockAt(x, checkY, z);
                 if (block.getType() != org.bukkit.Material.AIR) {
-                    return true; // Found elevator blocks at expected position
+                    nonAirBlocksFound++;
                 }
             }
         }
-        return false; // No elevator blocks found - likely misaligned
+        
+        // Consider position valid if we found at least some non-air blocks
+        // (at least 10% of the bounding box should contain elevator structure)
+        return nonAirBlocksFound > 0 && (blocksChecked == 0 || (double) nonAirBlocksFound / blocksChecked >= 0.1);
     }
 }
