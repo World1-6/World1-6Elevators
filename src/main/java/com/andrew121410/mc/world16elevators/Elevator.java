@@ -97,6 +97,11 @@ public class Elevator {
                 this.topBottomFloor--;
             }
         }
+
+        // Perform automatic position validation after construction
+        if (plugin != null) {
+            validateAndAutoFixAlignment();
+        }
     }
 
     public Collection<Entity> getEntities() {
@@ -231,17 +236,44 @@ public class Elevator {
     }
 
     private void moveWithWorldEdit(int howManyY, boolean goUP) {
+        // Store the original position for potential rollback
+        BoundingBox originalBoundingBox = this.elevatorMovement.getBoundingBox().clone();
+        BoundingBox originalTeleportingBoundingBox = this.elevatorMovement.getTeleportingBoundingBox().clone();
+        Location originalAtDoor = this.elevatorMovement.getAtDoor().clone();
+        
+        boolean worldEditSuccess = false;
         try {
             WorldEdit worldEdit = this.plugin.getOtherPlugins().getWorld16Utils().getClassWrappers().getWorldEdit();
             worldEdit.moveCuboidRegion(getBukkitWorld(), elevatorMovement.getBoundingBox(), new Location(getBukkitWorld(), 0, goUP ? 1 : -1, 0), howManyY);
+            worldEditSuccess = true;
         } catch (Exception e) {
             Bukkit.broadcast(Translate.miniMessage("<red>Error while trying to move the elevator: " + this.elevatorName + " on controller: " + this.elevatorControllerName));
             e.printStackTrace();
-            this.plugin.getServer().getPluginManager().disablePlugin(this.plugin);
-            return;
+            
+            // Don't disable the plugin immediately - try to recover
+            worldEditSuccess = false;
         }
 
-        this.elevatorMovement.shiftY(goUP ? howManyY : -howManyY);
+        if (worldEditSuccess) {
+            // Update the logical position only if WorldEdit succeeded
+            this.elevatorMovement.shiftY(goUP ? howManyY : -howManyY);
+            
+            // Validate that the position is correct after movement
+            if (!this.elevatorMovement.validatePosition(getBukkitWorld())) {
+                Bukkit.broadcast(Translate.miniMessage("<red>Warning: Elevator position validation failed after movement for elevator: " + this.elevatorName + " on controller: " + this.elevatorControllerName));
+                Bukkit.broadcast(Translate.miniMessage("<yellow>This elevator may require realignment using /elevator realign"));
+            } else {
+                // Position is valid - persist the updated state immediately to prevent data loss
+                persistElevatorState();
+            }
+        } else {
+            // WorldEdit failed - don't update position to prevent desynchronization
+            Bukkit.broadcast(Translate.miniMessage("<yellow>Elevator position kept unchanged due to movement failure for elevator: " + this.elevatorName));
+            
+            // Stop the elevator movement to prevent further issues
+            this.setGoing(false);
+            this.setIdling(true);
+        }
     }
 
     // Ran when it actually reaches a floor.
@@ -495,6 +527,100 @@ public class Elevator {
         }
 
         return null;
+    }
+
+    /**
+     * Automatically validates the elevator's position during initialization and attempts to fix
+     * any misalignment without requiring player intervention. This helps prevent elevator
+     * desynchronization issues from persisting across server restarts.
+     */
+    private void validateAndAutoFixAlignment() {
+        if (this.elevatorMovement == null || this.floorsMap == null || this.floorsMap.isEmpty()) {
+            return;
+        }
+
+        // Check if the current position appears to be valid
+        if (this.elevatorMovement.validatePosition(getBukkitWorld())) {
+            return; // Position appears correct, no action needed
+        }
+
+        // Position validation failed - attempt to find the correct position
+        ElevatorFloor lowestFloor = this.floorsMap.values().stream().min(Comparator.comparingInt(ElevatorFloor::getFloor)).orElse(null);
+        ElevatorFloor topFloor = this.floorsMap.values().stream().max(Comparator.comparingInt(ElevatorFloor::getFloor)).orElse(null);
+
+        if (lowestFloor == null || topFloor == null) {
+            return;
+        }
+
+        int startY = lowestFloor.getBlockUnderMainDoor().getBlockY();
+        int endY = topFloor.getBlockUnderMainDoor().getBlockY();
+
+        // Search for the actual elevator cabin location
+        for (int y = startY; y <= endY; y++) {
+            BoundingBox floorBoundingBox = new BoundingBox(
+                    this.elevatorMovement.getBoundingBox().getMinX(),
+                    y,
+                    this.elevatorMovement.getBoundingBox().getMinZ(),
+                    this.elevatorMovement.getBoundingBox().getMaxX(),
+                    y,
+                    this.elevatorMovement.getBoundingBox().getMaxZ()
+            );
+
+            // Check if the bounding box contains any non-air blocks
+            boolean foundNonAirBlock = false;
+            for (int x = (int) floorBoundingBox.getMinX(); x <= floorBoundingBox.getMaxX(); x++) {
+                for (int z = (int) floorBoundingBox.getMinZ(); z <= floorBoundingBox.getMaxZ(); z++) {
+                    Block block = getBukkitWorld().getBlockAt(x, y, z);
+                    if (block.getType() != Material.AIR) {
+                        foundNonAirBlock = true;
+                        break;
+                    }
+                }
+                if (foundNonAirBlock) break;
+            }
+
+            if (foundNonAirBlock) {
+                // Found the elevator cabin - auto-correct the position
+                double shiftAmount = y - this.elevatorMovement.getAtDoor().getY();
+                
+                this.elevatorMovement.getBoundingBox().shift(0, shiftAmount, 0);
+                this.elevatorMovement.getTeleportingBoundingBox().shift(0, shiftAmount, 0);
+                this.elevatorMovement.getAtDoor().setY(y);
+
+                // Update the floor number
+                for (ElevatorFloor elevatorFloor : this.floorsMap.values()) {
+                    if (elevatorFloor.getBlockUnderMainDoor().getBlockY() == y) {
+                        this.elevatorMovement.setFloor(elevatorFloor.getFloor());
+                        break;
+                    }
+                }
+
+                // Log the auto-correction for administrative awareness
+                Bukkit.broadcast(Translate.miniMessage("<yellow>Auto-corrected elevator alignment for elevator: <white>" + this.elevatorName + " <yellow>on controller: <white>" + this.elevatorControllerName + " <yellow>to floor: <white>" + this.elevatorMovement.getFloor()), "world16elevators.admin");
+                break;
+            }
+        }
+    }
+
+    /**
+     * Immediately persists the elevator's current state to prevent data loss during server shutdowns.
+     * This method saves the elevator controller containing this elevator to disk.
+     */
+    private void persistElevatorState() {
+        try {
+            if (this.plugin != null && this.elevatorControllerName != null) {
+                ElevatorController controller = this.plugin.getMemoryHolder().getElevatorControllerMap().get(this.elevatorControllerName.toLowerCase());
+                if (controller != null) {
+                    // Save this specific elevator controller to disk
+                    this.plugin.getElevatorManager().saveAndUnloadElevatorController(controller);
+                    // Reload it back into memory to maintain runtime state
+                    this.plugin.getElevatorManager().loadElevatorController(this.elevatorControllerName.toLowerCase());
+                }
+            }
+        } catch (Exception e) {
+            // Log but don't stop elevator operation if persistence fails
+            Bukkit.broadcast(Translate.miniMessage("<yellow>Warning: Failed to persist elevator state for: " + this.elevatorName + " - " + e.getMessage()), "world16elevators.admin");
+        }
     }
 
     /**

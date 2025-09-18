@@ -51,4 +51,29 @@ public class ElevatorMovement {
         this.boundingBox.shift(0, amount, 0);
         this.teleportingBoundingBox.shift(0, amount, 0);
     }
+
+    /**
+     * Validates that the elevator's bounding box position matches the actual elevator cabin location
+     * by checking for non-air blocks within the bounding box at the expected position.
+     *
+     * @param world The world to check blocks in
+     * @return true if the position appears to be correct (non-air blocks found), false if misaligned
+     */
+    public boolean validatePosition(org.bukkit.World world) {
+        if (world == null || this.boundingBox == null || this.atDoor == null) {
+            return false;
+        }
+
+        // Check for non-air blocks within the current bounding box position
+        int checkY = this.atDoor.getBlockY();
+        for (int x = (int) this.boundingBox.getMinX(); x <= this.boundingBox.getMaxX(); x++) {
+            for (int z = (int) this.boundingBox.getMinZ(); z <= this.boundingBox.getMaxZ(); z++) {
+                org.bukkit.block.Block block = world.getBlockAt(x, checkY, z);
+                if (block.getType() != org.bukkit.Material.AIR) {
+                    return true; // Found elevator blocks at expected position
+                }
+            }
+        }
+        return false; // No elevator blocks found - likely misaligned
+    }
 }
