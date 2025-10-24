@@ -1,5 +1,5 @@
 plugins {
-    id("io.freefair.lombok") version "8.14" // https://plugins.gradle.org/plugin/io.freefair.lombok
+    id("io.freefair.lombok") version "9.0.0" // https://plugins.gradle.org/plugin/io.freefair.lombok
     `java-library`
     `maven-publish`
 }
@@ -14,6 +14,7 @@ java.targetCompatibility = JavaVersion.VERSION_21
 tasks {
     compileJava {
         options.encoding = "UTF-8"
+        options.release.set(21)
     }
 
     jar {
@@ -50,9 +51,9 @@ repositories {
 }
 
 dependencies {
-    compileOnly("io.papermc.paper:paper-api:1.21.7-R0.1-SNAPSHOT")
+    compileOnly("io.papermc.paper:paper-api:1.21.10-R0.1-SNAPSHOT")
     compileOnly("com.github.World1-6.World1-6Utils:World1-6Utils-Plugin:130e75b272")
-    compileOnly("org.geysermc.floodgate:api:2.2.3-SNAPSHOT")
+    compileOnly("org.geysermc.floodgate:api:2.2.5-SNAPSHOT")
 }
 
 publishing {
