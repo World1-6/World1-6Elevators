@@ -8,8 +8,14 @@ import com.andrew121410.mc.world16utils.gui.GUIWindow;
 import com.andrew121410.mc.world16utils.gui.buttons.AbstractGUIButton;
 import com.andrew121410.mc.world16utils.gui.buttons.defaults.ClickEventButton;
 import com.andrew121410.mc.world16utils.utils.InventoryUtils;
+import io.papermc.paper.dialog.Dialog;
+import io.papermc.paper.registry.data.dialog.ActionButton;
+import io.papermc.paper.registry.data.dialog.DialogBase;
+import io.papermc.paper.registry.data.dialog.action.DialogAction;
+import io.papermc.paper.registry.data.dialog.type.DialogType;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.event.ClickCallback;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -81,6 +87,7 @@ public class ElevatorFloorSelectorManager {
                     // Handle floor selector types
                     switch (elevator.getElevatorSettings().getFloorSelectorType()) {
                         case CLICK_CHAT -> {
+                            // We have to handle bedrock players differently
                             if (World16Elevators.getInstance().getOtherPlugins().hasFloodgate()) {
                                 if (FloodgateApi.getInstance().isFloodgatePlayer(player.getUniqueId())) {
                                     handleFloodgatePlayer(player);
@@ -90,6 +97,7 @@ public class ElevatorFloorSelectorManager {
                             handleClickChat(player);
                         }
                         case GUI -> {
+                            // We have to handle bedrock players differently
                             if (World16Elevators.getInstance().getOtherPlugins().hasFloodgate()) {
                                 if (FloodgateApi.getInstance().isFloodgatePlayer(player.getUniqueId())) {
                                     handleFloodgatePlayer(player);
@@ -105,6 +113,39 @@ public class ElevatorFloorSelectorManager {
                             chatResponseManager.create(player, Translate.color("&bWhat floor?"), "", (thePlayer, response) -> {
                                 plugin.getServer().dispatchCommand(player, "elevator call " + elevator.getElevatorControllerName() + " " + elevator.getElevatorName() + " " + response);
                             });
+                        }
+
+                        case DIALOGUE -> {
+                            // We have to handle bedrock players differently
+                            if (World16Elevators.getInstance().getOtherPlugins().hasFloodgate()) {
+                                if (FloodgateApi.getInstance().isFloodgatePlayer(player.getUniqueId())) {
+                                    handleFloodgatePlayer(player);
+                                    break;
+                                }
+                            }
+
+                            // Create Action Buttons for each floor
+                            List<ActionButton> actionButtons = new ArrayList<>();
+                            List<ElevatorFloor> accessibleFloors = elevator.getFloors(player);
+                            for (ElevatorFloor elevatorFloor : accessibleFloors) {
+                                Component label = Translate.miniMessage(elevatorFloor.getName());
+                                int width = 100;
+                                // ActionButton.create expects a DialogAction, but lambda is not allowed. Use null for now.
+                                DialogAction dialogAction = DialogAction.customClick((response, audience) -> {
+                                    elevator.goToFloor(player, elevatorFloor.getFloor(), ElevatorStatus.DONT_KNOW, ElevatorWho.FLOOR_SELECTOR_MANAGER);
+                                }, ClickCallback.Options.builder()
+                                        .uses(1)
+                                        .lifetime(ClickCallback.DEFAULT_LIFETIME)
+                                        .build());
+
+                                actionButtons.add(ActionButton.create(label, null, width, dialogAction));
+                            }
+
+                            Dialog dialog = Dialog.create(builder -> builder.empty()
+                                    .base(DialogBase.builder(Component.text("Please Select Floor:")).build())
+                                    .type(DialogType.multiAction(actionButtons).build())
+                            );
+                            player.showDialog(dialog);
                         }
                     }
                     players.add(player.getUniqueId());

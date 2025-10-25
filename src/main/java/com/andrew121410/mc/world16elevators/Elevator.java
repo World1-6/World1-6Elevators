@@ -666,6 +666,17 @@ public class Elevator {
         return elevatorFloor;
     }
 
+    // Get all the floors only accessible by the player (per-floor permissions)
+    public List<ElevatorFloor> getFloors(Player player) {
+        return this.floorsMap.values().stream().filter(elevatorFloor -> {
+            String permission = elevatorFloor.getPermission();
+            if (permission == null || permission.isEmpty()) {
+                return true; // No permission required
+            }
+            return player.hasPermission(permission); // Check if player has the required permission
+        }).collect(Collectors.toList());
+    }
+
     private void arrivalChime(Location location) {
         getBukkitWorld().playSound(location, Sound.BLOCK_NOTE_BLOCK_PLING, 10F, 1.8F);
     }

@@ -4,5 +4,6 @@ public enum ElevatorFloorSelectorType {
 
     CLICK_CHAT,
     GUI,
-    CHAT_RESPONSE
+    CHAT_RESPONSE,
+    DIALOGUE
 }
