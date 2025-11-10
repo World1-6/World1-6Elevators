@@ -84,71 +84,86 @@ public class ElevatorFloorSelectorManager {
                         return;
                     }
 
-                    // Handle floor selector types
-                    switch (elevator.getElevatorSettings().getFloorSelectorType()) {
-                        case CLICK_CHAT -> {
-                            // We have to handle bedrock players differently
-                            if (World16Elevators.getInstance().getOtherPlugins().hasFloodgate()) {
-                                if (FloodgateApi.getInstance().isFloodgatePlayer(player.getUniqueId())) {
-                                    handleFloodgatePlayer(player);
-                                    break;
-                                }
-                            }
-                            handleClickChat(player);
-                        }
-                        case GUI -> {
-                            // We have to handle bedrock players differently
-                            if (World16Elevators.getInstance().getOtherPlugins().hasFloodgate()) {
-                                if (FloodgateApi.getInstance().isFloodgatePlayer(player.getUniqueId())) {
-                                    handleFloodgatePlayer(player);
-                                    break;
-                                }
-                            }
-                            handleGUI(player);
-                        }
-                        case CHAT_RESPONSE -> {
-                            ChatResponseManager chatResponseManager = plugin.getOtherPlugins().getWorld16Utils().getChatResponseManager();
-                            player.sendMessage("Please type in the chat your response");
-                            sendElevatorFloorsMessage(player);
-                            chatResponseManager.create(player, Translate.color("&bWhat floor?"), "", (thePlayer, response) -> {
-                                plugin.getServer().dispatchCommand(player, "elevator call " + elevator.getElevatorControllerName() + " " + elevator.getElevatorName() + " " + response);
-                            });
-                        }
-
-                        case DIALOGUE -> {
-                            // We have to handle bedrock players differently
-                            if (World16Elevators.getInstance().getOtherPlugins().hasFloodgate()) {
-                                if (FloodgateApi.getInstance().isFloodgatePlayer(player.getUniqueId())) {
-                                    handleFloodgatePlayer(player);
-                                    break;
-                                }
-                            }
-
-                            // Create Action Buttons for each floor
-                            List<ActionButton> actionButtons = new ArrayList<>();
-                            List<ElevatorFloor> accessibleFloors = elevator.getFloors(player);
-                            for (ElevatorFloor elevatorFloor : accessibleFloors) {
-                                Component label = Translate.miniMessage(elevatorFloor.getName());
-                                int width = 100;
-                                // ActionButton.create expects a DialogAction, but lambda is not allowed. Use null for now.
-                                DialogAction dialogAction = DialogAction.customClick((response, audience) -> {
-                                    elevator.goToFloor(player, elevatorFloor.getFloor(), ElevatorStatus.DONT_KNOW, ElevatorWho.FLOOR_SELECTOR_MANAGER);
-                                }, ClickCallback.Options.builder()
-                                        .uses(1)
-                                        .lifetime(ClickCallback.DEFAULT_LIFETIME)
-                                        .build());
-
-                                actionButtons.add(ActionButton.create(label, null, width, dialogAction));
-                            }
-
-                            Dialog dialog = Dialog.create(builder -> builder.empty()
-                                    .base(DialogBase.builder(Component.text("Please Select Floor:")).build())
-                                    .type(DialogType.multiAction(actionButtons).build())
-                            );
-                            player.showDialog(dialog);
-                        }
-                    }
+                    // Mark player as having received the message
                     players.add(player.getUniqueId());
+
+                    // Wait ticks before showing floor selector
+                    new BukkitRunnable() {
+                        @Override
+                        public void run() {
+                            // Check if player is still in the elevator
+                            if (!elevator.getPlayersUUIDs().contains(player.getUniqueId())) {
+                                // Player left, remove from tracking list
+                                players.remove(player.getUniqueId());
+                                return;
+                            }
+
+                            // Handle floor selector types
+                            switch (elevator.getElevatorSettings().getFloorSelectorType()) {
+                                case CLICK_CHAT -> {
+                                    // We have to handle bedrock players differently
+                                    if (World16Elevators.getInstance().getOtherPlugins().hasFloodgate()) {
+                                        if (FloodgateApi.getInstance().isFloodgatePlayer(player.getUniqueId())) {
+                                            handleFloodgatePlayer(player);
+                                            break;
+                                        }
+                                    }
+                                    handleClickChat(player);
+                                }
+                                case GUI -> {
+                                    // We have to handle bedrock players differently
+                                    if (World16Elevators.getInstance().getOtherPlugins().hasFloodgate()) {
+                                        if (FloodgateApi.getInstance().isFloodgatePlayer(player.getUniqueId())) {
+                                            handleFloodgatePlayer(player);
+                                            break;
+                                        }
+                                    }
+                                    handleGUI(player);
+                                }
+                                case CHAT_RESPONSE -> {
+                                    ChatResponseManager chatResponseManager = plugin.getOtherPlugins().getWorld16Utils().getChatResponseManager();
+                                    player.sendMessage("Please type in the chat your response");
+                                    sendElevatorFloorsMessage(player);
+                                    chatResponseManager.create(player, Translate.color("&bWhat floor?"), "", (thePlayer, response) -> {
+                                        plugin.getServer().dispatchCommand(player, "elevator call " + elevator.getElevatorControllerName() + " " + elevator.getElevatorName() + " " + response);
+                                    });
+                                }
+
+                                case DIALOGUE -> {
+                                    // We have to handle bedrock players differently
+                                    if (World16Elevators.getInstance().getOtherPlugins().hasFloodgate()) {
+                                        if (FloodgateApi.getInstance().isFloodgatePlayer(player.getUniqueId())) {
+                                            handleFloodgatePlayer(player);
+                                            break;
+                                        }
+                                    }
+
+                                    // Create Action Buttons for each floor
+                                    List<ActionButton> actionButtons = new ArrayList<>();
+                                    List<ElevatorFloor> accessibleFloors = elevator.getFloors(player);
+                                    for (ElevatorFloor elevatorFloor : accessibleFloors) {
+                                        Component label = Translate.miniMessage(elevatorFloor.getName());
+                                        int width = 100;
+                                        // ActionButton.create expects a DialogAction, but lambda is not allowed. Use null for now.
+                                        DialogAction dialogAction = DialogAction.customClick((response, audience) -> {
+                                            elevator.goToFloor(player, elevatorFloor.getFloor(), ElevatorStatus.DONT_KNOW, ElevatorWho.FLOOR_SELECTOR_MANAGER);
+                                        }, ClickCallback.Options.builder()
+                                                .uses(1)
+                                                .lifetime(ClickCallback.DEFAULT_LIFETIME)
+                                                .build());
+
+                                        actionButtons.add(ActionButton.create(label, null, width, dialogAction));
+                                    }
+
+                                    Dialog dialog = Dialog.create(builder -> builder.empty()
+                                            .base(DialogBase.builder(Component.text("Please Select Floor:")).build())
+                                            .type(DialogType.multiAction(actionButtons).build())
+                                    );
+                                    player.showDialog(dialog);
+                                }
+                            }
+                        }
+                    }.runTaskLater(plugin, 10L);
                 }
             }
         }.runTaskTimer(plugin, 1L, 20L);

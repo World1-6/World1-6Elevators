@@ -543,7 +543,7 @@ public class Elevator {
                                     } else {
                                         lastNewFloor = new ElevatorFloor(beginningFloorNumber, blockUnderMainDoor.clone());
                                         addFloor(lastNewFloor);
-                                        Bukkit.getServer().broadcastMessage("Added floor " + beginningFloorNumber);
+                                        Bukkit.getServer().broadcast(Translate.miniMessage("<green>Added floor " + beginningFloorNumber));
 
                                         beginningFloorNumber++;
                                         //0 won't be used as a floor anymore.
@@ -595,7 +595,7 @@ public class Elevator {
         }
         long endTime = Instant.now().toEpochMilli();
         long totalTime = endTime - startTime;
-        Bukkit.getServer().broadcastMessage("smartCreateFloors has completed took: " + totalTime + " milliseconds");
+        Bukkit.getServer().broadcast(Translate.miniMessage("smartCreateFloors has completed took: " + totalTime + " milliseconds"));
     }
 
     public void addFloor(ElevatorFloor elevatorFloor) {
@@ -609,7 +609,7 @@ public class Elevator {
                 else a--;
             }
             elevatorFloor.setFloor(a);
-            Bukkit.getServer().broadcastMessage("New floor has been set to " + a);
+            Bukkit.getServer().broadcast(Translate.miniMessage("New floor has been set to " + a));
         }
 
         if (this.floorsMap.containsKey(elevatorFloor.getFloor())) return; //Don't add the floor if we already have it.

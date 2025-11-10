@@ -3,7 +3,6 @@ package com.andrew121410.mc.world16elevators;
 import com.andrew121410.mc.world16elevators.enums.ElevatorStatus;
 import com.andrew121410.mc.world16utils.blocks.UniversalBlockUtils;
 import lombok.*;
-import org.bukkit.Effect;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -164,16 +163,23 @@ public class ElevatorFloor {
         return door;
     }
 
+    // Returns true if it was an iron door and the action was performed, false if not an iron door.
     public static boolean ifIronDoorThenSetOpenIfNotThenFalse(Block block, boolean value) {
         Door door = isIronDoor(block.getLocation());
         if (door == null) return false;
         door.setOpen(value);
         block.setBlockData(door);
-        if (value) block.getWorld().playEffect(block.getLocation(), Effect.IRON_DOOR_TOGGLE, 0);
-        else block.getWorld().playEffect(block.getLocation(), Effect.IRON_DOOR_CLOSE, 0);
+
+        // Play sound
+        if (value) {
+            block.getWorld().playSound(block.getLocation(), Sound.BLOCK_IRON_DOOR_OPEN, 1.0f, 1.0f);
+        } else {
+            block.getWorld().playSound(block.getLocation(), Sound.BLOCK_IRON_DOOR_CLOSE, 1.0f, 1.0f);
+        }
         return true;
     }
 
+    // Returns the block under the door if it's an iron door, otherwise returns the block at the location.
     public static Block ifIronDoorThenGetBlockUnderTheDoorIfNotThanReturn(Location location) {
         Door door = isIronDoor(location);
         if (door != null) {

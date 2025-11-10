@@ -6,6 +6,8 @@ import com.andrew121410.mc.world16elevators.ElevatorFloor;
 import com.andrew121410.mc.world16elevators.World16Elevators;
 import com.andrew121410.mc.world16elevators.enums.ElevatorCallButtonType;
 import com.andrew121410.mc.world16elevators.enums.ElevatorFloorSelectorType;
+import org.bukkit.NamespacedKey;
+import org.bukkit.Registry;
 import org.bukkit.Sound;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -49,8 +51,12 @@ public class ElevatorTab implements TabCompleter {
         tabCompleteList.add("volume");
         this.elevatorControllerMap = this.plugin.getMemoryHolder().getElevatorControllerMap();
         this.soundList = new ArrayList<>();
-        for (Sound value : Sound.values()) {
-            this.soundList.add(value.name());
+        // Use Registry.SOUND_EVENT instead of obsolete Registry.SOUNDS (since 1.21.4)
+        for (Sound sound : Registry.SOUND_EVENT) {
+            NamespacedKey key = Registry.SOUND_EVENT.getKey(sound);
+            if (key != null) {
+                this.soundList.add(key.toString());
+            }
         }
     }
 

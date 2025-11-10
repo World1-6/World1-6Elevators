@@ -52,7 +52,7 @@ repositories {
 
 dependencies {
     compileOnly("io.papermc.paper:paper-api:1.21.10-R0.1-SNAPSHOT")
-    compileOnly("com.github.World1-6.World1-6Utils:World1-6Utils-Plugin:130e75b272")
+    compileOnly("com.github.World1-6.World1-6Utils:World1-6Utils-Plugin:366d29bf7c")
     compileOnly("org.geysermc.floodgate:api:2.2.5-SNAPSHOT")
 }
 

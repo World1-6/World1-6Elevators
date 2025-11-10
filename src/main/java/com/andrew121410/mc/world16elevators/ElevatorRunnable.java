@@ -3,9 +3,10 @@ package com.andrew121410.mc.world16elevators;
 
 import com.andrew121410.mc.world16elevators.enums.ElevatorStatus;
 import com.andrew121410.mc.world16utils.chat.Translate;
-import com.andrew121410.mc.world16utils.player.PlayerUtils;
+import io.papermc.paper.entity.TeleportFlag;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.scheduler.BukkitRunnable;
 
 public class ElevatorRunnable extends BukkitRunnable {
@@ -107,7 +108,11 @@ public class ElevatorRunnable extends BukkitRunnable {
 
         // Teleport the passengers
         for (Player player : elevator.getPlayers()) {
-            PlayerUtils.smoothTeleport(player, player.getLocation().add(0, goingUp ? 1 : -1, 0));
+            player.teleport(
+                    player.getLocation().add(0.00, goingUp ? 1 : -1, 0.00),
+                    PlayerTeleportEvent.TeleportCause.PLUGIN,
+                    TeleportFlag.Relative.VELOCITY_ROTATION
+            );
         }
 
         // Elevator leveling (slows down the elevator as it approaches the target floor)

@@ -14,13 +14,10 @@ import com.andrew121410.mc.world16utils.utils.Utils;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.chat.ComponentBuilder;
-import net.md_5.bungee.api.chat.TextComponent;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.Sound;
-import org.bukkit.Tag;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
+import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.CommandBlock;
 import org.bukkit.command.BlockCommandSender;
@@ -645,7 +642,8 @@ public class ElevatorCMD implements CommandExecutor {
 
                         Sound sound;
                         try {
-                            sound = Sound.valueOf(fakeSound);
+                            NamespacedKey key = NamespacedKey.fromString(fakeSound);
+                            sound = Registry.SOUND_EVENT.get(key != null ? key : NamespacedKey.minecraft(fakeSound));
                         } catch (Exception e) {
                             player.sendMessage(Translate.miniMessage("<red>Invalid sound."));
                             return true;
@@ -768,15 +766,16 @@ public class ElevatorCMD implements CommandExecutor {
                 }
                 if (whatToRemove.equalsIgnoreCase("floorQueueBuffer")) {
                     if (setting.equalsIgnoreCase("list")) {
-                        ComponentBuilder mainComponentBuilder = new ComponentBuilder();
-                        TextComponent mainText = new TextComponent("Elevator queue system.");
-                        mainText.setColor(ChatColor.GOLD);
-                        mainText.setBold(true);
-                        mainComponentBuilder.append(mainText).append("\n");
-                        if (elevator == null) {
-                            elevatorController.getElevatorsMap().forEach((eleName, eleObject) -> mainComponentBuilder.append(makeQueueChatComponent(eleObject).create()));
-                        } else mainComponentBuilder.append(makeQueueChatComponent(elevator).create());
-                        player.spigot().sendMessage(mainComponentBuilder.create());
+                        // Send queue header
+                        player.sendMessage(
+                                Component.text()
+                                        .content("Elevator queue system.")
+                                        .color(NamedTextColor.GOLD)
+                                        .decoration(TextDecoration.BOLD, true)
+                                        .build()
+                        );
+                        // Send queue details for each elevator
+                        player.sendMessage(makeQueueChatComponent(elevator));
                         return true;
                     } else if (setting.equalsIgnoreCase("clear")) {
                         if (elevator == null) {
@@ -1108,15 +1107,33 @@ public class ElevatorCMD implements CommandExecutor {
         return elevatorArguments;
     }
 
-    private ComponentBuilder makeQueueChatComponent(Elevator eleObject) {
-        ComponentBuilder floorQueueObjectStringBuilder = new ComponentBuilder();
-        floorQueueObjectStringBuilder.color(ChatColor.BLUE).bold(false);
-        floorQueueObjectStringBuilder.append("Elevator: " + eleObject.getElevatorName()).append("\n").color(ChatColor.YELLOW).bold(false);
+    /**
+     * Creates a formatted chat component displaying the elevator's floor queue information.
+     * This includes the elevator name and a list of all floors in the queue buffer with their status.
+     * Used by the /elevator queue command to display the current state of the elevator queue system.
+     *
+     * @param eleObject The elevator to display queue information for
+     * @return A styled Adventure Component with the elevator name (yellow/gold) and floor queue details (aqua/blue)
+     */
+    private Component makeQueueChatComponent(Elevator eleObject) {
+        Component component = Component.text()
+                .append(Component.text("Elevator: ", NamedTextColor.YELLOW))
+                .append(Component.text(eleObject.getElevatorName(), NamedTextColor.GOLD))
+                .append(Component.newline())
+                .build();
+
         for (FloorQueueObject floorQueueObject : eleObject.getFloorQueueBuffer()) {
-            ComponentBuilder removeFloorFromFloorQueueBuffer = new ComponentBuilder().append("Floor: " + floorQueueObject.getFloorNumber()).append(" ").append("Status: " + floorQueueObject.getElevatorStatus().name()).append("\n");
-            floorQueueObjectStringBuilder.append(removeFloorFromFloorQueueBuffer.create());
+            component = component.append(
+                    Component.text()
+                            .append(Component.text("Floor: ", NamedTextColor.AQUA))
+                            .append(Component.text(String.valueOf(floorQueueObject.getFloorNumber()), NamedTextColor.WHITE))
+                            .append(Component.text(" Status: ", NamedTextColor.AQUA))
+                            .append(Component.text(floorQueueObject.getElevatorStatus().name(), NamedTextColor.BLUE))
+                            .append(Component.newline())
+                            .build()
+            );
         }
-        return floorQueueObjectStringBuilder;
+        return component;
     }
 }
 
