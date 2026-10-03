@@ -1,5 +1,5 @@
 plugins {
-    id("io.freefair.lombok") version "9.5.0" // https://plugins.gradle.org/plugin/io.freefair.lombok
+    id("io.freefair.lombok") version "9.8.0" // https://plugins.gradle.org/plugin/io.freefair.lombok
     `java-library`
     `maven-publish`
 }
